@@ -34,7 +34,7 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `dynamic_translate` | `false` | Translate one second after typing |
 | `translate_remember_language` | `false` | Save languages chosen in the window as the defaults |
 | `history_disable` | `false` | |
-| `translate_window_position` | `mouse` | `mouse` (at the cursor) or `pre_state` (last position) |
+| `translate_window_position` | `smart` | `smart` (beside the screenshot region or the cursor), `mouse` (at the cursor) or `pre_state` (last position) |
 | `translate_window_position_x`, `translate_window_position_y` | `0` | Saved position |
 | `translate_remember_window_size` | `false` | |
 | `translate_window_width`, `translate_window_height` | `350`, `420` | Saved size. Rust |
