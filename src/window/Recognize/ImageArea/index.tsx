@@ -8,6 +8,7 @@ import { invoke } from '@tauri-apps/api';
 import { atom, useAtom } from 'jotai';
 
 import { useConfig } from '../../../hooks';
+import { focusWindow, showWindow } from '../../../utils/window';
 import type { MutableRefObject } from 'react';
 import type { UnlistenFn } from '@tauri-apps/api/event';
 
@@ -26,9 +27,8 @@ export default function ImageArea() {
             if (hideWindow) {
                 appWindow.hide();
             } else {
-                appWindow.show();
-                // @ts-expect-error setFocus takes no argument; the extra true is ignored
-                appWindow.setFocus(true);
+                showWindow();
+                focusWindow();
             }
         });
     };

@@ -6,6 +6,7 @@ import { appWindow } from '@tauri-apps/api/window';
 import { emit } from '@tauri-apps/api/event';
 import { warn } from 'tauri-plugin-log-api';
 import { invoke } from '@tauri-apps/api';
+import { focusWindow, showWindow } from '../../utils/window';
 import type { MutableRefObject } from 'react';
 
 interface Point {
@@ -108,8 +109,8 @@ export default function Screenshot() {
                 draggable={false}
                 onLoad={() => {
                     if (imgurl !== '' && imgRef.current.complete) {
-                        void appWindow.show();
-                        void appWindow.setFocus();
+                        void showWindow();
+                        void focusWindow();
                         void appWindow.setResizable(false);
                     }
                 }}

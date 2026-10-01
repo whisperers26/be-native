@@ -20,6 +20,7 @@ import * as recognizeServices from '../../../../services/recognize';
 import * as builtinTtsServices from '../../../../services/tts';
 import detect from '../../../../utils/lang_detect';
 import { store } from '../../../../utils/store';
+import { focusWindow, showWindow } from '../../../../utils/window';
 import { info } from 'tauri-plugin-log-api';
 import { debug } from 'tauri-plugin-log-api';
 import type { MutableRefObject } from 'react';
@@ -70,15 +71,15 @@ export default function SourceArea(props: SourceAreaProps) {
         if (hideWindow) {
             appWindow.hide();
         } else {
-            appWindow.show();
-            appWindow.setFocus();
+            showWindow();
+            focusWindow();
         }
         // 清空检测语言
         setDetectLanguage('');
         if (text === '[INPUT_TRANSLATE]') {
             setWindowType('[INPUT_TRANSLATE]');
-            appWindow.show();
-            appWindow.setFocus();
+            showWindow();
+            focusWindow();
             // @ts-expect-error known bug (known-issues.md): the setter ignores the second argument
             setSourceText('', true);
         } else if (text === '[IMAGE_TRANSLATE]') {
@@ -243,7 +244,7 @@ export default function SourceArea(props: SourceAreaProps) {
                 });
             }
             unlisten = listen<string>('new_text', (event) => {
-                appWindow.setFocus();
+                focusWindow();
                 handleNewText(event.payload);
             });
         }
