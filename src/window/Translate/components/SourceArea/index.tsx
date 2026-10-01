@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { HiTranslate } from 'react-icons/hi';
 import { LuDelete } from 'react-icons/lu';
 import { invoke } from '@tauri-apps/api';
-import { atom, useAtom, useAtomValue } from 'jotai';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { getServiceName, getServiceSouceType, ServiceSourceType } from '../../../../utils/service_instance';
 import { useConfig, useSyncAtom, useVoice, useToastStyle } from '../../../../hooks';
 import { invoke_plugin } from '../../../../utils/invoke_plugin';
@@ -22,6 +22,7 @@ import { mergeLines } from '../../../../utils/merge_lines';
 import detect from '../../../../utils/lang_detect';
 import { store } from '../../../../utils/store';
 import { focusWindow, showWindow } from '../../../../utils/window';
+import { sourceBusyAtom } from '../../progress';
 import { info } from 'tauri-plugin-log-api';
 import { debug } from 'tauri-plugin-log-api';
 import type { MutableRefObject } from 'react';
@@ -51,6 +52,7 @@ export default function SourceArea(props: SourceAreaProps) {
     const [sourceText, setSourceText, syncSourceText] = useSyncAtom(sourceTextAtom);
     const [detectLanguage, setDetectLanguage] = useAtom(detectLanguageAtom);
     const sourceHeight = useAtomValue(sourceHeightAtom);
+    const setSourceBusy = useSetAtom(sourceBusyAtom);
     const [incrementalTranslate] = useConfig('incremental_translate', false);
     const [dynamicTranslate] = useConfig('dynamic_translate', false);
     const [mergeWrappedLines] = useConfig('translate_merge_lines', true);
@@ -73,6 +75,8 @@ export default function SourceArea(props: SourceAreaProps) {
     // plugin (known-issues.md).
     const handleNewText = async (text: string) => {
         text = text.trim();
+        // Busy until the text is ready for the cards, or it is clear that none is coming.
+        setSourceBusy(text === '[IMAGE_TRANSLATE]' ? 'image' : 'text');
         if (hideWindow) {
             appWindow.hide();
         } else {
@@ -87,6 +91,7 @@ export default function SourceArea(props: SourceAreaProps) {
             focusWindow();
             // @ts-expect-error known bug (known-issues.md): the setter ignores the second argument
             setSourceText('', true);
+            setSourceBusy(null);
         } else if (text === '[IMAGE_TRANSLATE]') {
             setWindowType('[IMAGE_TRANSLATE]');
             const base64 = await invoke<string>('get_base64');
@@ -118,16 +123,20 @@ export default function SourceArea(props: SourceAreaProps) {
                             } else {
                                 setSourceText(newText);
                             }
-                            detect_language(newText).then(() => {
-                                syncSourceText();
-                            });
+                            detect_language(newText)
+                                .then(() => {
+                                    syncSourceText();
+                                })
+                                .finally(() => setSourceBusy(null));
                         },
                         (e: any) => {
                             setSourceText(e.toString());
+                            setSourceBusy(null);
                         }
                     );
                 } else {
                     setSourceText('Language not supported');
+                    setSourceBusy(null);
                 }
             } else {
                 if (
@@ -161,16 +170,20 @@ export default function SourceArea(props: SourceAreaProps) {
                                 } else {
                                     setSourceText(newText);
                                 }
-                                detect_language(newText).then(() => {
-                                    syncSourceText();
-                                });
+                                detect_language(newText)
+                                    .then(() => {
+                                        syncSourceText();
+                                    })
+                                    .finally(() => setSourceBusy(null));
                             },
                             (e) => {
                                 setSourceText(e.toString());
+                                setSourceBusy(null);
                             }
                         );
                 } else {
                     setSourceText('Language not supported');
+                    setSourceBusy(null);
                 }
             }
         } else {
@@ -188,9 +201,11 @@ export default function SourceArea(props: SourceAreaProps) {
             } else {
                 setSourceText(newText);
             }
-            detect_language(newText).then(() => {
-                syncSourceText();
-            });
+            detect_language(newText)
+                .then(() => {
+                    syncSourceText();
+                })
+                .finally(() => setSourceBusy(null));
         }
     };
 
