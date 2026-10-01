@@ -2,7 +2,7 @@ use std::fs;
 
 use crate::config::get;
 use crate::config::set;
-use crate::placement::{beside, Rect};
+use crate::placement::{beside, inside, Rect};
 use crate::StringWrapper;
 use crate::APP;
 use dirs::cache_dir;
@@ -281,6 +281,14 @@ pub fn config_window() {
 // The gap between a window and what it is placed beside, in logical pixels
 const PLACEMENT_GAP: f64 = 8.0;
 
+// The size the Translate window opens at when its size is not remembered, in logical pixels. The
+// window then fits itself to what it shows, through `fit_translate_window`.
+const TRANSLATE_AUTO_SIZE: (i64, i64) = (420, 240);
+
+// What the `smart` position put the Translate window beside, and where it put it
+static TRANSLATE_PLACED: std::sync::Mutex<Option<(Rect, (i32, i32))>> =
+    std::sync::Mutex::new(None);
+
 // `region` is what the text came from, if it came from a place on the screen. The `smart` position
 // puts the window beside it.
 fn translate_window(region: Option<Rect>) -> Window {
@@ -291,20 +299,30 @@ fn translate_window(region: Option<Rect>) -> Window {
         return window;
     }
     window.set_skip_taskbar(true).unwrap();
+    *TRANSLATE_PLACED.lock().unwrap() = None;
     // Get Translate Window Size
-    let width = match get("translate_window_width") {
-        Some(v) => v.as_i64().unwrap(),
-        None => {
-            set("translate_window_width", 350);
-            350
-        }
+    let remember_size = match get("translate_remember_window_size") {
+        Some(v) => v.as_bool().unwrap_or(false),
+        None => false,
     };
-    let height = match get("translate_window_height") {
-        Some(v) => v.as_i64().unwrap(),
-        None => {
-            set("translate_window_height", 420);
-            420
-        }
+    let (width, height) = if remember_size {
+        let width = match get("translate_window_width") {
+            Some(v) => v.as_i64().unwrap(),
+            None => {
+                set("translate_window_width", 350);
+                350
+            }
+        };
+        let height = match get("translate_window_height") {
+            Some(v) => v.as_i64().unwrap(),
+            None => {
+                set("translate_window_height", 420);
+                420
+            }
+        };
+        (width, height)
+    } else {
+        TRANSLATE_AUTO_SIZE
     };
 
     let monitor = window.current_monitor().unwrap().unwrap();
@@ -334,6 +352,7 @@ fn translate_window(region: Option<Rect>) -> Window {
             window
                 .set_position(tauri::PhysicalPosition::new(x, y))
                 .unwrap();
+            *TRANSLATE_PLACED.lock().unwrap() = Some((anchor, (x, y)));
         }
         "mouse" => {
             // Adjust window position
@@ -394,6 +413,48 @@ fn translate_window(region: Option<Rect>) -> Window {
         .unwrap();
 
     window
+}
+
+// Give the Translate window the size it asks for, in logical pixels, and keep it on its monitor. A
+// window still where the `smart` position put it is placed again for its new size, so that it does
+// not grow over what it was put beside.
+#[tauri::command(async)]
+pub fn fit_translate_window(window: Window, width: f64, height: f64) {
+    let Ok(Some(monitor)) = window.current_monitor() else {
+        warn!("Monitor not found, the Translate window keeps its size");
+        return;
+    };
+    let Ok(current) = window.outer_position() else {
+        return;
+    };
+    let scale = monitor.scale_factor();
+    // Rounded up, so that a fraction of a pixel cut off does not leave something to scroll
+    let width = (width * scale).ceil() as i32;
+    let height = (height * scale).ceil() as i32;
+    let area = usable_area(&monitor);
+
+    let mut placed = TRANSLATE_PLACED.lock().unwrap();
+    let (x, y) = match placed.as_mut() {
+        Some((anchor, corner)) if *corner == (current.x, current.y) => {
+            *corner = beside(
+                *anchor,
+                width,
+                height,
+                area,
+                (PLACEMENT_GAP * scale) as i32,
+            );
+            *corner
+        }
+        _ => inside(current.x, current.y, width, height, area),
+    };
+    window
+        .set_size(tauri::PhysicalSize::new(width, height))
+        .unwrap_or_default();
+    if (x, y) != (current.x, current.y) {
+        window
+            .set_position(tauri::PhysicalPosition::new(x, y))
+            .unwrap_or_default();
+    }
 }
 
 pub fn selection_translate() {

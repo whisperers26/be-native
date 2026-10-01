@@ -5,13 +5,16 @@ import { appConfigDir, join } from '@tauri-apps/api/path';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import { Spacer, Button } from '@nextui-org/react';
 import { AiFillCloseCircle } from 'react-icons/ai';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { BsPinFill } from 'react-icons/bs';
+import { invoke } from '@tauri-apps/api';
+import { useAtomValue } from 'jotai';
 
 import LanguageArea from './components/LanguageArea';
-import SourceArea from './components/SourceArea';
+import SourceArea, { sourceTextAtom } from './components/SourceArea';
 import TargetArea from './components/TargetArea';
+import { fitSize, limitsFor, MIN_WIDTH } from './auto_size';
 import { osType } from '../../utils/env';
 import { useConfig } from '../../hooks';
 import { store } from '../../utils/store';
@@ -94,7 +97,6 @@ export default function Translate() {
     useEffect(() => {
         void isTestMode().then(setTestMode);
     }, []);
-    const [pluginList, setPluginList] = useState<PluginList | null>(null);
     const [serviceInstanceConfigMap, setServiceInstanceConfigMap] = useState<ServiceConfigMap | null>(null);
     const reorder = (list: string[], startIndex: number, endIndex: number) => {
         const result = Array.from(list);
@@ -180,6 +182,56 @@ export default function Translate() {
             };
         }
     }, [rememberWindowSize, testMode]);
+
+    const [pluginList, setPluginList] = useState<PluginList | null>(null);
+    const sourceText = useAtomValue(sourceTextAtom);
+    // The part of the window that scrolls, and all of what it shows.
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+    // A size that is not remembered follows what the window shows.
+    useEffect(() => {
+        const scroll = scrollRef.current;
+        const content = contentRef.current;
+        if (rememberWindowSize !== false || scroll === null || content === null) return;
+        let fitTimeout: ReturnType<typeof setTimeout> | null = null;
+        const fit = () => {
+            const textAreas = Array.from(content.querySelectorAll('textarea'));
+            if (content.offsetHeight === 0 || textAreas.length === 0) return;
+            const size = fitSize(
+                {
+                    width: window.innerWidth,
+                    // What surrounds the scrolling part, and all of what scrolls.
+                    height: window.innerHeight - scroll.clientHeight + content.offsetHeight,
+                    textHeights: textAreas.map((textArea) => textArea.offsetHeight),
+                    lineHeight: parseFloat(getComputedStyle(textAreas[0]).lineHeight) || 24,
+                },
+                limitsFor(window.screen)
+            );
+            if (size.width !== window.innerWidth || size.height !== window.innerHeight) {
+                void invoke('fit_translate_window', { ...size });
+            }
+        };
+        // The result cards open with an animation, so the content changes height many times in a row.
+        const observer = new ResizeObserver(() => {
+            if (fitTimeout) {
+                clearTimeout(fitTimeout);
+            }
+            fitTimeout = setTimeout(fit, 30);
+        });
+        observer.observe(content);
+        return () => {
+            observer.disconnect();
+            if (fitTimeout) {
+                clearTimeout(fitTimeout);
+            }
+        };
+    }, [rememberWindowSize, pluginList !== null]);
+    // fitSize only widens the window, so new text starts from the least width again.
+    useEffect(() => {
+        if (rememberWindowSize === false && window.innerWidth > MIN_WIDTH) {
+            void invoke('fit_translate_window', { width: MIN_WIDTH, height: window.innerHeight });
+        }
+    }, [sourceText]);
 
     const loadPluginList = async () => {
         const serviceTypeList = ['translate', 'tts', 'recognize', 'collection'];
@@ -296,68 +348,75 @@ export default function Translate() {
                     </Button>
                 </div>
                 <div className={`${osType === 'Linux' ? 'h-[calc(100vh-37px)]' : 'h-[calc(100vh-35px)]'} px-[8px]`}>
-                    <div className='h-full overflow-y-auto'>
-                        <div>
-                            {serviceInstanceConfigMap !== null && (
-                                <SourceArea
-                                    pluginList={pluginList}
-                                    serviceInstanceConfigMap={serviceInstanceConfigMap}
-                                />
-                            )}
-                        </div>
-                        <div className={`${hideLanguage && 'hidden'}`}>
-                            <LanguageArea />
-                            <Spacer y={2} />
-                        </div>
-                        <DragDropContext onDragEnd={onDragEnd}>
-                            <Droppable
-                                droppableId='droppable'
-                                direction='vertical'
-                            >
-                                {(provided) => (
-                                    <div
-                                        ref={provided.innerRef}
-                                        {...provided.droppableProps}
-                                    >
-                                        {translateServiceInstanceList !== null &&
-                                            serviceInstanceConfigMap !== null &&
-                                            translateServiceInstanceList.map((serviceInstanceKey, index) => {
-                                                const config = serviceInstanceConfigMap[serviceInstanceKey] ?? {};
-                                                const enable = config['enable'] ?? true;
-
-                                                return enable ? (
-                                                    <Draggable
-                                                        key={serviceInstanceKey}
-                                                        draggableId={serviceInstanceKey}
-                                                        index={index}
-                                                    >
-                                                        {(provided) => (
-                                                            <div
-                                                                ref={provided.innerRef}
-                                                                {...provided.draggableProps}
-                                                            >
-                                                                <TargetArea
-                                                                    {...provided.dragHandleProps}
-                                                                    index={index}
-                                                                    name={serviceInstanceKey}
-                                                                    translateServiceInstanceList={
-                                                                        translateServiceInstanceList
-                                                                    }
-                                                                    pluginList={pluginList}
-                                                                    serviceInstanceConfigMap={serviceInstanceConfigMap}
-                                                                />
-                                                                <Spacer y={2} />
-                                                            </div>
-                                                        )}
-                                                    </Draggable>
-                                                ) : (
-                                                    <></>
-                                                );
-                                            })}
-                                    </div>
+                    <div
+                        ref={scrollRef}
+                        className='h-full overflow-y-auto'
+                    >
+                        <div ref={contentRef}>
+                            <div>
+                                {serviceInstanceConfigMap !== null && (
+                                    <SourceArea
+                                        pluginList={pluginList}
+                                        serviceInstanceConfigMap={serviceInstanceConfigMap}
+                                    />
                                 )}
-                            </Droppable>
-                        </DragDropContext>
+                            </div>
+                            <div className={`${hideLanguage && 'hidden'}`}>
+                                <LanguageArea />
+                                <Spacer y={2} />
+                            </div>
+                            <DragDropContext onDragEnd={onDragEnd}>
+                                <Droppable
+                                    droppableId='droppable'
+                                    direction='vertical'
+                                >
+                                    {(provided) => (
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                        >
+                                            {translateServiceInstanceList !== null &&
+                                                serviceInstanceConfigMap !== null &&
+                                                translateServiceInstanceList.map((serviceInstanceKey, index) => {
+                                                    const config = serviceInstanceConfigMap[serviceInstanceKey] ?? {};
+                                                    const enable = config['enable'] ?? true;
+
+                                                    return enable ? (
+                                                        <Draggable
+                                                            key={serviceInstanceKey}
+                                                            draggableId={serviceInstanceKey}
+                                                            index={index}
+                                                        >
+                                                            {(provided) => (
+                                                                <div
+                                                                    ref={provided.innerRef}
+                                                                    {...provided.draggableProps}
+                                                                >
+                                                                    <TargetArea
+                                                                        {...provided.dragHandleProps}
+                                                                        index={index}
+                                                                        name={serviceInstanceKey}
+                                                                        translateServiceInstanceList={
+                                                                            translateServiceInstanceList
+                                                                        }
+                                                                        pluginList={pluginList}
+                                                                        serviceInstanceConfigMap={
+                                                                            serviceInstanceConfigMap
+                                                                        }
+                                                                    />
+                                                                    <Spacer y={2} />
+                                                                </div>
+                                                            )}
+                                                        </Draggable>
+                                                    ) : (
+                                                        <></>
+                                                    );
+                                                })}
+                                        </div>
+                                    )}
+                                </Droppable>
+                            </DragDropContext>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -36,8 +36,8 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `history_disable` | `false` | |
 | `translate_window_position` | `smart` | `smart` (beside the screenshot region or the cursor), `mouse` (at the cursor) or `pre_state` (last position) |
 | `translate_window_position_x`, `translate_window_position_y` | `0` | Saved position |
-| `translate_remember_window_size` | `false` | |
-| `translate_window_width`, `translate_window_height` | `350`, `420` | Saved size. Rust |
+| `translate_remember_window_size` | `false` | On: the window opens at the saved size, which follows the user's resizing. Off: it sizes itself to what it shows ([frontend.md](frontend.md#translate-window)) |
+| `translate_window_width`, `translate_window_height` | `350`, `420` | Saved size, in logical pixels; used only while the size is remembered. Rust |
 | `translate_close_on_blur` | `true` | |
 | `translate_always_on_top` | `false` | |
 | `translate_hide_window` | `false` | Translate without showing the window |

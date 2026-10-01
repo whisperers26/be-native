@@ -87,6 +87,65 @@ describe('Translate window', () => {
         expect(fakeTauri.store.get('translate_window_height')).toBe(528);
     });
 
+    it('asks for the size of what it shows when the size is not remembered', async () => {
+        fakeTauri.store.set('translate_detect_engine', 'local');
+        // jsdom lays nothing out and has no screen: the content is 500 px tall, in a part of the window 35 px
+        // shorter than the window.
+        const observed: { target: Element; changed: () => void }[] = [];
+        vi.stubGlobal(
+            'ResizeObserver',
+            class {
+                constructor(private changed: () => void) {}
+                observe(target: Element) {
+                    observed.push({ target, changed: this.changed });
+                }
+                unobserve() {}
+                disconnect() {}
+            }
+        );
+        vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) {
+            return this.tagName === 'TEXTAREA' ? 24 : 500;
+        });
+        vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(window.innerHeight - 35);
+        vi.stubGlobal('screen', { availWidth: 1920, availHeight: 1080 });
+        try {
+            render(
+                <NextUIProvider>
+                    <Translate />
+                </NextUIProvider>
+            );
+            await screen.findByText('Google');
+
+            const content = observed.find(({ target }) => target.parentElement?.className.includes('overflow-y-auto'));
+            content!.changed();
+
+            await vi.waitFor(() =>
+                expect(fakeTauri.calls.find((call) => call.cmd === 'fit_translate_window')?.args).toEqual({
+                    width: window.innerWidth,
+                    height: 535,
+                })
+            );
+        } finally {
+            vi.unstubAllGlobals();
+            vi.restoreAllMocks();
+        }
+    });
+
+    it('keeps the size it has when the size is remembered', async () => {
+        fakeTauri.store.set('translate_remember_window_size', true);
+        fakeTauri.store.set('translate_detect_engine', 'local');
+        fakeTauri.command('get_text', () => 'hello world');
+        render(
+            <NextUIProvider>
+                <Translate />
+            </NextUIProvider>
+        );
+
+        await screen.findByDisplayValue('hello world');
+
+        expect(fakeTauri.calls.filter((call) => call.cmd === 'fit_translate_window')).toEqual([]);
+    });
+
     it('shows text that arrives from Rust in the source box', async () => {
         fakeTauri.command('get_text', () => 'hello world');
         fakeTauri.command('lang_detect', () => 'en');
