@@ -21,6 +21,8 @@ Built-in translation, OCR ("recognize"), text-to-speech and collection (word boo
 
 The registry re-exports each module under its service name, which must equal `info.name`. Directory names can differ: `recognize/baidu` is `baidu_ocr`.
 
+The types live in `src/types/service.ts`: `ServiceModule` is what every module provides, and `TranslateService`, `RecognizeService`, `TtsService` and `CollectionService` are each kind's contract. Each registry checks its modules against its contract with `satisfies`, so a module that breaks it fails `pnpm typecheck`.
+
 `Language` is a TypeScript string enum from the app's language codes (`auto` plus `languageList` in `src/utils/language`) to the provider's codes. Callers test support with `appCode in Language` and pass `Language[appCode]`. Values may repeat (`zh_cn` and `zh_tw` can both map to `ZH`).
 
 ## Calling convention
@@ -34,7 +36,7 @@ The registry re-exports each module under its service name, which must equal `in
 
 - `config` is the instance's settings object from the store, or `{}` if none was ever saved.
 - `detect` is the detected source language, as an app code. `setResult(partial)` streams partial text; openai, geminipro, chatglm and ollama use it.
-- A dictionary result is `{ pronunciations: [{ region?, symbol, voice }], explanations: [{ trait, explains: string[] }], associations: string[], sentence: [{ source, target? }] }`. google, youdao, bing_dict, cambridge_dict and ecdict can return one; the Translate window renders it specially.
+- A dictionary result (`DictionaryResult`) is `{ pronunciations: [{ region?, symbol, voice }], explanations: [{ trait, explains: string[] }], associations?: string[], sentence?: [{ source, target? }] }`. google, youdao, bing_dict, cambridge_dict and ecdict can return one (cambridge_dict leaves out `associations` and `sentence`); the Translate window renders it specially.
 - Services signal errors by throwing, usually a string such as `` `Http Request Error\nHttp Status: ${status}\n...` ``, sometimes an `Error`. Callers show `e.toString()`.
 - The Translate window calls every enabled translate instance. TTS, and the OCR step of image translation, use the first instance in their list. The Recognize window lets the user pick.
 
