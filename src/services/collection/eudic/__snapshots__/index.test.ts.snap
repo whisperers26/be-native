@@ -1,0 +1,103 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`eudic collection > creates the category when it is missing, then posts the word to the new category 1`] = `
+[
+  {
+    "options": {
+      "headers": {
+        "Authorization": "test-token",
+        "Content-Type": "application/json",
+      },
+      "method": "GET",
+      "query": {
+        "language": "en",
+      },
+    },
+    "url": "https://api.frdic.com/api/open/v1/studylist/category",
+  },
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "language": "en",
+          "name": "pot",
+        },
+        "type": "Json",
+      },
+      "headers": {
+        "Authorization": "test-token",
+        "Content-Type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://api.frdic.com/api/open/v1/studylist/category",
+  },
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "id": "333",
+          "language": "en",
+          "words": [
+            "hello",
+          ],
+        },
+        "type": "Json",
+      },
+      "headers": {
+        "Authorization": "test-token",
+        "Content-Type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://api.frdic.com/api/open/v1/studylist/words",
+  },
+]
+`;
+
+exports[`eudic collection > exports its info 1`] = `
+{
+  "info": {
+    "icon": "logo/eudic.png",
+    "name": "eudic",
+  },
+}
+`;
+
+exports[`eudic collection > finds the category, posts the word to it and returns the message 1`] = `
+[
+  {
+    "options": {
+      "headers": {
+        "Authorization": "test-token",
+        "Content-Type": "application/json",
+      },
+      "method": "GET",
+      "query": {
+        "language": "en",
+      },
+    },
+    "url": "https://api.frdic.com/api/open/v1/studylist/category",
+  },
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "id": "222",
+          "language": "en",
+          "words": [
+            "hello",
+          ],
+        },
+        "type": "Json",
+      },
+      "headers": {
+        "Authorization": "test-token",
+        "Content-Type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://api.frdic.com/api/open/v1/studylist/words",
+  },
+]
+`;
