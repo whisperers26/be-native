@@ -16,23 +16,36 @@ import * as builtinServices from '../../../services/recognize';
 import { useConfig } from '../../../hooks';
 import { base64Atom } from '../ImageArea';
 import { pluginListAtom } from '..';
+import type { RecognizeService, ServiceConfigMap } from '../../../types/service';
 
 export const textAtom = atom<string>();
-let recognizeId = 0;
+// The id of the latest recognition: 0 until one has started, then the id nanoid made for it.
+let recognizeId: string | 0 = 0;
 
-export default function TextArea(props) {
+// The registry is looked up by a name known only at run time.
+type RecognizeServices = Record<string, RecognizeService>;
+
+interface TextAreaProps {
+    serviceInstanceConfigMap: ServiceConfigMap;
+}
+
+export default function TextArea(props: TextAreaProps) {
     const { serviceInstanceConfigMap } = props;
     const [autoCopy] = useConfig('recognize_auto_copy', false);
     const [deleteNewline] = useConfig('recognize_delete_newline', false);
     const [hideWindow] = useConfig('recognize_hide_window', false);
     const recognizeFlag = useAtomValue(recognizeFlagAtom);
     const currentServiceInstanceKey = useAtomValue(currentServiceInstanceKeyAtom);
-    const language = useAtomValue(languageAtom);
+    // ControlArea copies recognize_language in once it has been read, so this is still undefined if the effect below
+    // runs first (known-issues.md: the window can stay loading).
+    const language = useAtomValue(languageAtom)!;
     const base64 = useAtomValue(base64Atom);
     const [loading, setLoading] = useState(false);
+    // Undefined only until the effect below first runs setText(''), before any button can be pressed.
     const [text, setText] = useAtom(textAtom);
     const [error, setError] = useState('');
-    const pluginList = useAtomValue(pluginListAtom);
+    // The window renders this area only once it has loaded the plugin list.
+    const pluginList = useAtomValue(pluginListAtom)!;
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -57,7 +70,7 @@ export default function TextArea(props) {
                             config: pluginConfig,
                             utils,
                         }).then(
-                            (v) => {
+                            (v: any) => {
                                 if (recognizeId !== id) return;
                                 v = v.trim();
                                 if (deleteNewline) {
@@ -76,7 +89,7 @@ export default function TextArea(props) {
                                     });
                                 }
                             },
-                            (e) => {
+                            (e: any) => {
                                 if (recognizeId !== id) return;
                                 setError(e.toString());
                                 setLoading(false);
@@ -86,13 +99,18 @@ export default function TextArea(props) {
                 }
             } else {
                 const instanceConfig = serviceInstanceConfigMap[currentServiceInstanceKey] ?? {};
-                if (language in builtinServices[getServiceName(currentServiceInstanceKey)].Language) {
+                if (
+                    language in
+                    (builtinServices as RecognizeServices)[getServiceName(currentServiceInstanceKey)].Language
+                ) {
                     let id = nanoid();
                     recognizeId = id;
-                    builtinServices[getServiceName(currentServiceInstanceKey)]
+                    (builtinServices as RecognizeServices)[getServiceName(currentServiceInstanceKey)]
                         .recognize(
                             base64,
-                            builtinServices[getServiceName(currentServiceInstanceKey)].Language[language],
+                            (builtinServices as RecognizeServices)[getServiceName(currentServiceInstanceKey)].Language[
+                                language
+                            ],
                             {
                                 config: instanceConfig,
                             }
@@ -100,7 +118,9 @@ export default function TextArea(props) {
                         .then(
                             (v) => {
                                 if (recognizeId !== id) return;
-                                v = v.trim();
+                                // Only the system service can resolve to undefined, and only on an OS the app does
+                                // not run on.
+                                v = v!.trim();
                                 if (deleteNewline) {
                                     v = v.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
                                 }
@@ -131,11 +151,13 @@ export default function TextArea(props) {
         }
     }, [base64, currentServiceInstanceKey, language, recognizeFlag, autoCopy, deleteNewline, hideWindow]);
 
+    // The Card's radius is none, sm, md or lg. '10' is none of them, so NextUI falls back to the default, lg; the cast
+    // keeps the value as it is.
     return (
         <Card
             shadow='none'
             className='bg-content1 h-full ml-[6px] mr-[12px]'
-            radius='10'
+            radius={'10' as unknown as 'lg'}
         >
             <CardBody className='bg-content1 p-0 h-full'>
                 {loading ? (
@@ -182,7 +204,7 @@ export default function TextArea(props) {
                             size='sm'
                             variant='light'
                             onPress={() => {
-                                writeText(text);
+                                writeText(text!);
                             }}
                         >
                             <MdContentCopy className='text-[16px]' />
@@ -194,7 +216,7 @@ export default function TextArea(props) {
                             variant='light'
                             size='sm'
                             onPress={() => {
-                                setText(text.replace(/\-\s+/g, '').replace(/\s+/g, ' '));
+                                setText(text!.replace(/\-\s+/g, '').replace(/\s+/g, ' '));
                             }}
                         >
                             <MdSmartButton className='text-[16px]' />
@@ -206,7 +228,7 @@ export default function TextArea(props) {
                             variant='light'
                             size='sm'
                             onPress={() => {
-                                setText(text.replaceAll(' ', ''));
+                                setText(text!.replaceAll(' ', ''));
                             }}
                         >
                             <CgSpaceBetween className='text-[16px]' />
