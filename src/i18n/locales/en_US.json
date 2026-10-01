@@ -467,6 +467,10 @@
             "copy_text": "Copy",
             "delete_newline": "Delete Newline",
             "delete_space": "Delete Space"
+        },
+        "silent_recognize": {
+            "failed": "Text recognition failed",
+            "no_text": "No text found"
         }
     }
 }

@@ -467,6 +467,10 @@
             "copy_text": "复制",
             "delete_newline": "删除换行",
             "delete_space": "删除空格"
+        },
+        "silent_recognize": {
+            "failed": "文字识别失败",
+            "no_text": "没有识别到文字"
         }
     }
 }

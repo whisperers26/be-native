@@ -464,6 +464,10 @@
             "copy_text": "複製",
             "delete_newline": "刪除換行",
             "delete_space": "刪除空格"
+        },
+        "silent_recognize": {
+            "failed": "文字辨識失敗",
+            "no_text": "沒有辨識到文字"
         }
     }
 }
