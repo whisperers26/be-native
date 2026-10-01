@@ -29,6 +29,14 @@ describe('Screenshot window', () => {
         expect(screen.getByTestId('crosshair-vertical')).toHaveStyle({ left: '120px' });
     });
 
+    it('places the lines at the cursor before the mouse has moved', async () => {
+        fakeTauri.command('cursor_position', () => ({ x: 300, y: 200, monitor: { x: 0, y: 0 } }));
+        render(<Screenshot />);
+
+        expect(await screen.findByTestId('crosshair-horizontal')).toHaveStyle({ top: '200px' });
+        expect(screen.getByTestId('crosshair-vertical')).toHaveStyle({ left: '300px' });
+    });
+
     it('hides the lines when the pointer leaves the window', async () => {
         const { container } = render(<Screenshot />);
         const overlay = container.querySelector('.cursor-none')!;

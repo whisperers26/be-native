@@ -13,6 +13,14 @@ interface Point {
     y: number;
 }
 
+/** What the `cursor_position` command returns, in physical pixels. */
+interface CursorPosition extends Point {
+    /** The origin of the monitor under the cursor. */
+    monitor: Point;
+}
+
+const CURSOR_POLL_MS = 50;
+
 export default function Screenshot() {
     const [imgurl, setImgurl] = useState('');
     const [isMoved, setIsMoved] = useState(false);
@@ -24,6 +32,10 @@ export default function Screenshot() {
     // Where the crosshair lines meet, in CSS pixels; null while the pointer is not over the window.
     const [cursor, setCursor] = useState<Point | null>(null);
 
+    // What the poll below reads; it outlives the render it was created in.
+    const origin = useRef<Point | null>(null);
+    const pointerSeen = useRef(false);
+
     // The image is always rendered, so the ref is set before any handler runs.
     const imgRef = useRef<HTMLImageElement>() as MutableRefObject<HTMLImageElement>;
 
@@ -31,6 +43,7 @@ export default function Screenshot() {
         currentMonitor().then((monitor) => {
             // @ts-expect-error known bug (known-issues.md): currentMonitor() can return null
             const position = monitor.position;
+            origin.current = { x: position.x, y: position.y };
             invoke('screenshot', { x: position.x, y: position.y }).then(() => {
                 appCacheDir().then((appCacheDirPath) => {
                     join(appCacheDirPath, 'pot_screenshot.png').then((filePath) => {
@@ -39,6 +52,30 @@ export default function Screenshot() {
                 });
             });
         });
+    }, []);
+
+    // Until the mouse moves there is no mouse event to place the lines with, so ask Rust where the cursor is.
+    useEffect(() => {
+        let busy = false;
+        const timer = setInterval(async () => {
+            if (busy || origin.current === null) return;
+            busy = true;
+            try {
+                const position = await invoke<CursorPosition>('cursor_position');
+                const here = origin.current;
+                if (position.monitor.x === here.x && position.monitor.y === here.y && !pointerSeen.current) {
+                    setCursor({
+                        x: (position.x - here.x) / window.devicePixelRatio,
+                        y: (position.y - here.y) / window.devicePixelRatio,
+                    });
+                }
+            } catch {
+                // No cursor position this time; the next poll asks again.
+            } finally {
+                busy = false;
+            }
+        }, CURSOR_POLL_MS);
+        return () => clearInterval(timer);
     }, []);
 
     return (
@@ -91,6 +128,7 @@ export default function Screenshot() {
                     }
                 }}
                 onMouseMove={(e) => {
+                    pointerSeen.current = true;
                     setCursor({ x: e.clientX, y: e.clientY });
                     if (isDown) {
                         setIsMoved(true);
