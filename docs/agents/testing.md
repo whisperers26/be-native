@@ -91,4 +91,4 @@ Every window (`src/window/<Name>/index.test.tsx`), every settings page (`src/win
 - Keep the network out: a window that detects a language when it opens (Translate) needs `fakeTauri.store.set('translate_detect_engine', 'local')`; an unqueued HTTP request fails the run as an unhandled rejection.
 - Wait for whatever happens after the settings load (`findBy…`, `vi.waitFor`), never for a fixed time.
 
-React prints development warnings from the app's own code during these tests (`defaultProps` in react-beautiful-dnd, a `className={false}` in the Translate window's source area). They are not failures.
+React prints development warnings from the app's own code during these tests (`defaultProps` in react-beautiful-dnd, a `className={false}` in the Translate window's source area), and react-beautiful-dnd prints development-only "Unable to find drag handle" setup messages in the Service settings page test. They are not failures.
