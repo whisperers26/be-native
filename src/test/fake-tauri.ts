@@ -28,6 +28,7 @@ const DEFAULT_COMMANDS: Record<string, Handler> = {
     screenshot: () => null,
     cursor_position: () => ({ x: 0, y: 0, monitor: { x: 0, y: 0 } }),
     show_window: () => null,
+    fit_translate_window: () => null,
     focus_window: () => null,
     test_mode: () => false,
     cut_image: () => null,
