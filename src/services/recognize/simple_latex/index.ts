@@ -1,7 +1,16 @@
 import { readBinaryFile, BaseDirectory } from '@tauri-apps/api/fs';
 import { fetch, Body } from '@tauri-apps/api/http';
+import type { RecognizeOptions } from '../../../types/service';
 
-export async function recognize(base64, language, options = {}) {
+interface SimpleLatexResponse {
+    res?: { latex?: string };
+}
+
+export async function recognize(
+    base64: string,
+    language: string,
+    options: RecognizeOptions = {} as RecognizeOptions
+): Promise<string> {
     const { config } = options;
 
     const { token } = config;
@@ -10,7 +19,7 @@ export async function recognize(base64, language, options = {}) {
 
     let file = await readBinaryFile('pot_screenshot_cut.png', { dir: BaseDirectory.AppCache });
 
-    const res = await fetch(url, {
+    const res = await fetch<SimpleLatexResponse>(url, {
         method: 'POST',
         headers: {
             token,
