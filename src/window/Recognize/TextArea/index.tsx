@@ -151,8 +151,8 @@ export default function TextArea(props: TextAreaProps) {
         }
     }, [base64, currentServiceInstanceKey, language, recognizeFlag, autoCopy, deleteNewline, hideWindow]);
 
-    // The Card's radius is none, sm, md or lg. '10' is none of them, so NextUI falls back to the default, lg; the cast
-    // keeps the value as it is.
+    // known bug (known-issues.md): the Card's radius is none, sm, md or lg, so '10' falls back to lg; the cast keeps
+    // the value as it is.
     return (
         <Card
             shadow='none'
