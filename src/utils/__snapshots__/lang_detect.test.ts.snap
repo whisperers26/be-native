@@ -1,0 +1,166 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`language detection > baidu: posts the text as a form and maps its code 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "query": "こんにちは",
+        },
+        "type": "Form",
+      },
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      "method": "POST",
+    },
+    "url": "https://fanyi.baidu.com/langdetect",
+  },
+]
+`;
+
+exports[`language detection > bing: fetches a token, then detects with it 1`] = `
+[
+  {
+    "options": {
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.42",
+      },
+      "method": "GET",
+      "responseType": 2,
+    },
+    "url": "https://edge.microsoft.com/translate/auth",
+  },
+  {
+    "options": {
+      "body": {
+        "payload": [
+          {
+            "Text": "你好",
+          },
+        ],
+        "type": "Json",
+      },
+      "headers": {
+        "Referer": "https://appsumo.com/",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.42",
+        "accept": "*/*",
+        "accept-language": "zh-TW,zh;q=0.9,ja;q=0.8,zh-CN;q=0.7,en-US;q=0.6,en;q=0.5",
+        "authorization": "Bearer TOKEN",
+        "cache-control": "no-cache",
+        "content-type": "application/json",
+        "pragma": "no-cache",
+        "sec-ch-ua": ""Microsoft Edge";v="113", "Chromium";v="113", "Not-A.Brand";v="24"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": ""Windows"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "cross-site",
+      },
+      "method": "POST",
+      "query": {
+        "api-version": "3.0",
+      },
+    },
+    "url": "https://api-edge.cognitive.microsofttranslator.com/detect",
+  },
+]
+`;
+
+exports[`language detection > google: reads the detected code from the third element 1`] = `
+[
+  {
+    "options": {
+      "headers": {
+        "content-type": "application/json",
+      },
+      "method": "GET",
+      "query": {
+        "client": "gtx",
+        "hl": "zh-CN",
+        "ie": "UTF-8",
+        "kc": "7",
+        "oe": "UTF-8",
+        "otf": "1",
+        "q": "你好",
+        "sl": "auto",
+        "ssel": "0",
+        "tl": "zh-CN",
+        "tsel": "0",
+      },
+    },
+    "url": "https://translate.google.com/translate_a/single?dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t",
+  },
+]
+`;
+
+exports[`language detection > niutrans: sends the time and reads language 1`] = `
+[
+  {
+    "options": {
+      "headers": {
+        "content-type": "application/json",
+      },
+      "method": "GET",
+      "query": {
+        "source": "text",
+        "src_text": "hei",
+        "time": String {
+          "0": "1",
+          "1": "7",
+          "10": "6",
+          "11": "7",
+          "12": "8",
+          "2": "6",
+          "3": "7",
+          "4": "3",
+          "5": "2",
+          "6": "3",
+          "7": "0",
+          "8": "4",
+          "9": "5",
+        },
+      },
+    },
+    "url": "https://test.niutrans.com/NiuTransServer/language",
+  },
+]
+`;
+
+exports[`language detection > tencent: reads translate.source 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "sourceText": "안녕",
+        },
+        "type": "Form",
+      },
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      "method": "POST",
+    },
+    "url": "https://fanyi.qq.com/api/translate",
+  },
+]
+`;
+
+exports[`language detection > yandex: sends a uuid-based id and reads lang 1`] = `
+[
+  {
+    "options": {
+      "method": "GET",
+      "query": {
+        "id": "0123456789ab4cde8f0123456789abcd-0-0",
+        "srv": "android",
+        "text": "привіт",
+      },
+    },
+    "url": "https://translate.yandex.net/api/v1/tr.json/detect",
+  },
+]
+`;

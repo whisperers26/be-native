@@ -36,5 +36,8 @@ jobs:
             - name: Check docs
               run: pnpm check:docs
 
+            - name: Run tests
+              run: pnpm test
+
             - name: Build frontend
               run: pnpm build
