@@ -358,12 +358,18 @@ export default function TargetArea(props: TargetAreaProps) {
 
     // hide empty textarea
     useEffect(() => {
-        if (textAreaRef.current !== null) {
-            textAreaRef.current.style.height = '0px';
-            if (result !== '') {
-                textAreaRef.current.style.height = textAreaRef.current.scrollHeight + 'px';
+        const fit = () => {
+            if (textAreaRef.current !== null) {
+                textAreaRef.current.style.height = '0px';
+                if (result !== '') {
+                    textAreaRef.current.style.height = textAreaRef.current.scrollHeight + 'px';
+                }
             }
-        }
+        };
+        fit();
+        // The text wraps differently when the window's width changes.
+        window.addEventListener('resize', fit);
+        return () => window.removeEventListener('resize', fit);
     }, [result]);
 
     // refresh tts config

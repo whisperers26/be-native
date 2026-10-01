@@ -275,8 +275,14 @@ export default function SourceArea(props: SourceAreaProps) {
     }, [deleteNewline, incrementalTranslate, recognizeLanguage, recognizeServiceList, hideWindow]);
 
     useEffect(() => {
-        textAreaRef.current.style.height = '50px';
-        textAreaRef.current.style.height = textAreaRef.current.scrollHeight + 'px';
+        const fit = () => {
+            textAreaRef.current.style.height = '50px';
+            textAreaRef.current.style.height = textAreaRef.current.scrollHeight + 'px';
+        };
+        fit();
+        // The text wraps differently when the window's width changes.
+        window.addEventListener('resize', fit);
+        return () => window.removeEventListener('resize', fit);
     }, [sourceText]);
 
     const detect_language = async (text: string) => {
