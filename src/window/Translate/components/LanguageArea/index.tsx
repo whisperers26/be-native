@@ -8,8 +8,8 @@ import { languageList } from '../../../../utils/language';
 import { detectLanguageAtom } from '../SourceArea';
 import { useConfig } from '../../../../hooks';
 
-export const sourceLanguageAtom = atom();
-export const targetLanguageAtom = atom();
+export const sourceLanguageAtom = atom<string>();
+export const targetLanguageAtom = atom<string>();
 
 export default function LanguageArea() {
     const [rememberLanguage] = useConfig('translate_remember_language', false);
@@ -33,8 +33,9 @@ export default function LanguageArea() {
 
     useEffect(() => {
         if (rememberLanguage !== null && rememberLanguage) {
-            setTranslateSourceLanguage(sourceLanguage);
-            setTranslateTargetLanguage(targetLanguage);
+            // Both are undefined only until the effect above has copied the settings into them.
+            setTranslateSourceLanguage(sourceLanguage!);
+            setTranslateTargetLanguage(targetLanguage!);
         }
     }, [sourceLanguage, targetLanguage, rememberLanguage]);
 
@@ -58,13 +59,14 @@ export default function LanguageArea() {
                             aria-label='Source Language'
                             className='max-h-[50vh] overflow-y-auto'
                             onAction={(key) => {
-                                setSourceLanguage(key);
+                                setSourceLanguage(key as string);
                             }}
                         >
                             <DropdownItem key='auto'>{t('languages.auto')}</DropdownItem>
+                            {/* NextUI's collection children type does not accept a list after a fixed item */}
                             {languageList.map((x) => {
                                 return <DropdownItem key={x}>{t(`languages.${x}`)}</DropdownItem>;
-                            })}
+                            }) as any}
                         </DropdownMenu>
                     </Dropdown>
                 </div>
@@ -84,12 +86,13 @@ export default function LanguageArea() {
                                     if (targetLanguage === translateTargetLanguage) {
                                         setTargetLanguage(detectLanguage);
                                     } else {
-                                        setTargetLanguage(translateTargetLanguage);
+                                        setTargetLanguage(translateTargetLanguage!);
                                     }
                                 } else {
                                     if (targetLanguage === translateSecondLanguage) {
-                                        setTargetLanguage(translateTargetLanguage);
+                                        setTargetLanguage(translateTargetLanguage!);
                                     } else {
+                                        // @ts-expect-error known bug (known-issues.md): secondLanguage is not defined
                                         setTargetLanguage(secondLanguage);
                                     }
                                 }
@@ -113,7 +116,7 @@ export default function LanguageArea() {
                             aria-label='Target Language'
                             className='max-h-[50vh] overflow-y-auto'
                             onAction={(key) => {
-                                setTargetLanguage(key);
+                                setTargetLanguage(key as string);
                             }}
                         >
                             {languageList.map((x) => {

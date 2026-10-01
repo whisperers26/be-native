@@ -19,14 +19,9 @@ import * as _geminipro from './geminipro';
 import * as _ollama from './ollama';
 import * as _ecdict from './ecdict';
 import * as _lingva from './lingva';
-import type { ServiceModule, TranslateOptions, TranslateResult } from '../../types/service';
+import type { TranslateService } from '../../types/service';
 
-// What every module here provides (docs/agents/services.md). `satisfies` checks it and emits nothing.
-type TranslateService = ServiceModule<{
-    Language: Record<string, string>;
-    translate: (text: string, from: string, to: string, options: TranslateOptions) => Promise<TranslateResult>;
-}>;
-
+// `satisfies` checks each module against the contract in src/types/service.ts and emits nothing.
 export const deepl = _deepl satisfies TranslateService;
 export const bing = _bing satisfies TranslateService;
 export const yandex = _yandex satisfies TranslateService;

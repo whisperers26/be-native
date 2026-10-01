@@ -13,14 +13,9 @@ import * as _tencent_img_ocr from './tencent_img';
 import * as _volcengine_ocr from './volcengine';
 import * as _volcengine_multi_lang_ocr from './volcengine_multi_lang';
 import * as _qrcode from './qrcode';
-import type { RecognizeOptions, ServiceModule } from '../../types/service';
+import type { RecognizeService } from '../../types/service';
 
-// What every module here provides (docs/agents/services.md). `satisfies` checks it and emits nothing.
-type RecognizeService = ServiceModule<{
-    Language: Record<string, string>;
-    recognize: (base64: string, language: string, options: RecognizeOptions) => Promise<string | undefined>;
-}>;
-
+// `satisfies` checks each module against the contract in src/types/service.ts and emits nothing.
 export const system = _system satisfies RecognizeService;
 export const tesseract = _tesseract satisfies RecognizeService;
 export const baidu_ocr = _baidu_ocr satisfies RecognizeService;
