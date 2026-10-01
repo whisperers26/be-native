@@ -89,7 +89,7 @@ export async function translate(
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) {
-                        // @ts-expect-error setResult may be undefined here: the call is unguarded when no content arrived
+                        // @ts-expect-error known bug (known-issues.md): setResult is called unguarded and may be undefined
                         setResult(target.trim());
                         return target.trim();
                     }

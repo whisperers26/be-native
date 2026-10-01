@@ -50,7 +50,7 @@ export async function translate(
                 return '[STREAM]';
             }
         }
-        // @ts-expect-error setResult may be undefined here: the loop's guard is skipped when the stream yields nothing
+        // @ts-expect-error known bug (known-issues.md): setResult is called unguarded and may be undefined
         setResult(target.trim());
         return target.trim();
     } else {
