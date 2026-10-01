@@ -5,13 +5,21 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { useToastStyle } from '../../../../../hooks';
-import * as webdav from '../utils/webdav';
+import * as aliyun from '../utils/aliyun';
 
-export default function WebDavModal(props) {
-    const { isOpen, onOpenChange, url, username, password } = props;
-    const [webdavList, setWebdavList] = useState([]);
+interface AliyunModalProps {
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    accessToken: string;
+    // The page does not pass it, and the dialog does not use it.
+    refreshToken?: string;
+}
+
+export default function AliyunModal(props: AliyunModalProps) {
+    const { isOpen, onOpenChange, accessToken, refreshToken } = props;
+    const [fileList, setFileList] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
-    const [downloading, setDownloading] = useState([]);
+    const [downloading, setDownloading] = useState<boolean[]>([]);
 
     const { t } = useTranslation();
     const toastStyle = useToastStyle();
@@ -19,9 +27,9 @@ export default function WebDavModal(props) {
     useEffect(() => {
         if (isOpen) {
             setLoading(true);
-            webdav.list(url, username, password).then(
+            aliyun.list(accessToken).then(
                 (v) => {
-                    setWebdavList(v);
+                    setFileList(v);
                     setDownloading(
                         v.map(() => {
                             return false;
@@ -37,8 +45,8 @@ export default function WebDavModal(props) {
         }
     }, [isOpen]);
 
-    const getBackup = async (name, onClose) => {
-        webdav.get(url, username, password, name).then(
+    const getBackup = async (name: string, onClose: () => void) => {
+        aliyun.get(accessToken, name).then(
             () => {
                 setDownloading(
                     downloading.map(() => {
@@ -59,6 +67,7 @@ export default function WebDavModal(props) {
             }
         );
     };
+
     return (
         <Modal
             isOpen={isOpen}
@@ -80,11 +89,11 @@ export default function WebDavModal(props) {
                                         <div className='h-3 w-3/5 rounded-lg bg-default-200'></div>
                                     </Skeleton>
                                 </div>
-                            ) : webdavList.length === 0 ? (
+                            ) : fileList.length === 0 ? (
                                 <h2>{t('config.backup.empty')}</h2>
                             ) : (
                                 <div>
-                                    {webdavList.map((file, index) => {
+                                    {fileList.map((file, index) => {
                                         return (
                                             <div
                                                 className='flex justify-between'
@@ -111,10 +120,10 @@ export default function WebDavModal(props) {
                                                     color='danger'
                                                     variant='flat'
                                                     onPress={() => {
-                                                        webdav.remove(url, username, password, file).then(
+                                                        aliyun.remove(accessToken, file).then(
                                                             () => {
-                                                                setWebdavList(
-                                                                    webdavList.filter((_, i) => {
+                                                                setFileList(
+                                                                    fileList.filter((_, i) => {
                                                                         return i !== index;
                                                                     })
                                                                 );

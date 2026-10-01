@@ -11,8 +11,9 @@ import { useConfig } from '../../../../hooks/useConfig';
 import { useToastStyle } from '../../../../hooks';
 import { osType } from '../../../../utils/env';
 import { invoke } from '@tauri-apps/api';
+import type { KeyboardEvent } from 'react';
 
-const keyMap = {
+const keyMap: Record<string, string> = {
     Backquote: '`',
     Backslash: '\\',
     BracketLeft: '[',
@@ -54,7 +55,7 @@ export default function Hotkey() {
     const { t } = useTranslation();
     const toastStyle = useToastStyle();
 
-    function keyDown(e, setKey) {
+    function keyDown(e: KeyboardEvent, setKey: (value: string) => void) {
         e.preventDefault();
         if (e.keyCode === 8) {
             setKey('');
@@ -93,7 +94,7 @@ export default function Hotkey() {
         }
     }
 
-    function registerHandler(name, key) {
+    function registerHandler(name: string, key: string) {
         isRegistered(key).then((res) => {
             if (res) {
                 toast.error(t('config.hotkey.is_register'), { style: toastStyle });

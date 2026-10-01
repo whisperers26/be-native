@@ -2,7 +2,53 @@ import { invoke } from '@tauri-apps/api';
 import { Body, fetch } from '@tauri-apps/api/http';
 import { appConfigDir, join } from '@tauri-apps/api/path';
 
-export async function backup(token, name) {
+// Aliyun Drive's JSON replies, as far as this file reads them. A failed request answers with a message instead.
+interface AliyunResponse {
+    message?: string;
+}
+
+interface FileListResponse extends AliyunResponse {
+    items?: { name: string }[];
+}
+
+interface QrCodeResponse extends AliyunResponse {
+    qrCodeUrl?: string;
+    sid?: string;
+}
+
+interface StatusResponse extends AliyunResponse {
+    status?: string;
+    authCode?: string;
+}
+
+interface UserInfoResponse extends AliyunResponse {
+    avatar?: string;
+    name?: string;
+}
+
+interface AccessTokenResponse extends AliyunResponse {
+    access_token?: string;
+}
+
+interface DriveInfoResponse extends AliyunResponse {
+    default_drive_id?: string;
+}
+
+interface FileResponse extends AliyunResponse {
+    file_id?: string;
+}
+
+// The reply to creating a file lists the parts to upload, and the code reads the first without checking.
+interface NewFileResponse extends FileResponse {
+    upload_id?: string;
+    part_info_list: { upload_url: string }[];
+}
+
+interface DownloadUrlResponse extends AliyunResponse {
+    url?: string;
+}
+
+export async function backup(token: string, name: string) {
     const appConfigDirPath = await appConfigDir();
     const filePath = await join(appConfigDirPath, name);
     await invoke('local', {
@@ -26,10 +72,10 @@ export async function backup(token, name) {
     });
 }
 
-export async function list(token) {
+export async function list(token: string) {
     const drive_id = await driveId(token);
     const dir_id = await createDir(token, drive_id);
-    const res = await fetch('https://openapi.alipan.com/adrive/v1.0/openFile/list', {
+    const res = await fetch<FileListResponse>('https://openapi.alipan.com/adrive/v1.0/openFile/list', {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -60,17 +106,17 @@ export async function list(token) {
     }
 }
 
-export async function get(token, name) {
+export async function get(token: string, name: string) {
     const drive_id = await driveId(token);
     const file_id = await getFileByPath(token, drive_id, name);
     const url = await getDownloadUrl(token, drive_id, file_id);
     await invoke('aliyun', { operate: 'get', path: '', url });
 }
 
-export async function remove(token, name) {
+export async function remove(token: string, name: string) {
     const drive_id = await driveId(token);
     const file_id = await getFileByPath(token, drive_id, name);
-    const res = await fetch('https://openapi.alipan.com/adrive/v1.0/openFile/delete', {
+    const res = await fetch<AliyunResponse>('https://openapi.alipan.com/adrive/v1.0/openFile/delete', {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -93,7 +139,7 @@ export async function remove(token, name) {
 }
 
 export async function qrcode() {
-    const res = await fetch('https://openapi.alipan.com/oauth/authorize/qrcode', {
+    const res = await fetch<QrCodeResponse>('https://openapi.alipan.com/oauth/authorize/qrcode', {
         method: 'POST',
         body: Body.json({
             client_id: 'bf56dd2dc03a4d3489e3dda05dd6d466',
@@ -117,8 +163,8 @@ export async function qrcode() {
     }
 }
 
-export async function status(sid) {
-    const res = await fetch(`https://openapi.alipan.com/oauth/qrcode/${sid}/status`);
+export async function status(sid: string) {
+    const res = await fetch<StatusResponse>(`https://openapi.alipan.com/oauth/qrcode/${sid}/status`);
 
     if (res.ok) {
         const result = res.data;
@@ -137,8 +183,9 @@ export async function status(sid) {
     }
 }
 
-export async function userInfo(token) {
-    const res = await fetch('https://openapi.alipan.com/oauth/users/info', {
+export async function userInfo(token: string) {
+    // @ts-expect-error Tauri's FetchOptions requires a method, but fetch defaults to GET without one
+    const res = await fetch<UserInfoResponse>('https://openapi.alipan.com/oauth/users/info', {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -160,8 +207,8 @@ export async function userInfo(token) {
     }
 }
 
-export async function accessToken(code) {
-    const res = await fetch('https://pot-app.com/api/ali_access_token', {
+export async function accessToken(code: string) {
+    const res = await fetch<AccessTokenResponse>('https://pot-app.com/api/ali_access_token', {
         method: 'POST',
         body: Body.json({
             code,
@@ -185,8 +232,8 @@ export async function accessToken(code) {
     }
 }
 
-async function driveId(token) {
-    const res = await fetch('https://openapi.alipan.com/adrive/v1.0/user/getDriveInfo', {
+async function driveId(token: string) {
+    const res = await fetch<DriveInfoResponse>('https://openapi.alipan.com/adrive/v1.0/user/getDriveInfo', {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -209,8 +256,8 @@ async function driveId(token) {
     }
 }
 
-async function createDir(token, drive_id) {
-    const res = await fetch('https://openapi.alipan.com/adrive/v1.0/openFile/create', {
+async function createDir(token: string, drive_id: string) {
+    const res = await fetch<FileResponse>('https://openapi.alipan.com/adrive/v1.0/openFile/create', {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -240,8 +287,8 @@ async function createDir(token, drive_id) {
     }
 }
 
-async function createFile(token, drive_id, dir_id, name) {
-    const res = await fetch('https://openapi.alipan.com/adrive/v1.0/openFile/create', {
+async function createFile(token: string, drive_id: string, dir_id: string, name: string) {
+    const res = await fetch<NewFileResponse>('https://openapi.alipan.com/adrive/v1.0/openFile/create', {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -274,8 +321,8 @@ async function createFile(token, drive_id, dir_id, name) {
     }
 }
 
-async function getFileByPath(token, drive_id, name) {
-    const res = await fetch('https://openapi.alipan.com/adrive/v1.0/openFile/get_by_path', {
+async function getFileByPath(token: string, drive_id: string, name: string) {
+    const res = await fetch<FileResponse>('https://openapi.alipan.com/adrive/v1.0/openFile/get_by_path', {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -302,8 +349,8 @@ async function getFileByPath(token, drive_id, name) {
     }
 }
 
-async function getDownloadUrl(token, drive_id, file_id) {
-    const res = await fetch('https://openapi.alipan.com/adrive/v1.0/openFile/getDownloadUrl', {
+async function getDownloadUrl(token: string, drive_id: string, file_id: string) {
+    const res = await fetch<DownloadUrlResponse>('https://openapi.alipan.com/adrive/v1.0/openFile/getDownloadUrl', {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,

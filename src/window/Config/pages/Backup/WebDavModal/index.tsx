@@ -5,13 +5,21 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { useToastStyle } from '../../../../../hooks';
-import * as aliyun from '../utils/aliyun';
+import * as webdav from '../utils/webdav';
 
-export default function AliyunModal(props) {
-    const { isOpen, onOpenChange, accessToken, refreshToken } = props;
-    const [fileList, setFileList] = useState([]);
+interface WebDavModalProps {
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    url: string;
+    username: string;
+    password: string;
+}
+
+export default function WebDavModal(props: WebDavModalProps) {
+    const { isOpen, onOpenChange, url, username, password } = props;
+    const [webdavList, setWebdavList] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
-    const [downloading, setDownloading] = useState([]);
+    const [downloading, setDownloading] = useState<boolean[]>([]);
 
     const { t } = useTranslation();
     const toastStyle = useToastStyle();
@@ -19,9 +27,9 @@ export default function AliyunModal(props) {
     useEffect(() => {
         if (isOpen) {
             setLoading(true);
-            aliyun.list(accessToken).then(
+            webdav.list(url, username, password).then(
                 (v) => {
-                    setFileList(v);
+                    setWebdavList(v);
                     setDownloading(
                         v.map(() => {
                             return false;
@@ -37,8 +45,8 @@ export default function AliyunModal(props) {
         }
     }, [isOpen]);
 
-    const getBackup = async (name, onClose) => {
-        aliyun.get(accessToken, name).then(
+    const getBackup = async (name: string, onClose: () => void) => {
+        webdav.get(url, username, password, name).then(
             () => {
                 setDownloading(
                     downloading.map(() => {
@@ -59,7 +67,6 @@ export default function AliyunModal(props) {
             }
         );
     };
-
     return (
         <Modal
             isOpen={isOpen}
@@ -81,11 +88,11 @@ export default function AliyunModal(props) {
                                         <div className='h-3 w-3/5 rounded-lg bg-default-200'></div>
                                     </Skeleton>
                                 </div>
-                            ) : fileList.length === 0 ? (
+                            ) : webdavList.length === 0 ? (
                                 <h2>{t('config.backup.empty')}</h2>
                             ) : (
                                 <div>
-                                    {fileList.map((file, index) => {
+                                    {webdavList.map((file, index) => {
                                         return (
                                             <div
                                                 className='flex justify-between'
@@ -112,10 +119,10 @@ export default function AliyunModal(props) {
                                                     color='danger'
                                                     variant='flat'
                                                     onPress={() => {
-                                                        aliyun.remove(accessToken, file).then(
+                                                        webdav.remove(url, username, password, file).then(
                                                             () => {
-                                                                setFileList(
-                                                                    fileList.filter((_, i) => {
+                                                                setWebdavList(
+                                                                    webdavList.filter((_, i) => {
                                                                         return i !== index;
                                                                     })
                                                                 );

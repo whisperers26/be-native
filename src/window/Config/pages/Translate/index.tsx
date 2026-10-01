@@ -49,13 +49,14 @@ export default function Translate() {
                                     aria-label='source language'
                                     className='max-h-[50vh] overflow-y-auto'
                                     onAction={(key) => {
-                                        setSourceLanguage(key);
+                                        setSourceLanguage(key as string);
                                     }}
                                 >
                                     <DropdownItem key='auto'>{t('languages.auto')}</DropdownItem>
+                                    {/* NextUI's collection children type does not accept a list after a fixed item */}
                                     {languageList.map((item) => {
                                         return <DropdownItem key={item}>{t(`languages.${item}`)}</DropdownItem>;
-                                    })}
+                                    }) as any}
                                 </DropdownMenu>
                             </Dropdown>
                         )}
@@ -71,7 +72,7 @@ export default function Translate() {
                                     aria-label='target language'
                                     className='max-h-[50vh] overflow-y-auto'
                                     onAction={(key) => {
-                                        setTargetLanguage(key);
+                                        setTargetLanguage(key as string);
                                     }}
                                 >
                                     {languageList.map((item) => {
@@ -92,7 +93,7 @@ export default function Translate() {
                                     aria-label='second language'
                                     className='max-h-[50vh] overflow-y-auto'
                                     onAction={(key) => {
-                                        setSecondLanguage(key);
+                                        setSecondLanguage(key as string);
                                     }}
                                 >
                                     {languageList.map((item) => {
@@ -113,7 +114,7 @@ export default function Translate() {
                                     aria-label='detect engine'
                                     className='max-h-[50vh] overflow-y-auto'
                                     onAction={(key) => {
-                                        setDetectEngine(key);
+                                        setDetectEngine(key as string);
                                     }}
                                 >
                                     <DropdownItem key='baidu'>{t(`config.translate.baidu`)}</DropdownItem>
@@ -142,7 +143,7 @@ export default function Translate() {
                                     aria-label='auto copy'
                                     className='max-h-[50vh] overflow-y-auto'
                                     onAction={(key) => {
-                                        setAutoCopy(key);
+                                        setAutoCopy(key as string);
                                         invoke('update_tray', { language: '', copyMode: key });
                                     }}
                                 >
@@ -253,7 +254,7 @@ export default function Translate() {
                                     aria-label='window position'
                                     className='max-h-[50vh] overflow-y-auto'
                                     onAction={(key) => {
-                                        setWindowPosition(key);
+                                        setWindowPosition(key as string);
                                     }}
                                 >
                                     <DropdownItem key='mouse'>{t('config.translate.mouse')}</DropdownItem>

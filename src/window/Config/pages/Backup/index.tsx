@@ -22,7 +22,7 @@ import AliyunModal from './AliyunModal';
 import * as local from './utils/local';
 import * as aliyun from './utils/aliyun';
 
-let refreshTimer = null;
+let refreshTimer: ReturnType<typeof setInterval> | null = null;
 
 export default function Backup() {
     const [backupType, setBackupType] = useConfig('backup_type', 'webdav');
@@ -30,7 +30,7 @@ export default function Backup() {
     const [davPassword, setDavPassword] = useConfig('webdav_password', '');
     const [davUrl, setDavUrl] = useConfig('webdav_url', '');
     const [aliyunQrCodeUrl, setAliyunQrCodeUrl] = useState('');
-    const [aliyunUserInfo, setAliyunUserInfo] = useState(null);
+    const [aliyunUserInfo, setAliyunUserInfo] = useState<{ avatar?: string; name?: string } | null>(null);
     const [aliyunAccessToken, setAliyunAccessToken] = useConfig('aliyun_access_token', '');
     // const [aliyunRefreshToken, setAliyunRefreshToken] = useConfig('aliyun_refresh_token', '');
     const {
@@ -47,6 +47,7 @@ export default function Backup() {
     const toastStyle = useToastStyle();
     const { t } = useTranslation();
 
+    // The Backup button is pressed after the settings have been read, so none of them is still null.
     const onBackup = async () => {
         setUploading(true);
         const time = new Date();
@@ -57,9 +58,10 @@ export default function Backup() {
         let result;
         switch (backupType) {
             case 'webdav':
-                result = webdav.backup(davUrl, davUserName, davPassword, fileName + '.zip');
+                result = webdav.backup(davUrl!, davUserName!, davPassword!, fileName + '.zip');
                 break;
             case 'local':
+                // @ts-expect-error known bug (known-issues.md): the local backup takes no file name
                 result = local.backup(fileName);
                 break;
             case 'aliyun':
@@ -67,13 +69,14 @@ export default function Backup() {
                     toast.error(t('config.backup.aliyun_login_first'), { style: toastStyle });
                     setUploading(false);
                 } else {
-                    result = aliyun.backup(aliyunAccessToken, fileName + '.zip');
+                    result = aliyun.backup(aliyunAccessToken!, fileName + '.zip');
                 }
                 break;
             default:
                 warn('Unknown backup type');
                 return;
         }
+        // @ts-expect-error known bug (known-issues.md): result stays undefined when the Aliyun login is missing
         result.then(
             () => {
                 toast.success(t('config.backup.backup_success'), { style: toastStyle });
@@ -114,7 +117,9 @@ export default function Backup() {
         }
     };
 
-    const pollingStatus = async (sid) => {
+    // A catch variable is unknown; what these handlers catch is an error from the aliyun util or Tauri, and each only
+    // calls toString on it.
+    const pollingStatus = async (sid: string) => {
         refreshTimer = setInterval(async () => {
             try {
                 const { status, code } = await aliyun.status(sid);
@@ -124,15 +129,16 @@ export default function Backup() {
                         break;
                     }
                     case 'LoginSuccess': {
-                        clearInterval(refreshTimer);
+                        // refreshTimer is set, since this runs inside the interval; authCode comes with LoginSuccess.
+                        clearInterval(refreshTimer!);
                         toast.success(t('config.backup.login_success'), { style: toastStyle });
-                        const token = await aliyun.accessToken(code);
+                        const token = await aliyun.accessToken(code!);
                         setAliyunAccessToken(token);
                         await refreshUserInfo(token);
                         break;
                     }
                 }
-            } catch (e) {
+            } catch (e: any) {
                 toast.error(e.toString(), { style: toastStyle });
                 refreshQrCode();
             }
@@ -147,18 +153,18 @@ export default function Backup() {
                 clearInterval(refreshTimer);
             }
             pollingStatus(sid);
-        } catch (e) {
+        } catch (e: any) {
             setAliyunQrCodeUrl('');
             toast.error(e.toString(), { style: toastStyle });
         }
     };
 
-    const refreshUserInfo = async (token) => {
+    const refreshUserInfo = async (token: string) => {
         try {
             const info = await aliyun.userInfo(token);
             setAliyunQrCodeUrl('');
             setAliyunUserInfo(info);
-        } catch (e) {
+        } catch (e: any) {
             toast.error(e.toString(), { style: toastStyle });
             setAliyunAccessToken('');
             refreshQrCode();
@@ -170,14 +176,17 @@ export default function Backup() {
         if (aliyunAccessToken === '') {
             refreshQrCode();
         } else {
+            // @ts-expect-error known bug (known-issues.md): aliyun_access_token can still be null when this runs
             refreshUserInfo(aliyunAccessToken);
         }
 
         return () => {
+            // @ts-expect-error clearInterval accepts null at run time, but its type does not
             clearInterval(refreshTimer);
         };
     }, [backupType]);
 
+    // The dialogs use these settings only when a button press opens them, after the settings have been read.
     return (
         <Card className='mb-[10px]'>
             <Toaster />
@@ -192,7 +201,7 @@ export default function Backup() {
                             <DropdownMenu
                                 aria-label='backup type'
                                 onAction={(key) => {
-                                    setBackupType(key);
+                                    setBackupType(key as string);
                                 }}
                             >
                                 <DropdownItem key='webdav'>{t('config.backup.webdav')}</DropdownItem>
@@ -302,14 +311,14 @@ export default function Backup() {
             <WebDavModal
                 isOpen={isWebDavListOpen}
                 onOpenChange={onWebDavListOpenChange}
-                url={davUrl}
-                username={davUserName}
-                password={davPassword}
+                url={davUrl!}
+                username={davUserName!}
+                password={davPassword!}
             />
             <AliyunModal
                 isOpen={isAliyunListOpen}
                 onOpenChange={onAliyunListOpenChange}
-                accessToken={aliyunAccessToken}
+                accessToken={aliyunAccessToken!}
                 // refreshToken={aliyunRefreshToken}
             />
         </Card>
