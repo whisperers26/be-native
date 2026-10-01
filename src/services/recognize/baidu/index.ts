@@ -1,6 +1,19 @@
 import { fetch, Body } from '@tauri-apps/api/http';
+import type { RecognizeOptions } from '../../../types/service';
 
-export async function recognize(base64, language, options = {}) {
+interface BaiduTokenResponse {
+    access_token?: string;
+}
+
+interface BaiduOcrResponse {
+    words_result?: { words: string }[];
+}
+
+export async function recognize(
+    base64: string,
+    language: string,
+    options: RecognizeOptions = {} as RecognizeOptions
+): Promise<string> {
     const { config } = options;
 
     const { client_id, client_secret } = config;
@@ -8,7 +21,7 @@ export async function recognize(base64, language, options = {}) {
     const url = 'https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic';
     const token_url = 'https://aip.baidubce.com/oauth/2.0/token';
 
-    const token_res = await fetch(token_url, {
+    const token_res = await fetch<BaiduTokenResponse>(token_url, {
         method: 'POST',
         query: {
             grant_type: 'client_credentials',
@@ -24,7 +37,7 @@ export async function recognize(base64, language, options = {}) {
         if (token_res.data.access_token) {
             let token = token_res.data.access_token;
 
-            const res = await fetch(url, {
+            const res = await fetch<BaiduOcrResponse>(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

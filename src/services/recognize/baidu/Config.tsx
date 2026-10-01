@@ -8,8 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { useToastStyle } from '../../../hooks';
 import { useConfig } from '../../../hooks/useConfig';
 import { Language, recognize } from './index';
+import type { ServiceConfigProps } from '../../../types/service';
 
-export function Config(props) {
+export function Config(props: ServiceConfigProps) {
     const { instanceKey, updateServiceList, onClose } = props;
     const { t } = useTranslation();
     const [config, setConfig] = useConfig(
