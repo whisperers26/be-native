@@ -475,7 +475,7 @@
                 "instructions": "指令",
                 "llm7": {
                     "title": "LLM7（免费）",
-                    "description": "LLM7.io 是免费的在线服务，无需账号或密钥。要润色的文字会发送到 llm7.io。繁忙时可能较慢。"
+                    "description": "LLM7.io 是免费的在线服务，无需账号或密钥即可使用。要润色的文字会发送到 llm7.io。没有令牌时，它只响应少量请求，之后需要等待一分钟或更久，因此同时请求多个结果（各种语气）时会依次返回，可能需要等待。在 dash.llm7.io 免费申请令牌并填入 API Key 后，每分钟可请求 60 次。"
                 },
                 "openai": {
                     "title": "OpenAI",

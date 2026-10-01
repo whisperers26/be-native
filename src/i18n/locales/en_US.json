@@ -475,7 +475,7 @@
                 "instructions": "Instructions",
                 "llm7": {
                     "title": "LLM7 (free)",
-                    "description": "LLM7.io is a free online service that needs no account or key. The text you improve is sent to llm7.io. It can be slow when it is busy."
+                    "description": "LLM7.io is a free online service that works without an account or a key. The text you improve is sent to llm7.io. Without a token it answers only a few requests before it makes you wait a minute or more, so several results at once (the tones) arrive one after another and may take a while. A free token from dash.llm7.io, entered as the API key, allows 60 requests a minute."
                 },
                 "openai": {
                     "title": "OpenAI",
