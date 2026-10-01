@@ -310,13 +310,6 @@ fn translate_window(region: Option<Rect>) -> Window {
     let monitor = window.current_monitor().unwrap().unwrap();
     let dpi = monitor.scale_factor();
 
-    window
-        .set_size(tauri::PhysicalSize::new(
-            (width as f64) * dpi,
-            (height as f64) * dpi,
-        ))
-        .unwrap();
-
     let position_type = match get("translate_window_position") {
         Some(v) => v.as_str().unwrap().to_string(),
         None => "smart".to_string(),
@@ -392,6 +385,13 @@ fn translate_window(region: Option<Rect>) -> Window {
                 .unwrap();
         }
     }
+
+    // The size is set once the window is where it stays. A window that moves to a monitor with
+    // another scale is resized on the way (known-issues.md), so a size set before the move came
+    // out wrong there.
+    window
+        .set_size(tauri::LogicalSize::new(width as f64, height as f64))
+        .unwrap();
 
     window
 }

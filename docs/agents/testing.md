@@ -56,6 +56,7 @@ expect(httpMock.calls).toMatchSnapshot();
 - Settings: `fakeTauri.store` is the settings file (`config.json`); seed it before rendering, read it after.
 - Events: `listen`/`emit` work between all code under test; `fakeTauri.emit('new_text', 'hi')` plays Rust emitting an event; `fakeTauri.emitted` records what the app emitted.
 - Files: `fakeTauri.files.set('AppCache:pot_screenshot_cut.png', [137, 80])` (base directory name, colon, path) or a plain path.
+- Window: `fakeTauri.window` is the current window's size in physical pixels and its scale factor (`{ size: { width: 800, height: 600 }, scaleFactor: 1 }`); the monitor's own scale factor stays 1.
 - `fakeTauri.calls` records every IPC call; `fakeTauri.unhandled` lists calls the fake did not recognise. A render test asserts `unhandled` is empty.
 - Window label: `@tauri-apps/api/window` reads it when first imported, so set it at the top of the test file:
 

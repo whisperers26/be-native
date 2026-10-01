@@ -17,7 +17,7 @@ import { useConfig } from '../../hooks';
 import { store } from '../../utils/store';
 import { isTestMode } from '../../utils/window';
 import { info } from 'tauri-plugin-log-api';
-import type { LogicalPosition, LogicalSize, PhysicalPosition, PhysicalSize } from '@tauri-apps/api/window';
+import type { LogicalPosition, PhysicalPosition } from '@tauri-apps/api/window';
 import type { DropResult } from 'react-beautiful-dnd';
 import type { PluginList, ServiceConfigMap } from '../../types/service';
 
@@ -163,16 +163,12 @@ export default function Translate() {
                 }
                 resizeTimeout = setTimeout(async () => {
                     if (appWindow.label === 'translate') {
-                        // Physical at first, then logical, as the position above.
-                        let size: PhysicalSize | LogicalSize = await appWindow.outerSize();
-                        const monitor = await currentMonitor();
-                        // @ts-expect-error known bug (known-issues.md): currentMonitor() can return null
-                        const factor = monitor.scaleFactor;
-                        size = (size as PhysicalSize).toLogical(factor);
-                        // @ts-expect-error parseInt takes a string, and height is a number, which it converts
-                        await store.set('translate_window_height', parseInt(size.height));
-                        // @ts-expect-error parseInt takes a string, and width is a number, which it converts
-                        await store.set('translate_window_width', parseInt(size.width));
+                        // The inner size, which is what Rust sets when the window opens, and rounded: a
+                        // whole number of logical pixels is not always a whole number of physical ones,
+                        // and cutting the fraction off made the window a pixel smaller each time.
+                        const size = (await appWindow.innerSize()).toLogical(await appWindow.scaleFactor());
+                        await store.set('translate_window_height', Math.round(size.height));
+                        await store.set('translate_window_width', Math.round(size.width));
                         await store.save();
                     }
                 }, 100);
