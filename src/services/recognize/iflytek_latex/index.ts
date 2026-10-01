@@ -2,8 +2,17 @@ import { fetch } from '@tauri-apps/api/http';
 import hmacSHA256 from 'crypto-js/hmac-sha256';
 import hashSHA256 from 'crypto-js/sha256';
 import Base64 from 'crypto-js/enc-base64';
+import type { RecognizeOptions } from '../../../types/service';
 
-export async function recognize(base64, language, options = {}) {
+interface IflytekLatexResponse {
+    data: { region?: { recog: { content: string } }[] };
+}
+
+export async function recognize(
+    base64: string,
+    language: string,
+    options: RecognizeOptions = {} as RecognizeOptions
+): Promise<string> {
     const { config } = options;
 
     const { appid, apisecret, apikey } = config;
@@ -38,7 +47,7 @@ export async function recognize(base64, language, options = {}) {
         Digest: digest,
         Authorization: authorization,
     };
-    const res = await fetch(url, {
+    const res = await fetch<IflytekLatexResponse>(url, {
         method: 'POST',
         headers,
         body: {
