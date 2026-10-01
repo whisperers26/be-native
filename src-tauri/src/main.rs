@@ -38,6 +38,7 @@ use window::config_window;
 use window::cursor_position;
 use window::focus_window;
 use window::show_window;
+use window::test_mode;
 use window::updater_window;
 
 // Global AppHandle
@@ -157,6 +158,7 @@ fn main() {
             cursor_position,
             show_window,
             focus_window,
+            test_mode,
             lang_detect,
             agent_cli_run,
             webdav,

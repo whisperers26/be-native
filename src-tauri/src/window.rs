@@ -24,6 +24,12 @@ pub fn set_test_mode(on: bool) {
     TEST_MODE.store(on, Ordering::Relaxed);
 }
 
+// Whether test mode is on. The Translate window asks, to translate with a free service only.
+#[tauri::command]
+pub fn test_mode() -> bool {
+    TEST_MODE.load(Ordering::Relaxed)
+}
+
 // Get daemon window instance
 fn get_daemon_window() -> Window {
     let app_handle = APP.get().unwrap();
