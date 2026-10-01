@@ -13,8 +13,9 @@ import { useConfig } from '../../../hooks/useConfig';
 import { useToastStyle } from '../../../hooks';
 import { translate } from './index';
 import { Language } from './index';
+import type { ServiceConfigProps } from '../../../types/service';
 
-export function Config(props) {
+export function Config(props: ServiceConfigProps) {
     const { instanceKey, updateServiceList, onClose } = props;
     const { t } = useTranslation();
     const [deeplConfig, setDeeplConfig] = useConfig(
@@ -97,7 +98,7 @@ export function Config(props) {
                             onAction={(key) => {
                                 setDeeplConfig({
                                     ...deeplConfig,
-                                    type: key,
+                                    type: key as string,
                                 });
                             }}
                         >

@@ -1,6 +1,26 @@
 import { fetch, Body } from '@tauri-apps/api/http';
+import type { TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+interface DeepLFreeResponse {
+    result?: { texts?: { text: string }[] };
+    error?: { message: string };
+}
+
+interface DeepLXResponse {
+    data?: string;
+}
+
+interface DeepLKeyResponse {
+    translations: { text: string }[];
+    error?: { message: string };
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     const { config } = options;
 
     const serviceType = config['type'];
@@ -15,7 +35,7 @@ export async function translate(text, from, to, options = {}) {
     }
 }
 
-async function translate_by_free(text, from, to) {
+async function translate_by_free(text: string, from: string, to: string) {
     const url = 'https://www2.deepl.com/jsonrpc';
     const rand = getRandomNumber();
     const body = {
@@ -41,7 +61,7 @@ async function translate_by_free(text, from, to) {
         body_str = body_str.replace('"method":"', '"method": "');
     }
 
-    let res = await fetch(url, {
+    let res = await fetch<DeepLFreeResponse>(url, {
         method: 'POST',
         body: Body.text(body_str),
         headers: { 'Content-Type': 'application/json' },
@@ -62,8 +82,8 @@ async function translate_by_free(text, from, to) {
         }
     }
 }
-async function translate_by_deeplx(text, from, to, url) {
-    let res = await fetch(url, {
+async function translate_by_deeplx(text: string, from: string, to: string, url: string) {
+    let res = await fetch<DeepLXResponse>(url, {
         method: 'POST',
         body: Body.json({
             source_lang: from,
@@ -84,12 +104,12 @@ async function translate_by_deeplx(text, from, to, url) {
     }
 }
 
-async function translate_by_key(text, from, to, key) {
+async function translate_by_key(text: string, from: string, to: string, key: string) {
     const headers = {
         'Content-Type': 'application/json',
         Authorization: `DeepL-Auth-Key ${key}`,
     };
-    let body = {
+    let body: { text: string[]; target_lang: string; source_lang?: string } = {
         text: [text],
         target_lang: to,
     };
@@ -104,7 +124,7 @@ async function translate_by_key(text, from, to, key) {
     } else {
         url = 'https://api.deepl.com/v2/translate';
     }
-    let res = await fetch(url, {
+    let res = await fetch<DeepLKeyResponse>(url, {
         method: 'POST',
         body: Body.json(body),
         headers: headers,
@@ -126,7 +146,7 @@ async function translate_by_key(text, from, to, key) {
     }
 }
 
-function getTimeStamp(iCount) {
+function getTimeStamp(iCount: number) {
     const ts = Date.now();
     if (iCount !== 0) {
         iCount = iCount + 1;
@@ -136,7 +156,7 @@ function getTimeStamp(iCount) {
     }
 }
 
-function getICount(translate_text) {
+function getICount(translate_text: string) {
     return translate_text.split('i').length - 1;
 }
 
