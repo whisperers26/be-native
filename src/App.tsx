@@ -11,6 +11,7 @@ import Screenshot from './window/Screenshot';
 import Translate from './window/Translate';
 import Recognize from './window/Recognize';
 import Updater from './window/Updater';
+import Writing from './window/Writing';
 import { store } from './utils/store';
 import Config from './window/Config';
 import { useConfig } from './hooks';
@@ -25,6 +26,7 @@ const windowMap: Record<string, React.JSX.Element> = {
     silent_recognize: <SilentRecognize />,
     config: <Config />,
     updater: <Updater />,
+    writing: <Writing />,
 };
 
 export default function App() {
