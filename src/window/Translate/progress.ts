@@ -17,6 +17,11 @@ export const cardProgressAtom = atom<Record<string, CardProgress>>({});
 
 /** The window Rust opens to wait in: only large enough for the indicator. */
 export const WAITING_SIZE = 88;
+/** The indicator's disc, in the middle of that window. */
+export const DISC_SIZE = 64;
+
+/** Whether the source area has shown the window: the indicator comes in with an animation, which should be seen. */
+export const windowShowingAtom = atom(false);
 
 /**
  * `waiting`: the indicator alone. `opening`: the window is on its way to its size. `shown`: the window as it always

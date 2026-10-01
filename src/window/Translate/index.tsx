@@ -16,7 +16,16 @@ import SourceArea, { sourceHeightAtom, sourceTextAtom } from './components/Sourc
 import TargetArea from './components/TargetArea';
 import Progress from './components/Progress';
 import { fitSize, limitsFor, MIN_WIDTH } from './auto_size';
-import { cardProgressAtom, isReady, servicesInProgress, sourceBusyAtom, stageAtom } from './progress';
+import {
+    cardProgressAtom,
+    DISC_SIZE,
+    isReady,
+    servicesInProgress,
+    sourceBusyAtom,
+    stageAtom,
+    WAITING_SIZE,
+    windowShowingAtom,
+} from './progress';
 import * as builtinTranslateServices from '../../services/translate';
 import * as builtinRecognizeServices from '../../services/recognize';
 import { getServiceName, whetherPluginService } from '../../utils/service_instance';
@@ -77,8 +86,13 @@ void listen('tauri://move', () => {
 });
 
 const TEST_MODE_SERVICE_LIST = ['google'];
-// How long the window takes to open from its progress indicator: a little longer than Rust takes to resize it.
-const OPENING = 260;
+// What lies between the edge of the waiting window and the indicator's disc.
+const DISC_INSET = (WAITING_SIZE - DISC_SIZE) / 2;
+// How long the window takes to come out of its progress indicator, and the curve it follows: fast at first and
+// long in settling, as a sheet does on iOS. What the window shows lands with a slight bounce.
+const OPENING = 460;
+const UNFOLD = 'cubic-bezier(0.32, 0.72, 0, 1)';
+const LAND = 'cubic-bezier(0.34, 1.3, 0.64, 1)';
 
 export default function Translate() {
     const [closeOnBlur] = useConfig('translate_close_on_blur', true);
@@ -228,12 +242,30 @@ export default function Translate() {
     const readyRef = useRef(ready);
     readyRef.current = ready;
     const opened = useRef(false);
-    const open = (size: Size) => {
+    // Where the indicator is in the window once the window has its size, and whether the window has started to
+    // come out of it.
+    const [origin, setOrigin] = useState({ x: 0, y: 0 });
+    const [unfolded, setUnfolded] = useState(false);
+    const windowShowing = useAtomValue(windowShowingAtom);
+    // The window gets its size at once, see-through but for the indicator, which stays where it is on the screen;
+    // what it shows then comes out of the indicator. Drawing that here costs one resize of the window, where a
+    // window that grows costs one for every frame.
+    const open = async (size: Size) => {
         if (opened.current) return;
         opened.current = true;
+        const [x, y] = await invoke<[number, number]>('translate_window_origin', { ...size });
+        setOrigin({
+            x: Math.min(Math.max(x, 0), size.width - WAITING_SIZE),
+            y: Math.min(Math.max(y, 0), size.height - WAITING_SIZE),
+        });
         setStage('opening');
-        void invoke('fit_translate_window', { width: size.width, height: size.height });
-        setTimeout(() => setStage('shown'), OPENING);
+        await invoke('fit_translate_window', { ...size, glide: false });
+        // Two frames, so that the window has been drawn at its size before anything moves.
+        requestAnimationFrame(() => requestAnimationFrame(() => setUnfolded(true)));
+        setTimeout(() => {
+            setStage('shown');
+            void invoke('translate_window_opened');
+        }, OPENING);
     };
     // A remembered size is the size the window opens to.
     useEffect(() => {
@@ -246,14 +278,14 @@ export default function Translate() {
             layoutRef.current = size;
             setLayout(size);
             if (readyRef.current) {
-                open(size);
+                void open(size);
             }
         })();
     }, [rememberWindowSize]);
     useEffect(() => {
         if (stage !== 'waiting' || !ready) return;
         if (rememberWindowSize === true) {
-            open(layoutRef.current);
+            void open(layoutRef.current);
         } else {
             requestFit.current?.();
         }
@@ -313,7 +345,7 @@ export default function Translate() {
                     // Measure again at the new size, until it stays.
                     fitTimeout = setTimeout(fit, 30);
                 } else if (readyRef.current) {
-                    open(layoutRef.current);
+                    void open(layoutRef.current);
                 }
                 return;
             }
@@ -445,19 +477,18 @@ export default function Translate() {
     return (
         pluginList && (
             <>
-                {stage !== 'shown' && (
+                {stage !== 'shown' && windowShowing && (
                     <Progress
                         icons={progressIcons()}
+                        origin={origin}
                         leaving={stage === 'opening'}
                         onPress={() => setPressed(true)}
                     />
                 )}
+                {/* Until the window has opened, its content keeps the size it will open to: unseen at first, and
+                    then cut to the indicator's disc, which widens into the window. */}
                 <div
-                    className={`bg-background ${stage === 'shown' && 'h-screen w-screen'} ${
-                        osType === 'Linux' && 'rounded-[10px] border-1 border-default-100'
-                    }`}
-                    // Until the window has opened, its content keeps the size it will open to, unseen at first and
-                    // then uncovered as the window grows over it.
+                    className={stage === 'shown' ? undefined : 'bg-background'}
                     style={
                         stage === 'shown'
                             ? undefined
@@ -467,128 +498,155 @@ export default function Translate() {
                                   left: 0,
                                   width: layout.width,
                                   height: layout.height,
-                                  overflow: 'hidden',
                                   visibility: stage === 'waiting' ? 'hidden' : 'visible',
-                                  opacity: stage === 'waiting' ? 0 : 1,
-                                  transition: 'opacity 200ms ease-out',
+                                  clipPath: unfolded
+                                      ? 'inset(0px round 8px)'
+                                      : `inset(${origin.y + DISC_INSET}px ${
+                                            layout.width - origin.x - WAITING_SIZE + DISC_INSET
+                                        }px ${layout.height - origin.y - WAITING_SIZE + DISC_INSET}px ${
+                                            origin.x + DISC_INSET
+                                        }px round ${DISC_SIZE / 2}px)`,
+                                  transition: `clip-path ${OPENING - 40}ms ${UNFOLD}`,
                               }
                     }
                 >
                     <div
-                        className='fixed top-[5px] left-[5px] right-[5px] h-[30px]'
-                        data-tauri-drag-region='true'
-                    />
-                    <div className={`h-[35px] w-full flex ${osType === 'Darwin' ? 'justify-end' : 'justify-between'}`}>
-                        <Button
-                            isIconOnly
-                            size='sm'
-                            variant='flat'
-                            disableAnimation
-                            className='my-auto bg-transparent'
-                            onPress={() => {
-                                if (pined) {
-                                    if (closeOnBlur) {
-                                        unlisten = listenBlur();
-                                    }
-                                    appWindow.setAlwaysOnTop(false);
-                                } else {
-                                    unlistenBlur();
-                                    appWindow.setAlwaysOnTop(true);
-                                }
-                                setPined(!pined);
-                            }}
-                        >
-                            <BsPinFill className={`text-[20px] ${pined ? 'text-primary' : 'text-default-400'}`} />
-                        </Button>
-                        <Button
-                            isIconOnly
-                            size='sm'
-                            variant='flat'
-                            disableAnimation
-                            className={`my-auto ${osType === 'Darwin' && 'hidden'} bg-transparent`}
-                            onPress={() => {
-                                void appWindow.close();
-                            }}
-                        >
-                            <AiFillCloseCircle className='text-[20px] text-default-400' />
-                        </Button>
-                    </div>
-                    <div
-                        className={`${osType === 'Linux' ? 'h-[calc(100vh-37px)]' : 'h-[calc(100vh-35px)]'} px-[8px]`}
-                        // The height of the window it will be, not of the one it waits in.
+                        className={`bg-background ${stage === 'shown' ? 'h-screen w-screen' : 'h-full w-full overflow-hidden'} ${
+                            osType === 'Linux' && 'rounded-[10px] border-1 border-default-100'
+                        }`}
                         style={
-                            stage === 'shown' ? undefined : { height: layout.height - (osType === 'Linux' ? 37 : 35) }
+                            stage === 'shown'
+                                ? undefined
+                                : {
+                                      opacity: unfolded ? 1 : 0,
+                                      transform: unfolded ? 'none' : 'scale(0.92)',
+                                      transformOrigin: `${origin.x + WAITING_SIZE / 2}px ${origin.y + WAITING_SIZE / 2}px`,
+                                      transition: `opacity 240ms ease-out 50ms, transform ${OPENING - 40}ms ${LAND}`,
+                                  }
                         }
                     >
                         <div
-                            ref={scrollRef}
-                            className='h-full overflow-y-auto'
+                            className='fixed top-[5px] left-[5px] right-[5px] h-[30px]'
+                            data-tauri-drag-region='true'
+                        />
+                        <div
+                            className={`h-[35px] w-full flex ${osType === 'Darwin' ? 'justify-end' : 'justify-between'}`}
                         >
-                            <div ref={contentRef}>
-                                <div>
-                                    {serviceInstanceConfigMap !== null && (
-                                        <SourceArea
-                                            pluginList={pluginList}
-                                            serviceInstanceConfigMap={serviceInstanceConfigMap}
-                                        />
-                                    )}
-                                </div>
-                                <div className={`${hideLanguage && 'hidden'}`}>
-                                    <LanguageArea />
-                                    <Spacer y={2} />
-                                </div>
-                                <DragDropContext onDragEnd={onDragEnd}>
-                                    <Droppable
-                                        droppableId='droppable'
-                                        direction='vertical'
-                                    >
-                                        {(provided) => (
-                                            <div
-                                                ref={provided.innerRef}
-                                                {...provided.droppableProps}
-                                            >
-                                                {translateServiceInstanceList !== null &&
-                                                    serviceInstanceConfigMap !== null &&
-                                                    translateServiceInstanceList.map((serviceInstanceKey, index) => {
-                                                        const config =
-                                                            serviceInstanceConfigMap[serviceInstanceKey] ?? {};
-                                                        const enable = config['enable'] ?? true;
-
-                                                        return enable ? (
-                                                            <Draggable
-                                                                key={serviceInstanceKey}
-                                                                draggableId={serviceInstanceKey}
-                                                                index={index}
-                                                            >
-                                                                {(provided) => (
-                                                                    <div
-                                                                        ref={provided.innerRef}
-                                                                        {...provided.draggableProps}
-                                                                    >
-                                                                        <TargetArea
-                                                                            {...provided.dragHandleProps}
-                                                                            index={index}
-                                                                            name={serviceInstanceKey}
-                                                                            translateServiceInstanceList={
-                                                                                translateServiceInstanceList
-                                                                            }
-                                                                            pluginList={pluginList}
-                                                                            serviceInstanceConfigMap={
-                                                                                serviceInstanceConfigMap
-                                                                            }
-                                                                        />
-                                                                        <Spacer y={2} />
-                                                                    </div>
-                                                                )}
-                                                            </Draggable>
-                                                        ) : (
-                                                            <></>
-                                                        );
-                                                    })}
-                                            </div>
+                            <Button
+                                isIconOnly
+                                size='sm'
+                                variant='flat'
+                                disableAnimation
+                                className='my-auto bg-transparent'
+                                onPress={() => {
+                                    if (pined) {
+                                        if (closeOnBlur) {
+                                            unlisten = listenBlur();
+                                        }
+                                        appWindow.setAlwaysOnTop(false);
+                                    } else {
+                                        unlistenBlur();
+                                        appWindow.setAlwaysOnTop(true);
+                                    }
+                                    setPined(!pined);
+                                }}
+                            >
+                                <BsPinFill className={`text-[20px] ${pined ? 'text-primary' : 'text-default-400'}`} />
+                            </Button>
+                            <Button
+                                isIconOnly
+                                size='sm'
+                                variant='flat'
+                                disableAnimation
+                                className={`my-auto ${osType === 'Darwin' && 'hidden'} bg-transparent`}
+                                onPress={() => {
+                                    void appWindow.close();
+                                }}
+                            >
+                                <AiFillCloseCircle className='text-[20px] text-default-400' />
+                            </Button>
+                        </div>
+                        <div
+                            className={`${osType === 'Linux' ? 'h-[calc(100vh-37px)]' : 'h-[calc(100vh-35px)]'} px-[8px]`}
+                            // The height of the window it will be, not of the one it waits in.
+                            style={
+                                stage === 'shown'
+                                    ? undefined
+                                    : { height: layout.height - (osType === 'Linux' ? 37 : 35) }
+                            }
+                        >
+                            <div
+                                ref={scrollRef}
+                                className='h-full overflow-y-auto'
+                            >
+                                <div ref={contentRef}>
+                                    <div>
+                                        {serviceInstanceConfigMap !== null && (
+                                            <SourceArea
+                                                pluginList={pluginList}
+                                                serviceInstanceConfigMap={serviceInstanceConfigMap}
+                                            />
                                         )}
-                                    </Droppable>
-                                </DragDropContext>
+                                    </div>
+                                    <div className={`${hideLanguage && 'hidden'}`}>
+                                        <LanguageArea />
+                                        <Spacer y={2} />
+                                    </div>
+                                    <DragDropContext onDragEnd={onDragEnd}>
+                                        <Droppable
+                                            droppableId='droppable'
+                                            direction='vertical'
+                                        >
+                                            {(provided) => (
+                                                <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.droppableProps}
+                                                >
+                                                    {translateServiceInstanceList !== null &&
+                                                        serviceInstanceConfigMap !== null &&
+                                                        translateServiceInstanceList.map(
+                                                            (serviceInstanceKey, index) => {
+                                                                const config =
+                                                                    serviceInstanceConfigMap[serviceInstanceKey] ?? {};
+                                                                const enable = config['enable'] ?? true;
+
+                                                                return enable ? (
+                                                                    <Draggable
+                                                                        key={serviceInstanceKey}
+                                                                        draggableId={serviceInstanceKey}
+                                                                        index={index}
+                                                                    >
+                                                                        {(provided) => (
+                                                                            <div
+                                                                                ref={provided.innerRef}
+                                                                                {...provided.draggableProps}
+                                                                            >
+                                                                                <TargetArea
+                                                                                    {...provided.dragHandleProps}
+                                                                                    index={index}
+                                                                                    name={serviceInstanceKey}
+                                                                                    translateServiceInstanceList={
+                                                                                        translateServiceInstanceList
+                                                                                    }
+                                                                                    pluginList={pluginList}
+                                                                                    serviceInstanceConfigMap={
+                                                                                        serviceInstanceConfigMap
+                                                                                    }
+                                                                                />
+                                                                                <Spacer y={2} />
+                                                                            </div>
+                                                                        )}
+                                                                    </Draggable>
+                                                                ) : (
+                                                                    <></>
+                                                                );
+                                                            }
+                                                        )}
+                                                </div>
+                                            )}
+                                        </Droppable>
+                                    </DragDropContext>
+                                </div>
                             </div>
                         </div>
                     </div>

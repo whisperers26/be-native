@@ -173,6 +173,7 @@ describe('Translate window', () => {
             expect(fakeTauri.calls.find((call) => call.cmd === 'fit_translate_window')?.args).toEqual({
                 width: 598,
                 height: 528,
+                glide: false,
             })
         );
     });

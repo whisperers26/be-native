@@ -22,7 +22,7 @@ import { mergeLines } from '../../../../utils/merge_lines';
 import detect from '../../../../utils/lang_detect';
 import { store } from '../../../../utils/store';
 import { focusWindow, showWindow } from '../../../../utils/window';
-import { sourceBusyAtom } from '../../progress';
+import { sourceBusyAtom, windowShowingAtom } from '../../progress';
 import { info } from 'tauri-plugin-log-api';
 import { debug } from 'tauri-plugin-log-api';
 import type { MutableRefObject } from 'react';
@@ -53,6 +53,7 @@ export default function SourceArea(props: SourceAreaProps) {
     const [detectLanguage, setDetectLanguage] = useAtom(detectLanguageAtom);
     const sourceHeight = useAtomValue(sourceHeightAtom);
     const setSourceBusy = useSetAtom(sourceBusyAtom);
+    const setWindowShowing = useSetAtom(windowShowingAtom);
     const [incrementalTranslate] = useConfig('incremental_translate', false);
     const [dynamicTranslate] = useConfig('dynamic_translate', false);
     const [mergeWrappedLines] = useConfig('translate_merge_lines', true);
@@ -82,6 +83,7 @@ export default function SourceArea(props: SourceAreaProps) {
         } else {
             showWindow();
             focusWindow();
+            setWindowShowing(true);
         }
         // 清空检测语言
         setDetectLanguage('');
@@ -89,6 +91,7 @@ export default function SourceArea(props: SourceAreaProps) {
             setWindowType('[INPUT_TRANSLATE]');
             showWindow();
             focusWindow();
+            setWindowShowing(true);
             // @ts-expect-error known bug (known-issues.md): the setter ignores the second argument
             setSourceText('', true);
             setSourceBusy(null);
