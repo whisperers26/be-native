@@ -43,7 +43,7 @@
 | `cut_image` | `left`, `top`, `width`, `height` | — | Crops it to `pot_screenshot_cut.png` |
 | `get_base64` | — | string | `pot_screenshot_cut.png` as base64; `""` if missing |
 | `copy_img` | `width`, `height` | — | Copies the cut image to the clipboard |
-| `system_ocr` | `lang` | string | OS OCR of `pot_screenshot_cut.png` |
+| `system_ocr` | `lang` | string | OS OCR of `pot_screenshot_cut.png`; the text has one line per line read |
 | `lang_detect` | `text` | string | Offline language detection; an app language code, `en` if unsure |
 | `agent_cli_run` | `id`, `spec`, `prompt` | string | Runs one prompt in a Claude Code or Codex session of its own and returns the answer; emits `agent_cli_stream` meanwhile |
 | `set_proxy`, `unset_proxy` | — | bool | Set or clear the proxy environment variables. The frontend never calls them; the proxy is applied at launch |
