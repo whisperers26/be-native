@@ -148,6 +148,31 @@ describe('Writing window', () => {
         );
     });
 
+    it('replaces once when the box is clicked twice', async () => {
+        fakeTauri.command('writing_replace', () => new Promise(() => {}));
+        httpMock.queue(answer('He and I go.'));
+        open();
+        const box = await screen.findByText('He and I go.');
+
+        fireEvent.click(box);
+        fireEvent.click(box);
+
+        await vi.waitFor(() => expect(fakeTauri.calls.some((call) => call.cmd === 'writing_replace')).toBe(true));
+        expect(fakeTauri.calls.filter((call) => call.cmd === 'writing_replace')).toHaveLength(1);
+    });
+
+    it('keeps its boxes, and asks nothing again, when the animations are switched off', async () => {
+        httpMock.queue(answer('He and I go.'));
+        open();
+        await screen.findByText('He and I go.');
+
+        fakeTauri.emit('writing_window_animation_changed', false);
+        await new Promise((done) => setTimeout(done, 50));
+
+        expect(screen.getByText('He and I go.')).toBeInTheDocument();
+        expect(httpMock.calls).toHaveLength(1);
+    });
+
     it('copies without replacing', async () => {
         httpMock.queue(answer('He and I go.'));
         open();
