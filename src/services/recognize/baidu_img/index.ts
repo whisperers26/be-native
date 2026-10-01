@@ -2,8 +2,17 @@ import { readBinaryFile, BaseDirectory } from '@tauri-apps/api/fs';
 import { fetch, Body } from '@tauri-apps/api/http';
 import { nanoid } from 'nanoid';
 import md5 from 'md5';
+import type { RecognizeOptions } from '../../../types/service';
 
-export async function recognize(base64, language, options = {}) {
+interface BaiduImgResponse {
+    data?: { sumSrc?: string; sumDst?: string };
+}
+
+export async function recognize(
+    base64: string,
+    language: string,
+    options: RecognizeOptions = {} as RecognizeOptions
+): Promise<string> {
     const { config } = options;
 
     const { appid, secret } = config;
@@ -19,7 +28,7 @@ export async function recognize(base64, language, options = {}) {
     const str = appid + md5(file) + salt + 'APICUIDmac' + secret;
     const sign = md5(str);
 
-    let res = await fetch(url, {
+    let res = await fetch<BaiduImgResponse>(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'multipart/form-data',
