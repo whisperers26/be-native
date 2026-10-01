@@ -11,8 +11,19 @@ import React, { useState } from 'react';
 import { createServiceInstanceKey } from '../../../../../utils/service_instance';
 import { useToastStyle } from '../../../../../hooks';
 import { emit } from '@tauri-apps/api/event';
+import type { PluginConfigInfo } from '../../../../../types/service';
 
-export default function SelectPluginModal(props) {
+interface SelectPluginModalProps {
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    setCurrentConfigKey: (instanceKey: string) => void;
+    onConfigOpen: () => void;
+    pluginType: string;
+    pluginList: Record<string, PluginConfigInfo>;
+    deleteService: (instanceKey: string) => void;
+}
+
+export default function SelectPluginModal(props: SelectPluginModalProps) {
     const { isOpen, onOpenChange, setCurrentConfigKey, onConfigOpen, pluginType, pluginList, deleteService } = props;
     const [installing, setInstalling] = useState(false);
     const { t } = useTranslation();
@@ -77,6 +88,8 @@ export default function SelectPluginModal(props) {
                                                         toast.success(t('config.service.uninstall_success'), {
                                                             style: toastStyle,
                                                         });
+                                                        // known bug (known-issues.md): x is the plugin's name, but the
+                                                        // list holds <plugin>@<id> keys, so the instances stay in it
                                                         deleteService(x);
                                                         emit('reload_plugin_list');
                                                     },
