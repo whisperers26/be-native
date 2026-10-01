@@ -10,7 +10,6 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `app_theme` | `system` | `system`, `light`, `dark` |
 | `app_font`, `app_fallback_font` | `default` | Font family names |
 | `app_font_size` | `16` | Pixels. A number by default, but the General page saves a picked size as a string (`'18'`) |
-| `transparent` | `true` | Transparent window background (not macOS) |
 | `window_animation` | `true` | Off: the progress indicator, the circle-to-window opening and the windows' resizing (Translate and Writing) happen at once. The indicator's turning ring is not part of it |
 | `dev_mode` | `false` | F12 opens devtools |
 | `check_update` | `true` | Check for updates at launch (release builds only; a debug build never does). Rust |
