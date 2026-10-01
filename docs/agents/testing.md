@@ -19,6 +19,7 @@ Tests sit next to the code they test (`src/utils/index.test.ts` tests `src/utils
 | `src/test/setup.ts` | Runs before every test file: installs the fakes below, freezes time and randomness, stubs browser APIs jsdom lacks |
 | `src/test/http.ts` | `httpMock`: replaces `fetch` from `@tauri-apps/api/http` |
 | `src/test/fake-tauri.ts` | `fakeTauri`: an in-memory Tauri backend answering every IPC call |
+| `src/test/stream.ts` | `stubFetch`, `streamBody`, `sseEvent`: the browser `fetch` and streamed bodies, for the services that do not use Tauri's `fetch` |
 | `src/test/harness.test.ts` | Tests of the helpers above, including the frozen values |
 
 ## What is frozen
@@ -45,7 +46,7 @@ expect(result).toBe('hallo');
 expect(httpMock.calls).toMatchSnapshot();
 ```
 
-`queue({ status: 500, data: {...} })` makes a failed response (`ok` is false). A request with nothing queued throws `httpMock: no response queued for <METHOD> <url>`. Code that uses the browser's `fetch` instead (chatglm, streaming openai and geminipro, ollama) needs `vi.stubGlobal('fetch', ...)` in its test.
+`queue({ status: 500, data: {...} })` makes a failed response (`ok` is false). A request with nothing queued throws `httpMock: no response queued for <METHOD> <url>`. Code that uses the browser's `fetch` instead (chatglm, streaming openai and geminipro, ollama) uses `stubFetch` from `src/test/stream`: it replaces the global `fetch` for one test and returns a function listing the calls in the same `{ url, options }` shape. Build streamed bodies with `streamBody(...reads)` (or `streamBody(text, readSize)` to split bytes across reads) and server-sent events with `sseEvent(delta)`.
 
 ## The fake Tauri backend
 
