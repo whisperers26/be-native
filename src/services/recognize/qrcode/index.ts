@@ -1,12 +1,23 @@
 import jsQR from 'jsqr';
+import type { RecognizeOptions } from '../../../types/service';
 
-export async function recognize(base64, language, options = {}) {
-    let canvas = document.createElement('CANVAS');
-    let ctx = canvas.getContext('2d');
+interface ImageSnapshot {
+    data: ImageData;
+    height: number;
+    width: number;
+}
+
+export async function recognize(
+    base64: string,
+    language: string,
+    options: RecognizeOptions = {} as RecognizeOptions
+): Promise<string> {
+    let canvas = document.createElement('CANVAS') as HTMLCanvasElement;
+    let ctx = canvas.getContext('2d')!;
     base64 = 'data:image/png;base64,' + base64;
     let img = new Image();
     img.src = base64;
-    let imgdata = await new Promise((resolve, reject) => {
+    let imgdata = await new Promise<ImageSnapshot>((resolve, reject) => {
         img.onload = () => {
             img.crossOrigin = 'anonymous';
             canvas.height = img.height;
