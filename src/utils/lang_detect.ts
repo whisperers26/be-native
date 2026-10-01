@@ -4,8 +4,8 @@ import { store } from './store';
 import { v4 as uuidv4 } from 'uuid';
 
 // https://fanyi-api.baidu.com/product/113
-async function baidu_detect(text) {
-    const lang_map = {
+async function baidu_detect(text: string) {
+    const lang_map: Record<string, string> = {
         zh: 'zh_cn',
         cht: 'zh_tw',
         en: 'en',
@@ -29,7 +29,7 @@ async function baidu_detect(text) {
         per: 'fa',
         ukr: 'uk'
     };
-    let res = await fetch('https://fanyi.baidu.com/langdetect', {
+    let res = await fetch<{ lan?: string }>('https://fanyi.baidu.com/langdetect', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -48,9 +48,9 @@ async function baidu_detect(text) {
 }
 // 腾讯只支持这么多语言
 // https://cloud.tencent.com/document/product/551/15619
-async function tencent_detect(text) {
+async function tencent_detect(text: string) {
 
-    const lang_map = {
+    const lang_map: Record<string, string> = {
         zh: 'zh_cn',
         en: 'en',
         ja: 'ja',
@@ -69,7 +69,7 @@ async function tencent_detect(text) {
         ar: 'ar',
         hi: 'hi',
     };
-    let res = await fetch('https://fanyi.qq.com/api/translate', {
+    let res = await fetch<{ translate?: { source?: string } }>('https://fanyi.qq.com/api/translate', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -87,8 +87,8 @@ async function tencent_detect(text) {
     return 'en';
 }
 // https://cloud.google.com/translate/docs/languages?hl=zh-cn
-async function google_detect(text) {
-    const lang_map = {
+async function google_detect(text: string) {
+    const lang_map: Record<string, string> = {
         'zh-CN': 'zh_cn',
         'zh-TW': 'zh_tw',
         ja: 'ja',
@@ -113,7 +113,7 @@ async function google_detect(text) {
         no: 'nb_no',
         uk: 'uk'
     };
-    let res = await fetch(
+    let res = await fetch<[unknown, unknown, string?]>(
         `https://translate.google.com/translate_a/single?dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t`,
         {
             method: 'GET',
@@ -142,8 +142,8 @@ async function google_detect(text) {
     return 'en';
 }
 // https://niutrans.com/documents/contents/trans_text#languageList
-async function niutrans_detect(text) {
-    const lang_map = {
+async function niutrans_detect(text: string) {
+    const lang_map: Record<string, string> = {
         zh: 'zh_cn',
         cht: 'zh_cn',
         en: 'en',
@@ -170,7 +170,7 @@ async function niutrans_detect(text) {
         fa: 'fa',
         uk: 'uk'
     };
-    let res = await fetch('https://test.niutrans.com/NiuTransServer/language', {
+    let res = await fetch<{ language?: string }>('https://test.niutrans.com/NiuTransServer/language', {
         method: 'GET',
         headers: { 'content-type': 'application/json' },
         query: {
@@ -188,8 +188,8 @@ async function niutrans_detect(text) {
     return 'en';
 }
 // https://yandex.com/dev/translate/doc/en/concepts/api-overview
-async function yandex_detect(text) {
-    const lang_map = {
+async function yandex_detect(text: string) {
+    const lang_map: Record<string, string> = {
         zh: 'zh_cn',
         en: 'en',
         ja: 'ja',
@@ -212,7 +212,7 @@ async function yandex_detect(text) {
         uk: 'uk'
     };
 
-    let res = await fetch('https://translate.yandex.net/api/v1/tr.json/detect', {
+    let res = await fetch<{ lang?: string }>('https://translate.yandex.net/api/v1/tr.json/detect', {
         method: 'GET',
         query: {
             id: uuidv4().replaceAll('-', '') + '-0-0',
@@ -229,8 +229,8 @@ async function yandex_detect(text) {
     return 'en';
 }
 // https://learn.microsoft.com/en-us/azure/ai-services/translator/language-support
-async function bing_detect(text) {
-    const lang_map = {
+async function bing_detect(text: string) {
+    const lang_map: Record<string, string> = {
         'zh-Hans': 'zh_cn',
         'zh-Hant': 'zh_tw',
         en: 'en',
@@ -270,7 +270,7 @@ async function bing_detect(text) {
     if (token.ok) {
         const url = 'https://api-edge.cognitive.microsofttranslator.com/detect';
 
-        let res = await fetch(url, {
+        let res = await fetch<{ language?: string }[]>(url, {
             method: 'POST',
             headers: {
                 accept: '*/*',
@@ -306,11 +306,11 @@ async function bing_detect(text) {
     return 'en';
 }
 
-async function local_detect(text) {
-    return await invoke('lang_detect', { text: text });
+async function local_detect(text: string) {
+    return await invoke<string>('lang_detect', { text: text });
 }
 
-export default async function detect(text) {
+export default async function detect(text: string) {
     let langDetectEngine = (await store.get('translate_detect_engine')) ?? 'baidu';
 
     switch (langDetectEngine) {
