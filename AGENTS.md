@@ -30,6 +30,8 @@ frontend in strict TypeScript in `src/`.
    own branch.
 7. When you run the app to test, keep its windows on the secondary monitor,
    never the primary one. How: [testing.md](docs/agents/testing.md).
+8. Every release gets a description of its major changes in English, Chinese
+   and Korean. Procedure: [setup-and-run.md](docs/agents/setup-and-run.md#release-description).
 
 ## Commands
 
