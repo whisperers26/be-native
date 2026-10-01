@@ -183,17 +183,12 @@
                 "github": "GitHub",
                 "view_log": "Ver registros",
                 "view_config": "Ver configuración",
-                "discussion": "Debates de GitHub",
                 "title": "Acerca de la aplicación",
                 "website": "Sitio web",
                 "feedback": "Comentarios",
-                "community": "Comunidad",
                 "check_update": "Comprobar actualizaciones",
                 "issue": "Incidencia",
-                "email": "Correo electrónico",
-                "qq_channel": "Canal de QQ",
-                "telegram": "Telegram",
-                "qq_group": "Grupo de QQ"
+                "email": "Correo electrónico"
             }
         },
         "updater": {

@@ -205,14 +205,9 @@
                 "feedback": "Зворотний зв'язок",
                 "issue": "Повідомити про проблему",
                 "email": "Email",
-                "community": "Спільнота",
                 "check_update": "Перевірити оновлення",
                 "view_log": "Переглянути журнал",
-                "view_config": "Переглянути конфігурацію",
-                "qq_channel": "QQ-канал",
-                "qq_group": "QQ-група",
-                "telegram": "Telegram",
-                "discussion": "Обговорення на GitHub"
+                "view_config": "Переглянути конфігурацію"
             }
         },
         "services": {

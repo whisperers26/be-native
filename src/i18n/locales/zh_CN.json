@@ -208,14 +208,9 @@
                 "feedback": "问题反馈",
                 "issue": "议题",
                 "email": "邮件",
-                "community": "社区交流",
                 "check_update": "检查更新",
                 "view_log": "查看日志",
-                "view_config": "查看配置文件",
-                "qq_channel": "QQ 频道",
-                "qq_group": "QQ 群",
-                "telegram": "Telegram",
-                "discussion": "Github 讨论"
+                "view_config": "查看配置文件"
             }
         },
         "updater": {

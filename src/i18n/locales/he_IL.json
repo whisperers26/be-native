@@ -181,18 +181,13 @@
             "about": {
                 "email": "דוא\"ל",
                 "title": "אודות התוכנה",
-                "community": "קהילה",
                 "check_update": "חפש עדכונים",
                 "view_log": "הצג יומן רישום",
                 "view_config": "הצג תצורה",
-                "telegram": "Telegram",
-                "discussion": "דיון Github",
                 "github": "GitHub",
                 "label": "אודות",
                 "website": "אתר האינטרנט",
                 "feedback": "משוב",
-                "qq_channel": "ערוץ QQ",
-                "qq_group": "קבוצת QQ",
                 "issue": "גיליון"
             },
             "recognize": {

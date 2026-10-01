@@ -196,14 +196,9 @@
                 "feedback": "கருத்து",
                 "issue": "சிக்கல்",
                 "email": "மின்னஞ்சல்",
-                "community": "சமூகம்",
                 "check_update": "புதுப்பிப்பைச் சரிபார்க்கவும்",
                 "view_log": "பதிவைக் காண்க",
-                "view_config": "கட்டமைப்பைக் காண்க",
-                "qq_channel": "QQ சேனல்",
-                "qq_group": "QQ குழு",
-                "telegram": "தந்தி",
-                "discussion": "அறிவிலிமையம் கலந்துரையாடல்"
+                "view_config": "கட்டமைப்பைக் காண்க"
             }
         },
         "services": {
