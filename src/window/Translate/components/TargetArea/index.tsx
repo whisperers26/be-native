@@ -320,8 +320,10 @@ export default function TargetArea(props: TargetAreaProps) {
                             if (index === 0 && !clipboardMonitor) {
                                 switch (autoCopy) {
                                     case 'target':
+                                        // @ts-expect-error known bug (known-issues.md): v can be a dictionary object
                                         writeText(v).then(() => {
                                             if (hideWindow) {
+                                                // @ts-expect-error known bug (known-issues.md): v can be a dictionary object
                                                 sendNotification({ title: t('common.write_clipboard'), body: v });
                                             }
                                         });
@@ -394,13 +396,15 @@ export default function TargetArea(props: TargetAreaProps) {
                 throw new Error('Language not supported');
             }
             const instanceConfig = serviceInstanceConfigMap[instanceKey];
+            // The speak button is disabled unless the result is a string.
             let data = await (builtinTtsServices as TtsServices)[getServiceName(instanceKey)].tts(
-                result,
+                result as string,
                 (builtinTtsServices as TtsServices)[getServiceName(instanceKey)].Language[targetLanguage],
                 {
                     config: instanceConfig,
                 }
             );
+            // @ts-expect-error known bug (known-issues.md): lingva TTS returns undefined after an HTTP error
             speak(data);
         }
     };
@@ -570,6 +574,7 @@ export default function TargetArea(props: TargetAreaProps) {
                                                     <HiOutlineVolumeUp
                                                         className={`text-[${appFontSize}px] inline-block my-auto cursor-pointer`}
                                                         onClick={() => {
+                                                            // @ts-expect-error known bug (known-issues.md): voice can be a URL string
                                                             speak(pronunciation['voice']);
                                                         }}
                                                     />
@@ -588,7 +593,7 @@ export default function TargetArea(props: TargetAreaProps) {
                                                                 {index === 0 ? (
                                                                     <>
                                                                         <span
-                                                                            className={`text-[${appFontSize - 2}px] text-default-500 mr-[12px]`}
+                                                                            className={`text-[${appFontSize! - 2}px] text-default-500 mr-[12px]`}
                                                                         >
                                                                             {explanations['trait']}
                                                                         </span>
@@ -601,7 +606,7 @@ export default function TargetArea(props: TargetAreaProps) {
                                                                     </>
                                                                 ) : (
                                                                     <span
-                                                                        className={`text-[${appFontSize - 2}px] text-default-500 select-text mr-1`}
+                                                                        className={`text-[${appFontSize! - 2}px] text-default-500 select-text mr-1`}
                                                                         key={nanoid()}
                                                                     >
                                                                         {explain}
@@ -628,7 +633,7 @@ export default function TargetArea(props: TargetAreaProps) {
                                     result['sentence'].map((sentence, index) => {
                                         return (
                                             <div key={nanoid()}>
-                                                <span className={`text-[${appFontSize - 2}px] mr-[12px]`}>
+                                                <span className={`text-[${appFontSize! - 2}px] mr-[12px]`}>
                                                     {index + 1}.
                                                 </span>
                                                 <>
@@ -699,7 +704,7 @@ export default function TargetArea(props: TargetAreaProps) {
                                     size='sm'
                                     isDisabled={typeof result !== 'string' || result === ''}
                                     onPress={() => {
-                                        writeText(result);
+                                        writeText(result as string);
                                     }}
                                 >
                                     <MdContentCopy className='text-[16px]' />
@@ -742,7 +747,7 @@ export default function TargetArea(props: TargetAreaProps) {
                                                     getServiceName(currentTranslateServiceInstanceKey)
                                                 );
                                                 func(
-                                                    result.trim(),
+                                                    (result as string).trim(),
                                                     pluginInfo.language[newSourceLanguage],
                                                     pluginInfo.language[newTargetLanguage],
                                                     {
@@ -791,7 +796,7 @@ export default function TargetArea(props: TargetAreaProps) {
                                                     getServiceName(currentTranslateServiceInstanceKey)
                                                 ]
                                                     .translate(
-                                                        result.trim(),
+                                                        (result as string).trim(),
                                                         LanguageEnum[newSourceLanguage],
                                                         LanguageEnum[newTargetLanguage],
                                                         {
@@ -808,6 +813,7 @@ export default function TargetArea(props: TargetAreaProps) {
                                                             if (v === result) {
                                                                 setResult(v + ' ');
                                                             } else {
+                                                                // @ts-expect-error known bug (known-issues.md): v can be a dictionary object
                                                                 setResult(v.trim());
                                                             }
                                                             setIsLoading(false);
