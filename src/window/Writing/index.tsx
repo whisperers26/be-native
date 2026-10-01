@@ -113,9 +113,15 @@ export default function Writing() {
         setBusy((all) => (Boolean(all[id]) === value ? all : { ...all, [id]: value }));
     }, []);
     const onReplace = useCallback((result: string) => {
-        invoke('writing_replace', { text: result }).catch((e) => {
-            void logError(`Writing improvement: replace failed: ${e}`);
-        });
+        if (replacing.current) return;
+        replacing.current = true;
+        invoke('writing_replace', { text: result })
+            .catch((e) => {
+                void logError(`Writing improvement: replace failed: ${e}`);
+            })
+            .finally(() => {
+                replacing.current = false;
+            });
     }, []);
 
     const askTones = () => {
@@ -124,6 +130,8 @@ export default function Writing() {
         setMoreSpecs((specs) => [...specs, ...toneResults(tones, services)]);
     };
     const askCustom = () => {
+    // One result is picked: a second click before the window has closed picks nothing.
+    const replacing = useRef(false);
         const request = customRequest.trim();
         if (services === null || request === '') return;
         const round = customRound.current++;
