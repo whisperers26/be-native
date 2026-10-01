@@ -21,17 +21,7 @@ export default function About() {
                 <h1 className='font-bold text-2xl text-center'>{appName}</h1>
                 <p className='text-center text-sm text-gray-500 mb-[5px]'>{appVersion}</p>
                 <Divider />
-                <div className='flex justify-between'>
-                    <Button
-                        variant='light'
-                        className='my-[5px]'
-                        size='sm'
-                        onPress={() => {
-                            open('https://pot-app.com');
-                        }}
-                    >
-                        {t('config.about.website')}
-                    </Button>
+                <div className='flex justify-around'>
                     <Button
                         variant='light'
                         className='my-[5px]'

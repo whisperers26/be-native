@@ -25,8 +25,9 @@ describe('About settings page', () => {
 
         expect(await screen.findByRole('heading', { name: 'Be Native' })).toBeInTheDocument();
         expect(await screen.findByText('3.0.7')).toBeInTheDocument();
-        expect(await screen.findByText('Website')).toBeInTheDocument();
         expect(await screen.findByText('GitHub')).toBeInTheDocument();
+        expect(await screen.findByText('Feedback')).toBeInTheDocument();
+        expect(screen.queryByText('Website')).not.toBeInTheDocument();
         expect(fakeTauri.unhandled).toEqual([]);
     });
 });
