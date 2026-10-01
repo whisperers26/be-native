@@ -24,15 +24,32 @@ import {
     getServiceSouceType,
     whetherAvailableService,
 } from '../../../../utils/service_instance';
+import type { CollectionService, PluginList, TranslateService } from '../../../../types/service';
+import type { Key, ReactElement } from 'react';
+
+// The registries are looked up by a name known only at run time.
+type TranslateServices = Record<string, TranslateService>;
+type CollectionServices = Record<string, CollectionService>;
+
+// A row of the history table, which the Translate window creates and fills.
+interface HistoryItem {
+    id: number;
+    text: string;
+    source: string;
+    target: string;
+    service: string;
+    result: string;
+    timestamp: number;
+}
 
 export default function History() {
-    const [collectionServiceList] = useConfig('collection_service_list', []);
+    const [collectionServiceList] = useConfig<string[]>('collection_service_list', []);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [pluginList, setPluginList] = useState(null);
-    const [selectedItem, setSelectItem] = useState(null);
+    const [pluginList, setPluginList] = useState<PluginList | null>(null);
+    const [selectedItem, setSelectItem] = useState<HistoryItem | null>(null);
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
-    const [items, setItems] = useState([]);
+    const [items, setItems] = useState<HistoryItem[]>([]);
     const toastStyle = useToastStyle();
     const { t } = useTranslation();
     useEffect(() => {
@@ -46,20 +63,21 @@ export default function History() {
 
     const init = async () => {
         const db = await Database.load('sqlite:history.db');
-        const result = await db.select('SELECT COUNT(*) FROM history');
+        const result = await db.select<{ 'COUNT(*)': number }[]>('SELECT COUNT(*) FROM history');
         if (result[0] && result[0]['COUNT(*)']) {
             setTotal(result[0]['COUNT(*)']);
         }
     };
     const getData = async () => {
         const db = await Database.load('sqlite:history.db');
-        let result = await db.select('SELECT * FROM history ORDER BY id DESC LIMIT 20 OFFSET $1', [20 * (page - 1)]);
+        let result = await db.select<HistoryItem[]>('SELECT * FROM history ORDER BY id DESC LIMIT 20 OFFSET $1', [20 * (page - 1)]);
         setItems(result);
     };
 
-    const getSelectedData = async (id) => {
+    // The table's row key is the id, which NextUI hands back as a Key.
+    const getSelectedData = async (id: Key) => {
         const db = await Database.load('sqlite:history.db');
-        let result = await db.select('SELECT * FROM history WHERE id=$1', [id]);
+        let result = await db.select<HistoryItem[]>('SELECT * FROM history WHERE id=$1', [id]);
         setSelectItem(result[0]);
     };
     const clearData = async () => {
@@ -70,18 +88,19 @@ export default function History() {
         setTotal(0);
         setPage(1);
     };
+    // The dialog's Save button, the only caller, is rendered only while an item is selected.
     const updateData = async () => {
         const db = await Database.load('sqlite:history.db');
         await db.execute('UPDATE history SET text=$1, result=$2 WHERE id=$3', [
-            selectedItem.text,
-            selectedItem.result,
-            selectedItem.id,
+            selectedItem!.text,
+            selectedItem!.result,
+            selectedItem!.id,
         ]);
         await getData();
     };
 
-    const formatDate = (date) => {
-        function padTo2Digits(num) {
+    const formatDate = (date: Date) => {
+        function padTo2Digits(num: number) {
             return num.toString().padStart(2, '0');
         }
         const year = date.getFullYear().toString().slice(2, 4);
@@ -94,7 +113,7 @@ export default function History() {
     };
     const loadPluginList = async () => {
         const serviceTypeList = ['translate', 'collection'];
-        let temp = {};
+        let temp: PluginList = {};
         for (const serviceType of serviceTypeList) {
             temp[serviceType] = {};
             if (await exists(`plugins/${serviceType}`, { dir: BaseDirectory.AppConfig })) {
@@ -112,7 +131,8 @@ export default function History() {
                         );
                         pluginInfo.icon = convertFileSrc(iconPath);
                     }
-                    temp[serviceType][plugin.name] = pluginInfo;
+                    // readDir lists children, and every child has a name.
+                    temp[serviceType][plugin.name!] = pluginInfo;
                 }
             }
         }
@@ -141,19 +161,26 @@ export default function History() {
                     }}
                 >
                     <TableHeader>
+                        {/* @ts-expect-error NextUI's TableColumn requires children, but the header is hidden */}
                         <TableColumn key='service' />
+                        {/* @ts-expect-error NextUI's TableColumn requires children, but the header is hidden */}
                         <TableColumn key='text' />
+                        {/* @ts-expect-error NextUI's TableColumn requires children, but the header is hidden */}
                         <TableColumn key='source' />
+                        {/* @ts-expect-error NextUI's TableColumn requires children, but the header is hidden */}
                         <TableColumn key='target' />
+                        {/* @ts-expect-error NextUI's TableColumn requires children, but the header is hidden */}
                         <TableColumn key='result' />
+                        {/* @ts-expect-error NextUI's TableColumn requires children, but the header is hidden */}
                         <TableColumn key='timestamp' />
                     </TableHeader>
                     <TableBody
                         emptyContent={'No History to display.'}
                         items={items}
                     >
+                        {/* A service that is gone gives false, which the collection skips, but its type wants a row */}
                         {(item) =>
-                            whetherAvailableService(item.service, {
+                            (whetherAvailableService(item.service, {
                                 [ServiceSourceType.BUILDIN]: builtinServices,
                                 [ServiceSourceType.PLUGIN]: pluginList[ServiceType.TRANSLATE],
                             }) && (
@@ -167,7 +194,7 @@ export default function History() {
                                             />
                                         ) : (
                                             <img
-                                                src={`${builtinServices[getServiceName(item.service)].info.icon}`}
+                                                src={`${(builtinServices as TranslateServices)[getServiceName(item.service)].info.icon}`}
                                                 className='h-[18px] w-[18px] my-auto mr-[8px]'
                                                 draggable={false}
                                             />
@@ -185,10 +212,10 @@ export default function History() {
                                         </p>
                                     </TableCell>
                                     <TableCell>
-                                        <span className={`w-[30px] fi fi-${LanguageFlag[item.source]}`} />
+                                        <span className={`w-[30px] fi fi-${LanguageFlag[item.source as keyof typeof LanguageFlag]}`} />
                                     </TableCell>
                                     <TableCell>
-                                        <span className={`w-[30px] fi fi-${LanguageFlag[item.target]}`} />
+                                        <span className={`w-[30px] fi fi-${LanguageFlag[item.target as keyof typeof LanguageFlag]}`} />
                                     </TableCell>
                                     <TableCell>
                                         <p
@@ -207,7 +234,7 @@ export default function History() {
                                         </p>
                                     </TableCell>
                                 </TableRow>
-                            )
+                            )) as ReactElement
                         }
                     </TableBody>
                 </Table>
@@ -250,7 +277,7 @@ export default function History() {
                                                 />
                                             ) : (
                                                 <img
-                                                    src={`${builtinServices[getServiceName(selectedItem.service)].info.icon}`}
+                                                    src={`${(builtinServices as TranslateServices)[getServiceName(selectedItem.service)].info.icon}`}
                                                     className='h-[24px] w-[24px] m-auto mr-[8px]'
                                                     draggable={false}
                                                 />
@@ -304,7 +331,7 @@ export default function History() {
                                                                         config: pluginConfig,
                                                                         utils,
                                                                     }).then(
-                                                                        (_) => {
+                                                                        (_: any) => {
                                                                             toast.success(
                                                                                 t('translate.add_collection_success'),
                                                                                 {
@@ -312,7 +339,7 @@ export default function History() {
                                                                                 }
                                                                             );
                                                                         },
-                                                                        (e) => {
+                                                                        (e: any) => {
                                                                             toast.error(e.toString(), {
                                                                                 style: toastStyle,
                                                                             });
@@ -321,7 +348,7 @@ export default function History() {
                                                                 } else {
                                                                     const instanceConfig =
                                                                         (await store.get(instanceKey)) ?? {};
-                                                                    builtinCollectionServices[
+                                                                    (builtinCollectionServices as CollectionServices)[
                                                                         getServiceName(instanceKey)
                                                                     ]
                                                                         .collection(
@@ -358,7 +385,7 @@ export default function History() {
                                                                         ? pluginList['collection'][
                                                                               getServiceName(instanceKey)
                                                                           ].icon
-                                                                        : builtinCollectionServices[
+                                                                        : (builtinCollectionServices as CollectionServices)[
                                                                               getServiceName(instanceKey)
                                                                           ].info.icon
                                                                 }
