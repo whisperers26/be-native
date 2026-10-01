@@ -55,6 +55,7 @@ export default function SourceArea(props: SourceAreaProps) {
     const [ttsServiceList] = useConfig('tts_service_list', ['lingva_tts']);
     const [hideWindow] = useConfig('translate_hide_window', false);
     const [hideSource] = useConfig('hide_source', false);
+    const [rememberWindowSize] = useConfig('translate_remember_window_size', false);
     const [ttsPluginInfo, setTtsPluginInfo] = useState<PluginInfo>();
     const [windowType, setWindowType] = useState('[SELECTION_TRANSLATE]');
     const toastStyle = useToastStyle();
@@ -402,7 +403,10 @@ export default function SourceArea(props: SourceAreaProps) {
                 className='bg-content1 rounded-[10px] mt-[1px] pb-0'
             >
                 <Toaster />
-                <CardBody className='bg-content1 p-[12px] pb-0 max-h-[40vh] overflow-y-auto'>
+                {/* A window that fits itself to its content shows the whole text; one of a fixed size keeps room for the results. */}
+                <CardBody
+                    className={`bg-content1 p-[12px] pb-0 overflow-y-auto ${rememberWindowSize === false ? '' : 'max-h-[40vh]'}`}
+                >
                     <textarea
                         autoFocus
                         ref={textAreaRef}
