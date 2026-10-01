@@ -543,7 +543,8 @@ export default function Translate() {
                                       transform: unfolded ? 'none' : 'scale(0.92)',
                                       transformOrigin: `${origin.x + WAITING_SIZE / 2}px ${origin.y + WAITING_SIZE / 2}px`,
                                       willChange: 'opacity, transform',
-                                      transition: `opacity 260ms ease-out 140ms, transform ${OPENING - 80}ms ${LAND} 60ms`,
+                                      // From the first frame on: what comes in half way through reads as a hitch.
+                                      transition: `opacity 320ms ease-out 30ms, transform ${OPENING - 40}ms ${LAND}`,
                                   }
                         }
                     >
