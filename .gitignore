@@ -23,3 +23,6 @@ dist-ssr
 
 # Git worktrees that Claude Code creates for subagents
 .claude/worktrees/
+
+# Real-app smoke test output (pnpm smoke)
+test-results/

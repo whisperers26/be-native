@@ -23,6 +23,7 @@
 > - AI 代理按照 [AGENTS.md](./AGENTS.md) 及 [docs/agents](./docs/agents/) 中的 wiki 工作。
 > - 每个 Pull Request 都会经过 CI 检查（文档检查和前端构建）。
 > - 前端行为由自动化测试（Vitest）固定，命令为 `pnpm test`。
+> - 真实应用冒烟测试（`pnpm smoke`，Windows）通过本地 HTTP 接口检查应用的各个窗口。
 
 <!-- fork:end -->
 
@@ -469,6 +470,13 @@ Rust >= 1.80.0
 5. 打包构建
     ```bash
     pnpm tauri build # Build into installation package
+    ```
+
+6. 测试
+
+    ```bash
+    pnpm test # Unit and component tests
+    pnpm smoke # Real-app smoke test (Windows; start the app with pnpm tauri dev first)
     ```
 
 <div align="center">

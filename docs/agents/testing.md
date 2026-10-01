@@ -67,3 +67,15 @@ expect(httpMock.calls).toMatchSnapshot();
 - These are characterization tests: they pin what the code does today, including its bugs (see [known-issues.md](known-issues.md)). A refactor must keep them passing without changing them.
 - Snapshot files change only in a PR that means to change behaviour, and that PR says which snapshots changed and why. Never run `vitest -u` to make a refactor pass.
 - Prove a new test can fail: break the code under test on purpose (one character), watch the test fail, restore.
+
+## Real-app smoke test
+
+`pnpm smoke` checks the real app on Windows. Start the app first with the "Tauri dev" run configuration in RustRover (or `pnpm tauri dev`), then run the "Smoke test" run configuration (or `pnpm smoke`). It:
+
+1. Stops at once, with exit code 1, if nothing answers on the app's HTTP port (`server_port`, default 60828) or the app is not this repository's dev build (`src-tauri\target\debug\pot.exe`).
+2. Closes any open app windows, then runs four scenarios through the HTTP API: `config` (`GET /config`, window shows "General Settings"), `translate` (`POST /translate` with `hello world`, which the window must show), `input` (`GET /input_translate`), and `ocr` (writes a "Hello World" image to the app's `pot_screenshot_cut.png`, then `GET /ocr_recognize?screenshot=false`). Each scenario waits up to 15 s for its window, reads its text through UI Automation where it checks text, saves a screenshot, and closes the window.
+3. Fails on any `[ERROR]` or `panicked` line the app logged during the run, except translation services failing on the network (`[<service>]happened error`), which it lists as warnings: several default services depend on servers that are gone (see [known-issues.md](known-issues.md)).
+
+Results go to `test-results/smoke/<time>/` (gitignored): `report.json` and one PNG per scenario. `scripts/smoke/windows.ps1` holds the Windows helpers (find, capture and close windows; read UI Automation text; draw the OCR image).
+
+The baseline from the JavaScript code is kept at `test-results/smoke/baseline-js/` on the owner's machine. After a refactor, run the smoke test again and compare the screenshots with it: layout, labels and the shown image must match; live translation results may differ.

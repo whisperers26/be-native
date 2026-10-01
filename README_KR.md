@@ -23,6 +23,7 @@
 > - AI 에이전트는 [AGENTS.md](./AGENTS.md)와 [docs/agents](./docs/agents/)의 위키를 따라 작업합니다.
 > - 모든 풀 리퀘스트는 CI에서 검사됩니다(문서 검사 및 프런트엔드 빌드).
 > - 자동화 테스트(Vitest)가 프런트엔드 동작을 고정합니다: `pnpm test`.
+> - 실제 앱 스모크 테스트(`pnpm smoke`, Windows)가 로컬 HTTP API로 앱의 창을 검사합니다.
 
 <!-- fork:end -->
 
@@ -467,6 +468,13 @@ Rust >= 1.80.0
 5. 빌드
     ```bash
     pnpm tauri build # Build into installation package
+    ```
+
+6. 테스트
+
+    ```bash
+    pnpm test # Unit and component tests
+    pnpm smoke # Real-app smoke test (Windows; start the app with pnpm tauri dev first)
     ```
 
 <div align="center">

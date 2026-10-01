@@ -64,4 +64,15 @@ To start as on first run, quit the app and move `config.json` away.
 
 ## In RustRover
 
-Open the repository root. RustRover finds the Cargo project at `src-tauri/Cargo.toml` and the Node project at the root, with pnpm as its package manager. Run `pnpm tauri dev` in the IDE terminal, or create an npm run configuration for the `tauri` script with the argument `dev`. There are no shared run configurations yet.
+Open the repository root. RustRover finds the Cargo project at `src-tauri/Cargo.toml` and the Node project at the root, with pnpm as its package manager.
+
+Shared run configurations live in `.run/` and appear in the run menu:
+
+| Configuration | Runs |
+| --- | --- |
+| Tauri dev | `pnpm tauri dev`: the app |
+| Unit tests | `pnpm test` |
+| Smoke test | `pnpm smoke`, against the running app ([testing.md](testing.md)) |
+| Docs check | `pnpm check:docs` |
+
+RustRover passes its own environment to these. If it was already open when you installed Rust, "Tauri dev" fails with "failed to get cargo metadata: program not found"; restart RustRover so it picks up `%USERPROFILE%\.cargo\bin`.

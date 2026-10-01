@@ -23,6 +23,7 @@
 > - AI agents work from [AGENTS.md](./AGENTS.md) and the wiki in [docs/agents](./docs/agents/).
 > - CI checks every pull request (docs check and frontend build).
 > - Automated tests (Vitest) pin the frontend's behaviour: `pnpm test`.
+> - A real-app smoke test (`pnpm smoke`, Windows) checks the app's windows through its local HTTP API.
 
 <!-- fork:end -->
 
@@ -467,6 +468,13 @@ Rust >= 1.80.0
 5. Build
     ```bash
     pnpm tauri build # Build into installation package
+    ```
+
+6. Test
+
+    ```bash
+    pnpm test # Unit and component tests
+    pnpm smoke # Real-app smoke test (Windows; start the app with pnpm tauri dev first)
     ```
 
 <div align="center">
