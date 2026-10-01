@@ -6,19 +6,11 @@ pub enum Error {
     #[error(transparent)]
     Error(#[from] Box<dyn std::error::Error>),
     #[error(transparent)]
-    Dav(#[from] reqwest_dav::Error),
-    #[error(transparent)]
-    DavRe(#[from] reqwest_dav::re_exports::reqwest::Error),
-    #[error(transparent)]
     Serde(#[from] serde_json::Error),
     #[error(transparent)]
     Zip(#[from] zip::result::ZipError),
     #[error(transparent)]
-    WalkDir(#[from] walkdir::Error),
-    #[error(transparent)]
     Tauri(#[from] tauri::Error),
-    #[error(transparent)]
-    StripPrefix(#[from] std::path::StripPrefixError),
     #[error(transparent)]
     Arboard(#[from] arboard::Error),
     #[error(transparent)]
