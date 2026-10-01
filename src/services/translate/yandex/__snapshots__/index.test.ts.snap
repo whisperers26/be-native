@@ -1,0 +1,66 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`yandex translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fa": "fa",
+    "fr": "fr",
+    "he": "he",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "ja",
+    "ko": "ko",
+    "ms": "ms",
+    "nb_no": "no",
+    "nl": "nl",
+    "nn_no": "no",
+    "pl": "pl",
+    "pt_br": "pt",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "sv": "sv",
+    "th": "th",
+    "tr": "tr",
+    "uk": "uk",
+    "vi": "vi",
+    "zh_cn": "zh",
+    "zh_tw": "zh",
+  },
+  "info": {
+    "icon": "logo/yandex.svg",
+    "name": "yandex",
+  },
+}
+`;
+
+exports[`yandex translate > posts a form with a uuid-based id in the query and returns the first text as it is 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "source_lang": "en",
+          "target_lang": "de",
+          "text": "hello world",
+        },
+        "type": "Form",
+      },
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      "method": "POST",
+      "query": {
+        "id": "0123456789ab4cde8f0123456789abcd-0-0",
+        "srv": "android",
+      },
+    },
+    "url": "https://translate.yandex.net/api/v1/tr.json/translate",
+  },
+]
+`;
