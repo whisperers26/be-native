@@ -1,0 +1,89 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`anki collection > creates the deck and the note type, then adds the note, with three POSTs to AnkiConnect 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "action": "createDeck",
+          "params": {
+            "deck": "Pot",
+          },
+          "version": 6,
+        },
+        "type": "Json",
+      },
+      "method": "POST",
+    },
+    "url": "http://127.0.0.1:8765",
+  },
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "action": "createModel",
+          "params": {
+            "cardTemplates": [
+              {
+                "Back": "{{FrontSide}}<br>{{Symbol1}} {{Voice1}}<br>{{Symbol2}} {{Voice2}}<hr id=answer>{{Back}}",
+                "Front": "{{Front}}",
+                "Name": "Pot Card 2",
+              },
+            ],
+            "inOrderFields": [
+              "Front",
+              "Back",
+              "Symbol1",
+              "Voice1",
+              "Symbol2",
+              "Voice2",
+            ],
+            "isCloze": false,
+            "modelName": "Pot Card 2",
+          },
+          "version": 6,
+        },
+        "type": "Json",
+      },
+      "method": "POST",
+    },
+    "url": "http://127.0.0.1:8765",
+  },
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "action": "addNote",
+          "params": {
+            "note": {
+              "audio": [],
+              "deckName": "Pot",
+              "fields": {
+                "Back": "hallo",
+                "Front": "hello",
+                "Symbol1": undefined,
+                "Symbol2": undefined,
+              },
+              "modelName": "Pot Card 2",
+            },
+          },
+          "version": 6,
+        },
+        "type": "Json",
+      },
+      "method": "POST",
+    },
+    "url": "http://127.0.0.1:8765",
+  },
+]
+`;
+
+exports[`anki collection > exports its info 1`] = `
+{
+  "info": {
+    "icon": "logo/anki.svg",
+    "name": "anki",
+  },
+}
+`;
