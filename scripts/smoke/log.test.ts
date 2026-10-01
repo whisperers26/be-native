@@ -44,13 +44,36 @@ describe('classifyLogLines', () => {
         expect(classifyLogLines([line])).toEqual({ appErrors: [], serviceErrors: [line] });
     });
 
+    // The Translate window logs every translate error through the same "happened error" line, so a
+    // bug in the app's own code (a refactor slip) looks like a service failure unless the message says so.
+    it.each([
+        'TypeError: x is not a function',
+        'ReferenceError: y is not defined',
+        // One message per part of the pattern, so dropping any part fails a row.
+        'TypeError: Assignment to constant variable.',
+        "ReferenceError: Cannot access 'z' before initialization",
+        'SyntaxError: Unexpected end of JSON input',
+        'RangeError: Invalid array length',
+        'result.map is not a function',
+        'nanoid is not defined',
+        "Cannot read properties of undefined (reading 'translation')",
+    ])('treats a JavaScript error in a service line as an app error: %s', (message) => {
+        const line = logged('ERROR', `[deepl]happened error: ${message}`);
+
+        expect(classifyLogLines([line])).toEqual({ appErrors: [line], serviceErrors: [] });
+    });
+
     it('sorts a mixed log, keeping each line and the order they came in', () => {
         const panic = "thread 'main' panicked at src/main.rs:12:5:";
         const appError = logged('ERROR', 'failed to read config.json');
         const bing = logged('ERROR', '[bing]happened error: Get Token Failed');
+        const deepl = logged('ERROR', '[deepl]happened error: TypeError: x is not a function');
         const ecdict = logged('ERROR', '[ecdict]happened error: Http Request Error');
-        const lines = [logged('INFO', 'started'), bing, panic, logged('INFO', 'translating'), ecdict, appError];
+        const lines = [logged('INFO', 'started'), bing, panic, deepl, logged('INFO', 'translating'), ecdict, appError];
 
-        expect(classifyLogLines(lines)).toEqual({ appErrors: [panic, appError], serviceErrors: [bing, ecdict] });
+        expect(classifyLogLines(lines)).toEqual({
+            appErrors: [panic, deepl, appError],
+            serviceErrors: [bing, ecdict],
+        });
     });
 });
