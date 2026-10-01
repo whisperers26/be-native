@@ -486,17 +486,21 @@ fn set_rect(window: &Window, rect: Rect) {
         .unwrap_or_default();
 }
 
-// Give the Translate window the size it asks for, in logical pixels, and keep it on its monitor. A
-// window still where the `smart` position put it is placed again for its new size, so that it does
-// not grow over what it was put beside. A window that is showing glides to its new size and place.
-#[tauri::command(async)]
-pub fn fit_translate_window(window: Window, width: f64, height: f64) {
+// Where the Translate window is and where a fit to `width` x `height`, in logical pixels, takes it.
+// A window still where the `smart` position put it, or on its way there, is placed again for its
+// new size, so that it does not grow over what it was put beside; the last value says so.
+fn fit_rects(
+    window: &Window,
+    width: f64,
+    height: f64,
+    on_its_way: bool,
+) -> Option<(Rect, Rect, bool)> {
     let Ok(Some(monitor)) = window.current_monitor() else {
         warn!("Monitor not found, the Translate window keeps its size");
-        return;
+        return None;
     };
     let (Ok(current), Ok(size)) = (window.outer_position(), window.inner_size()) else {
-        return;
+        return None;
     };
     let scale = monitor.scale_factor();
     // Rounded up, so that a fraction of a pixel cut off does not leave something to scroll
@@ -504,28 +508,12 @@ pub fn fit_translate_window(window: Window, width: f64, height: f64) {
     let height = (height * scale).ceil() as i32;
     let area = translate_area(&monitor);
 
-    if TRANSLATE_WAITING.swap(false, Ordering::SeqCst) {
-        #[cfg(not(target_os = "linux"))]
-        set_shadow(&window, true).unwrap_or_default();
-    }
-    let fit = FIT_COUNT.fetch_add(1, Ordering::SeqCst) + 1;
-    // On its way to where it was placed, the window is not there yet, but it has not been moved
-    let on_its_way = FIT_UNDER_WAY.swap(true, Ordering::SeqCst);
-    let (x, y) = {
-        let mut placed = TRANSLATE_PLACED.lock().unwrap();
-        match placed.as_mut() {
-            Some((anchor, corner)) if on_its_way || *corner == (current.x, current.y) => {
-                *corner = beside(
-                    *anchor,
-                    width,
-                    height,
-                    area,
-                    (PLACEMENT_GAP * scale) as i32,
-                );
-                *corner
-            }
-            _ => inside(current.x, current.y, width, height, area),
-        }
+    let ((x, y), placed) = match *TRANSLATE_PLACED.lock().unwrap() {
+        Some((anchor, corner)) if on_its_way || corner == (current.x, current.y) => (
+            beside(anchor, width, height, area, (PLACEMENT_GAP * scale) as i32),
+            true,
+        ),
+        _ => (inside(current.x, current.y, width, height, area), false),
     };
     let from = Rect {
         x: current.x,
@@ -539,8 +527,45 @@ pub fn fit_translate_window(window: Window, width: f64, height: f64) {
         width,
         height,
     };
+    Some((from, to, placed))
+}
 
-    if window.is_visible().unwrap_or(false) && from != to {
+// Where the Translate window's top left corner is now, seen from the corner it would have after a
+// fit to this size, in logical pixels. The window draws what it shows now at that place while it
+// opens, so that it stays where it is on the screen.
+#[tauri::command(async)]
+pub fn translate_window_origin(window: Window, width: f64, height: f64) -> (f64, f64) {
+    let on_its_way = FIT_UNDER_WAY.load(Ordering::SeqCst);
+    let Some((from, to, _)) = fit_rects(&window, width, height, on_its_way) else {
+        return (0.0, 0.0);
+    };
+    let scale = window.scale_factor().unwrap_or(1.0);
+    (
+        (from.x - to.x) as f64 / scale,
+        (from.y - to.y) as f64 / scale,
+    )
+}
+
+// Give the Translate window the size it asks for, in logical pixels, and keep it on its monitor. A
+// window that is showing glides to its new size and place, unless `glide` is false: the window
+// then draws the change itself.
+#[tauri::command(async)]
+pub fn fit_translate_window(window: Window, width: f64, height: f64, glide: Option<bool>) {
+    TRANSLATE_WAITING.store(false, Ordering::SeqCst);
+    let fit = FIT_COUNT.fetch_add(1, Ordering::SeqCst) + 1;
+    // On its way to where it was placed, the window is not there yet, but it has not been moved
+    let on_its_way = FIT_UNDER_WAY.swap(true, Ordering::SeqCst);
+    let Some((from, to, placed)) = fit_rects(&window, width, height, on_its_way) else {
+        FIT_UNDER_WAY.store(false, Ordering::SeqCst);
+        return;
+    };
+    if placed {
+        if let Some((_, corner)) = TRANSLATE_PLACED.lock().unwrap().as_mut() {
+            *corner = (to.x, to.y);
+        }
+    }
+
+    if glide.unwrap_or(true) && window.is_visible().unwrap_or(false) && from != to {
         let start = std::time::Instant::now();
         loop {
             if FIT_COUNT.load(Ordering::SeqCst) != fit {
@@ -559,6 +584,16 @@ pub fn fit_translate_window(window: Window, width: f64, height: f64) {
         set_rect(&window, to);
         FIT_UNDER_WAY.store(false, Ordering::SeqCst);
     }
+}
+
+// Give the Translate window its shadow, which it waits without: the window calls this once it has
+// opened, because the shadow lies around the whole window, however little of it is drawn yet.
+#[tauri::command]
+pub fn translate_window_opened(window: Window) {
+    #[cfg(not(target_os = "linux"))]
+    set_shadow(&window, true).unwrap_or_default();
+    #[cfg(target_os = "linux")]
+    let _ = window;
 }
 
 pub fn selection_translate() {
