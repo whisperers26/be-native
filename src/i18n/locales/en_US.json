@@ -203,19 +203,11 @@
             "about": {
                 "label": "About",
                 "title": "About Application",
-                "website": "Website",
                 "github": "GitHub",
                 "feedback": "Feedback",
-                "issue": "Issue",
-                "email": "Email",
-                "community": "Community",
                 "check_update": "Check Update",
                 "view_log": "View Log",
-                "view_config": "View Config",
-                "qq_channel": "QQ Channel",
-                "qq_group": "QQ Group",
-                "telegram": "Telegram",
-                "discussion": "Github Discussion"
+                "view_config": "View Config"
             }
         },
         "updater": {

@@ -421,19 +421,11 @@
             },
             "about": {
                 "title": "Sobre a Aplicação",
-                "qq_group": "Grupo QQ",
-                "website": "Website",
                 "check_update": "Procurar Atualização",
-                "telegram": "Telegram",
                 "feedback": "Realimentação",
                 "label": "Sobre",
                 "view_config": "Exibir Configuração",
-                "issue": "Problemas",
-                "community": "Comunidade",
-                "email": "Email",
                 "github": "GitHub",
-                "discussion": "Discussão no GitHub",
-                "qq_channel": "Canal no QQ",
                 "view_log": "Exibir Registro"
             },
             "history": {
