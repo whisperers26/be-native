@@ -29,6 +29,7 @@
 > - Pushing a `v*` tag builds and publishes signed installers as a GitHub release; the in-app updater reads the latest release instead of upstream's feed.
 > - The app is named Be Native and has its own icon; a debug build (`pnpm tauri dev`) calls itself "Be Native (Debug)" and does not check for updates at launch.
 > - Selecting a screen region shows a horizontal and a vertical line through the pointer instead of a small crosshair; the lines stay on one monitor and follow the pointer to another.
+> - Silent text recognition: its own hotkey (also in the tray menu and the HTTP API as `/ocr_copy`) selects a screen region and copies the recognized text to the clipboard without opening a window.
 
 <!-- fork:end -->
 
@@ -323,6 +324,8 @@ GET "/ocr_recognize?screenshot=false" => OCR without taking screenshot
 GET "/ocr_translate?screenshot=false" => Translate screenshot without taking screenshot
 GET "/ocr_recognize?screenshot=true" => OCR with screenshot
 GET "/ocr_translate?screenshot=true" => Translate screenshot
+GET "/ocr_copy" => Recognize a screenshot region and copy the text, without a window
+GET "/ocr_copy?screenshot=false" => Copy the text of an existing screenshot, without a window
 ```
 
 ## Example:

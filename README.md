@@ -29,6 +29,7 @@
 > - 推送 `v*` 标签会构建并在 GitHub 发布带签名的安装包，应用内更新读取最新的发布，不再读取上游的更新源。
 > - 应用更名为 Be Native 并换了新图标；调试版本（`pnpm tauri dev`）显示为 “Be Native (Debug)”，启动时不检查更新。
 > - 框选屏幕区域时，用穿过鼠标位置的一条横线和一条竖线代替小十字光标；线条只画在一块屏幕上，鼠标移到另一块屏幕时跟着过去。
+> - 静默文字识别：用单独的快捷键（托盘菜单和 HTTP API 的 `/ocr_copy` 也可触发）框选屏幕区域后，不弹出任何窗口，直接把识别出的文字复制到剪切板。
 
 <!-- fork:end -->
 
@@ -327,6 +328,8 @@ GET "/ocr_recognize?screenshot=false" => 截图OCR(不使用软件内截图),
 GET "/ocr_translate?screenshot=false" => 截图翻译(不使用软件内截图),
 GET "/ocr_recognize?screenshot=true" => 截图OCR,
 GET "/ocr_translate?screenshot=true" => 截图翻译,
+GET "/ocr_copy" => 截图识别并复制文字(不弹出窗口),
+GET "/ocr_copy?screenshot=false" => 识别已有截图并复制文字(不弹出窗口),
 ```
 
 ## 示例：
