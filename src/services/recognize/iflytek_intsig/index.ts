@@ -1,8 +1,17 @@
 import { fetch } from '@tauri-apps/api/http';
 import CryptoJS from 'crypto-js';
 import { iflytek_auth } from '../iflytek';
+import type { RecognizeOptions } from '../../../types/service';
 
-export async function recognize(base64, language, options = {}) {
+interface IflytekIntsigResponse {
+    payload?: { recognizeDocumentRes: { text: string } };
+}
+
+export async function recognize(
+    base64: string,
+    language: string,
+    options: RecognizeOptions = {} as RecognizeOptions
+): Promise<string> {
     const { config } = options;
 
     const { appid, apisecret, apikey } = config;
@@ -45,7 +54,7 @@ export async function recognize(base64, language, options = {}) {
     };
 
     // 发送请求
-    let res = await fetch(request_url, {
+    let res = await fetch<IflytekIntsigResponse>(request_url, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: { type: 'Text', payload: JSON.stringify(request_body) },
