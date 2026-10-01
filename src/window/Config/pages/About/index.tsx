@@ -1,4 +1,4 @@
-import { Divider, Button, Popover, PopoverTrigger, PopoverContent } from '@nextui-org/react';
+import { Divider, Button } from '@nextui-org/react';
 import { appLogDir, appConfigDir } from '@tauri-apps/api/path';
 import { useTranslation } from 'react-i18next';
 import { open } from '@tauri-apps/api/shell';
@@ -42,44 +42,16 @@ export default function About() {
                     >
                         {t('config.about.github')}
                     </Button>
-                    <Popover
-                        placement='top'
-                        offset={10}
+                    <Button
+                        variant='light'
+                        className='my-[5px]'
+                        size='sm'
+                        onPress={() => {
+                            open('https://github.com/whisperers26/be-native/issues');
+                        }}
                     >
-                        <PopoverTrigger>
-                            <Button
-                                variant='light'
-                                className='my-[5px]'
-                                size='sm'
-                            >
-                                {t('config.about.feedback')}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent>
-                            <div className='flex justify-between'>
-                                <Button
-                                    variant='light'
-                                    className='my-[5px]'
-                                    size='sm'
-                                    onPress={() => {
-                                        open('https://github.com/pot-app/pot-desktop/issues');
-                                    }}
-                                >
-                                    {t('config.about.issue')}
-                                </Button>
-                                <Button
-                                    variant='light'
-                                    className='my-[5px]'
-                                    size='sm'
-                                    onPress={() => {
-                                        open('mailto:support@pot-app.com');
-                                    }}
-                                >
-                                    {t('config.about.email')}
-                                </Button>
-                            </div>
-                        </PopoverContent>
-                    </Popover>
+                        {t('config.about.feedback')}
+                    </Button>
                 </div>
                 <Divider />
             </div>
