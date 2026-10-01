@@ -1,0 +1,49 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`tesseract OCR > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ara",
+    "auto": "eng",
+    "de": "deu",
+    "en": "eng",
+    "es": "spa",
+    "fr": "fra",
+    "he": "heb",
+    "hi": "hin",
+    "id": "ind",
+    "it": "ita",
+    "ja": "jpn",
+    "ko": "kor",
+    "ms": "msa",
+    "pt_br": "por",
+    "pt_pt": "por",
+    "ru": "rus",
+    "th": "tha",
+    "tr": "tur",
+    "uk": "ukr",
+    "vi": "vie",
+    "yue": "chi_sim",
+    "zh_cn": "chi_sim",
+    "zh_tw": "chi_tra",
+  },
+  "info": {
+    "icon": "logo/tesseract.png",
+    "name": "tesseract",
+  },
+}
+`;
+
+exports[`tesseract OCR > recognizes the image as a PNG data URL with the app-hosted worker and core and the remote language data 1`] = `
+[
+  [
+    "data:image/png;base64,aW1hZ2U=",
+    "eng",
+    {
+      "corePath": "/tesseract-core-simd-lstm.wasm.js",
+      "langPath": "https://pub-f6afb74f13c64cd89561b4714dca1c27.r2.dev",
+      "workerPath": "/worker.min.js",
+    },
+  ],
+]
+`;
