@@ -59,4 +59,4 @@ All of `src/` is TypeScript. Write a new file as `.ts`, or `.tsx` when it holds 
 | L3 | `src/components`, `src/window` | Done |
 | L4 | `src/main`, `src/App`, `index.html`, Vite and Tailwind configs; `allowJs` off | Done |
 
-Staying JavaScript on purpose: `postcss.config.js`, `updater/*.mjs` (upstream's release tooling), `public/*.js` (bundled Tesseract files), external `.potext` plugins.
+Staying JavaScript on purpose: `postcss.config.js`, `public/*.js` (bundled Tesseract files), external `.potext` plugins.

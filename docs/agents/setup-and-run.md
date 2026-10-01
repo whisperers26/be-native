@@ -44,7 +44,7 @@ What to expect:
   ```
 
 - With `dev_mode` on (Config → General), F12 opens the devtools of the focused window.
-- The updater still checks upstream's feed, which now announces a "4.0.0" that is a notice about upstream's successor app (Manggo), not a Pot release. So every launch with `check_update` on opens the Updater window. Close it, and never click Update: it would download upstream's installer. Turn off "check for updates" in Config → General to stop it.
+- The updater reads `latest.json` from this fork's latest GitHub release. A build older than that release opens the Updater window at launch; a build at the latest version stays quiet. Turn off "check for updates" in Config → General to stop the launch check.
 
 ## Data on disk
 
@@ -61,7 +61,17 @@ To start as on first run, quit the app and move `config.json` away.
 | Command | Result |
 | --- | --- |
 | `pnpm build` | The frontend only, into `dist/`, in about 15 seconds. It warns that the main chunk is over 500 kB; that is expected. |
-| `pnpm tauri build` | A release binary plus MSI and NSIS installers in `src-tauri/target/release/bundle/`, in about 2.5 minutes. It then exits with "A public key has been found, but no private key. Make sure to set `TAURI_PRIVATE_KEY` environment variable.": the updater is active with upstream's public key, and only the signing of the updater bundles needs the private key. The installers are already written by then. |
+| `pnpm tauri build` | A release binary plus MSI and NSIS installers in `src-tauri/target/release/bundle/`, in about 2.5 minutes. It then exits with "A public key has been found, but no private key. Make sure to set `TAURI_PRIVATE_KEY` environment variable.": only the signing of the updater bundles needs the private key. The installers are already written by then. |
+
+## Releasing
+
+A release is a `v*` tag on `main`; `release.yml` does the rest.
+
+1. Set the same version in `package.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock` (the `pot` package) and `src-tauri/tauri.conf.json`, and merge that through a PR.
+2. `git switch main && git pull --ff-only && git tag v<version> && git push origin v<version>`.
+3. Watch it: `gh run watch --repo whisperers26/be-native`. The release appears at `https://github.com/whisperers26/be-native/releases` with the installers and `latest.json`.
+
+The update bundles are signed with a minisign key. Its public half is `pubkey` in `tauri.conf.json`; the private half lives only in the repository secrets `TAURI_PRIVATE_KEY` and `TAURI_KEY_PASSWORD` and in the owner's backup. Losing it means installed copies can never update again, because they only accept bundles signed by that key.
 
 ## In RustRover
 
