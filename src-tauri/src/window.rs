@@ -2,13 +2,13 @@ use std::fs;
 
 use crate::config::get;
 use crate::config::set;
-use crate::placement::{beside, inside, Rect};
+use crate::placement::{beside, between, inset, inside, Rect};
 use crate::StringWrapper;
 use crate::APP;
 use dirs::cache_dir;
 use log::{info, warn};
 use mouse_position::mouse_position::{Mouse, Position};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use tauri::Manager;
 use tauri::Monitor;
 use tauri::Window;
@@ -280,6 +280,16 @@ pub fn config_window() {
 
 // The gap between a window and what it is placed beside, in logical pixels
 const PLACEMENT_GAP: f64 = 8.0;
+// The room the Translate window leaves between itself and the edges of the monitor's usable area
+const EDGE_MARGIN: f64 = 12.0;
+
+// Where the Translate window may be on a monitor
+fn translate_area(monitor: &Monitor) -> Rect {
+    inset(
+        usable_area(monitor),
+        (EDGE_MARGIN * monitor.scale_factor()) as i32,
+    )
+}
 
 // The size the Translate window opens at when its size is not remembered, in logical pixels. The
 // window then fits itself to what it shows, through `fit_translate_window`.
@@ -289,9 +299,16 @@ const TRANSLATE_AUTO_SIZE: (i64, i64) = (420, 240);
 static TRANSLATE_PLACED: std::sync::Mutex<Option<(Rect, (i32, i32))>> =
     std::sync::Mutex::new(None);
 
+// The size the Translate window opens at while its text is recognized and translated, in logical
+// pixels: room for a round progress indicator. The window asks for its real size, through
+// `fit_translate_window`, once it has something to show.
+const TRANSLATE_WAITING_SIZE: (i64, i64) = (88, 88);
+// Whether the Translate window is still at its waiting size, without a shadow
+static TRANSLATE_WAITING: AtomicBool = AtomicBool::new(false);
+
 // `region` is what the text came from, if it came from a place on the screen. The `smart` position
-// puts the window beside it.
-fn translate_window(region: Option<Rect>) -> Window {
+// puts the window beside it. `waiting` opens the window at its waiting size.
+fn translate_window(region: Option<Rect>, waiting: bool) -> Window {
     // Mouse physical position
     let mut mouse_position = placement_point();
     let (window, exists) = build_window("translate", "Translate");
@@ -305,7 +322,13 @@ fn translate_window(region: Option<Rect>) -> Window {
         Some(v) => v.as_bool().unwrap_or(false),
         None => false,
     };
-    let (width, height) = if remember_size {
+    TRANSLATE_WAITING.store(waiting, Ordering::SeqCst);
+    let (width, height) = if waiting {
+        // A square shadow around a round indicator would show the window it sits in
+        #[cfg(not(target_os = "linux"))]
+        set_shadow(&window, false).unwrap_or_default();
+        TRANSLATE_WAITING_SIZE
+    } else if remember_size {
         let width = match get("translate_window_width") {
             Some(v) => v.as_i64().unwrap(),
             None => {
@@ -346,7 +369,7 @@ fn translate_window(region: Option<Rect>) -> Window {
                 anchor,
                 (width as f64 * dpi) as i32,
                 (height as f64 * dpi) as i32,
-                usable_area(&monitor),
+                translate_area(&monitor),
                 (PLACEMENT_GAP * dpi) as i32,
             );
             window
@@ -415,46 +438,162 @@ fn translate_window(region: Option<Rect>) -> Window {
     window
 }
 
-// Give the Translate window the size it asks for, in logical pixels, and keep it on its monitor. A
-// window still where the `smart` position put it is placed again for its new size, so that it does
-// not grow over what it was put beside.
-#[tauri::command(async)]
-pub fn fit_translate_window(window: Window, width: f64, height: f64) {
-    let Ok(Some(monitor)) = window.current_monitor() else {
-        warn!("Monitor not found, the Translate window keeps its size");
+// Whether the Translate window was opened at its waiting size and has not asked for its size yet
+#[tauri::command]
+pub fn translate_window_waiting() -> bool {
+    TRANSLATE_WAITING.load(Ordering::SeqCst)
+}
+
+// How long the Translate window takes to get to a new size and place
+const FIT_DURATION: std::time::Duration = std::time::Duration::from_millis(160);
+// Counts the fits asked for: one that is under way stops when a newer one starts
+static FIT_COUNT: AtomicU64 = AtomicU64::new(0);
+static FIT_UNDER_WAY: AtomicBool = AtomicBool::new(false);
+
+// Move and resize a window in one step, in physical pixels, so that it is never seen with a new
+// place and its old size
+#[cfg(target_os = "windows")]
+fn set_rect(window: &Window, rect: Rect) {
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::UI::WindowsAndMessaging::{
+        SetWindowPos, SWP_NOACTIVATE, SWP_NOOWNERZORDER, SWP_NOZORDER,
+    };
+
+    let Ok(hwnd) = window.hwnd() else {
+        warn!("Window handle not found: {}", window.label());
         return;
     };
-    let Ok(current) = window.outer_position() else {
-        return;
+    unsafe {
+        let _ = SetWindowPos(
+            HWND(hwnd.0 as _),
+            HWND::default(),
+            rect.x,
+            rect.y,
+            rect.width,
+            rect.height,
+            SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE,
+        );
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn set_rect(window: &Window, rect: Rect) {
+    window
+        .set_size(tauri::PhysicalSize::new(rect.width, rect.height))
+        .unwrap_or_default();
+    window
+        .set_position(tauri::PhysicalPosition::new(rect.x, rect.y))
+        .unwrap_or_default();
+}
+
+// Where the Translate window is and where a fit to `width` x `height`, in logical pixels, takes it.
+// A window still where the `smart` position put it, or on its way there, is placed again for its
+// new size, so that it does not grow over what it was put beside; the last value says so.
+fn fit_rects(
+    window: &Window,
+    width: f64,
+    height: f64,
+    on_its_way: bool,
+) -> Option<(Rect, Rect, bool)> {
+    let Ok(Some(monitor)) = window.current_monitor() else {
+        warn!("Monitor not found, the Translate window keeps its size");
+        return None;
+    };
+    let (Ok(current), Ok(size)) = (window.outer_position(), window.inner_size()) else {
+        return None;
     };
     let scale = monitor.scale_factor();
     // Rounded up, so that a fraction of a pixel cut off does not leave something to scroll
     let width = (width * scale).ceil() as i32;
     let height = (height * scale).ceil() as i32;
-    let area = usable_area(&monitor);
+    let area = translate_area(&monitor);
 
-    let mut placed = TRANSLATE_PLACED.lock().unwrap();
-    let (x, y) = match placed.as_mut() {
-        Some((anchor, corner)) if *corner == (current.x, current.y) => {
-            *corner = beside(
-                *anchor,
-                width,
-                height,
-                area,
-                (PLACEMENT_GAP * scale) as i32,
-            );
-            *corner
-        }
-        _ => inside(current.x, current.y, width, height, area),
+    let ((x, y), placed) = match *TRANSLATE_PLACED.lock().unwrap() {
+        Some((anchor, corner)) if on_its_way || corner == (current.x, current.y) => (
+            beside(anchor, width, height, area, (PLACEMENT_GAP * scale) as i32),
+            true,
+        ),
+        _ => (inside(current.x, current.y, width, height, area), false),
     };
-    window
-        .set_size(tauri::PhysicalSize::new(width, height))
-        .unwrap_or_default();
-    if (x, y) != (current.x, current.y) {
-        window
-            .set_position(tauri::PhysicalPosition::new(x, y))
-            .unwrap_or_default();
+    let from = Rect {
+        x: current.x,
+        y: current.y,
+        width: size.width as i32,
+        height: size.height as i32,
+    };
+    let to = Rect {
+        x,
+        y,
+        width,
+        height,
+    };
+    Some((from, to, placed))
+}
+
+// Where the Translate window's top left corner is now, seen from the corner it would have after a
+// fit to this size, in logical pixels. The window draws what it shows now at that place while it
+// opens, so that it stays where it is on the screen.
+#[tauri::command(async)]
+pub fn translate_window_origin(window: Window, width: f64, height: f64) -> (f64, f64) {
+    let on_its_way = FIT_UNDER_WAY.load(Ordering::SeqCst);
+    let Some((from, to, _)) = fit_rects(&window, width, height, on_its_way) else {
+        return (0.0, 0.0);
+    };
+    let scale = window.scale_factor().unwrap_or(1.0);
+    (
+        (from.x - to.x) as f64 / scale,
+        (from.y - to.y) as f64 / scale,
+    )
+}
+
+// Give the Translate window the size it asks for, in logical pixels, and keep it on its monitor. A
+// window that is showing glides to its new size and place, unless `glide` is false: the window
+// then draws the change itself.
+#[tauri::command(async)]
+pub fn fit_translate_window(window: Window, width: f64, height: f64, glide: Option<bool>) {
+    TRANSLATE_WAITING.store(false, Ordering::SeqCst);
+    let fit = FIT_COUNT.fetch_add(1, Ordering::SeqCst) + 1;
+    // On its way to where it was placed, the window is not there yet, but it has not been moved
+    let on_its_way = FIT_UNDER_WAY.swap(true, Ordering::SeqCst);
+    let Some((from, to, placed)) = fit_rects(&window, width, height, on_its_way) else {
+        FIT_UNDER_WAY.store(false, Ordering::SeqCst);
+        return;
+    };
+    if placed {
+        if let Some((_, corner)) = TRANSLATE_PLACED.lock().unwrap().as_mut() {
+            *corner = (to.x, to.y);
+        }
     }
+
+    if glide.unwrap_or(true) && window.is_visible().unwrap_or(false) && from != to {
+        let start = std::time::Instant::now();
+        loop {
+            if FIT_COUNT.load(Ordering::SeqCst) != fit {
+                // A newer fit goes on from where this one got to
+                return;
+            }
+            let part = start.elapsed().as_secs_f64() / FIT_DURATION.as_secs_f64();
+            if part >= 1.0 {
+                break;
+            }
+            set_rect(&window, between(from, to, part));
+            std::thread::sleep(std::time::Duration::from_millis(8));
+        }
+    }
+    if FIT_COUNT.load(Ordering::SeqCst) == fit {
+        set_rect(&window, to);
+        FIT_UNDER_WAY.store(false, Ordering::SeqCst);
+    }
+}
+
+// Give the Translate window its shadow, which it waits without: the window calls this once it has
+// opened, because the shadow lies around the whole window, however little of it is drawn yet.
+#[tauri::command]
+pub fn translate_window_opened(window: Window) {
+    #[cfg(not(target_os = "linux"))]
+    set_shadow(&window, true).unwrap_or_default();
+    #[cfg(target_os = "linux")]
+    let _ = window;
 }
 
 pub fn selection_translate() {
@@ -468,7 +607,8 @@ pub fn selection_translate() {
         state.0.lock().unwrap().replace_range(.., &text);
     }
 
-    let window = translate_window(None);
+    // With nothing selected there is nothing to wait for
+    let window = translate_window(None, !text.trim().is_empty());
     window.emit("new_text", text).unwrap();
 }
 
@@ -481,7 +621,7 @@ pub fn input_translate() {
         .lock()
         .unwrap()
         .replace_range(.., "[INPUT_TRANSLATE]");
-    let window = translate_window(None);
+    let window = translate_window(None, false);
     let position_type = match get("translate_window_position") {
         Some(v) => v.as_str().unwrap().to_string(),
         None => "smart".to_string(),
@@ -498,7 +638,7 @@ pub fn text_translate(text: String) {
     // Clear State
     let state: tauri::State<StringWrapper> = app_handle.state();
     state.0.lock().unwrap().replace_range(.., &text);
-    let window = translate_window(None);
+    let window = translate_window(None, !text.trim().is_empty());
     window.emit("new_text", text).unwrap();
 }
 
@@ -512,7 +652,7 @@ pub fn image_translate() {
         .replace_range(.., "[IMAGE_TRANSLATE]");
     // In test mode the window stays on the secondary monitor, wherever the region was
     let region = crate::screenshot::take_region().filter(|_| !TEST_MODE.load(Ordering::Relaxed));
-    let window = translate_window(region);
+    let window = translate_window(region, true);
     window.emit("new_text", "[IMAGE_TRANSLATE]").unwrap();
 }
 

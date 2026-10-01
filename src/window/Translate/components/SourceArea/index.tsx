@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { HiTranslate } from 'react-icons/hi';
 import { LuDelete } from 'react-icons/lu';
 import { invoke } from '@tauri-apps/api';
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { getServiceName, getServiceSouceType, ServiceSourceType } from '../../../../utils/service_instance';
 import { useConfig, useSyncAtom, useVoice, useToastStyle } from '../../../../hooks';
 import { invoke_plugin } from '../../../../utils/invoke_plugin';
@@ -22,6 +22,7 @@ import { mergeLines } from '../../../../utils/merge_lines';
 import detect from '../../../../utils/lang_detect';
 import { store } from '../../../../utils/store';
 import { focusWindow, showWindow } from '../../../../utils/window';
+import { sourceBusyAtom, windowShowingAtom } from '../../progress';
 import { info } from 'tauri-plugin-log-api';
 import { debug } from 'tauri-plugin-log-api';
 import type { MutableRefObject } from 'react';
@@ -30,6 +31,8 @@ import type { PluginInfo, PluginList, RecognizeService, ServiceConfigMap, TtsSer
 
 export const sourceTextAtom = atom('');
 export const detectLanguageAtom = atom('');
+// The height the box around the text is kept to, in a window that fits itself to its content: null shows all the text.
+export const sourceHeightAtom = atom<number | null>(null);
 
 let unlisten: Promise<UnlistenFn> | null = null;
 let timer = null;
@@ -48,6 +51,9 @@ export default function SourceArea(props: SourceAreaProps) {
     const [appFontSize] = useConfig('app_font_size', 16);
     const [sourceText, setSourceText, syncSourceText] = useSyncAtom(sourceTextAtom);
     const [detectLanguage, setDetectLanguage] = useAtom(detectLanguageAtom);
+    const sourceHeight = useAtomValue(sourceHeightAtom);
+    const setSourceBusy = useSetAtom(sourceBusyAtom);
+    const setWindowShowing = useSetAtom(windowShowingAtom);
     const [incrementalTranslate] = useConfig('incremental_translate', false);
     const [dynamicTranslate] = useConfig('dynamic_translate', false);
     const [mergeWrappedLines] = useConfig('translate_merge_lines', true);
@@ -70,11 +76,14 @@ export default function SourceArea(props: SourceAreaProps) {
     // plugin (known-issues.md).
     const handleNewText = async (text: string) => {
         text = text.trim();
+        // Busy until the text is ready for the cards, or it is clear that none is coming.
+        setSourceBusy(text === '[IMAGE_TRANSLATE]' ? 'image' : 'text');
         if (hideWindow) {
             appWindow.hide();
         } else {
             showWindow();
             focusWindow();
+            setWindowShowing(true);
         }
         // 清空检测语言
         setDetectLanguage('');
@@ -82,8 +91,10 @@ export default function SourceArea(props: SourceAreaProps) {
             setWindowType('[INPUT_TRANSLATE]');
             showWindow();
             focusWindow();
+            setWindowShowing(true);
             // @ts-expect-error known bug (known-issues.md): the setter ignores the second argument
             setSourceText('', true);
+            setSourceBusy(null);
         } else if (text === '[IMAGE_TRANSLATE]') {
             setWindowType('[IMAGE_TRANSLATE]');
             const base64 = await invoke<string>('get_base64');
@@ -115,16 +126,20 @@ export default function SourceArea(props: SourceAreaProps) {
                             } else {
                                 setSourceText(newText);
                             }
-                            detect_language(newText).then(() => {
-                                syncSourceText();
-                            });
+                            detect_language(newText)
+                                .then(() => {
+                                    syncSourceText();
+                                })
+                                .finally(() => setSourceBusy(null));
                         },
                         (e: any) => {
                             setSourceText(e.toString());
+                            setSourceBusy(null);
                         }
                     );
                 } else {
                     setSourceText('Language not supported');
+                    setSourceBusy(null);
                 }
             } else {
                 if (
@@ -158,16 +173,20 @@ export default function SourceArea(props: SourceAreaProps) {
                                 } else {
                                     setSourceText(newText);
                                 }
-                                detect_language(newText).then(() => {
-                                    syncSourceText();
-                                });
+                                detect_language(newText)
+                                    .then(() => {
+                                        syncSourceText();
+                                    })
+                                    .finally(() => setSourceBusy(null));
                             },
                             (e) => {
                                 setSourceText(e.toString());
+                                setSourceBusy(null);
                             }
                         );
                 } else {
                     setSourceText('Language not supported');
+                    setSourceBusy(null);
                 }
             }
         } else {
@@ -185,9 +204,11 @@ export default function SourceArea(props: SourceAreaProps) {
             } else {
                 setSourceText(newText);
             }
-            detect_language(newText).then(() => {
-                syncSourceText();
-            });
+            detect_language(newText)
+                .then(() => {
+                    syncSourceText();
+                })
+                .finally(() => setSourceBusy(null));
         }
     };
 
@@ -282,9 +303,17 @@ export default function SourceArea(props: SourceAreaProps) {
             textAreaRef.current.style.height = textAreaRef.current.scrollHeight + 'px';
         };
         fit();
-        // The text wraps differently when the window's width changes.
-        window.addEventListener('resize', fit);
-        return () => window.removeEventListener('resize', fit);
+        // The text wraps differently when the box gets another width, with the window or while the window's
+        // content is laid out unseen.
+        let width = textAreaRef.current.offsetWidth;
+        const observer = new ResizeObserver(() => {
+            if (textAreaRef.current !== null && textAreaRef.current.offsetWidth !== width) {
+                width = textAreaRef.current.offsetWidth;
+                fit();
+            }
+        });
+        observer.observe(textAreaRef.current);
+        return () => observer.disconnect();
     }, [sourceText]);
 
     const detect_language = async (text: string) => {
@@ -404,9 +433,10 @@ export default function SourceArea(props: SourceAreaProps) {
                 className='bg-content1 rounded-[10px] mt-[1px] pb-0'
             >
                 <Toaster />
-                {/* A window that fits itself to its content shows the whole text; one of a fixed size keeps room for the results. */}
+                {/* A window that fits itself to its content says how much of the text to show; one of a fixed size keeps room for the results. */}
                 <CardBody
                     className={`bg-content1 p-[12px] pb-0 overflow-y-auto ${rememberWindowSize === false ? '' : 'max-h-[40vh]'}`}
+                    style={rememberWindowSize === false && sourceHeight !== null ? { maxHeight: sourceHeight } : undefined}
                 >
                     <textarea
                         autoFocus

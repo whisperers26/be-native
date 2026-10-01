@@ -1,5 +1,6 @@
 import { NextUIProvider } from '@nextui-org/react';
 import { render, screen } from '@testing-library/react';
+import { Provider } from 'jotai';
 import { describe, expect, it, vi } from 'vitest';
 import { fakeTauri } from '../../test/fake-tauri';
 import '../../i18n';
@@ -89,8 +90,8 @@ describe('Translate window', () => {
 
     it('asks for the size of what it shows when the size is not remembered', async () => {
         fakeTauri.store.set('translate_detect_engine', 'local');
-        // jsdom lays nothing out and has no screen: the content is 500 px tall, in a part of the window 35 px
-        // shorter than the window.
+        // jsdom lays nothing out and has no screen: the content is 500 px tall, 35 px below the top of the
+        // window.
         const observed: { target: Element; changed: () => void }[] = [];
         vi.stubGlobal(
             'ResizeObserver',
@@ -106,8 +107,15 @@ describe('Translate window', () => {
         vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) {
             return this.tagName === 'TEXTAREA' ? 24 : 500;
         });
-        vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(window.innerHeight - 35);
+        vi.spyOn(Element.prototype, 'scrollHeight', 'get').mockImplementation(function (this: Element) {
+            return this.tagName === 'TEXTAREA' ? 24 : 0;
+        });
+        vi.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockImplementation(function (this: HTMLElement) {
+            return this.className.includes('h-full overflow-y-auto') ? 35 : 0;
+        });
         vi.stubGlobal('screen', { availWidth: 1920, availHeight: 1080 });
+        // The least width, so that the window has no reason to change it.
+        vi.stubGlobal('innerWidth', 420);
         try {
             render(
                 <NextUIProvider>
@@ -121,8 +129,10 @@ describe('Translate window', () => {
 
             await vi.waitFor(() =>
                 expect(fakeTauri.calls.find((call) => call.cmd === 'fit_translate_window')?.args).toEqual({
-                    width: window.innerWidth,
-                    height: 535,
+                    width: 420,
+                    // 35 px above the content, its 500 px, and a pixel to spare
+                    height: 536,
+                    glide: true,
                 })
             );
         } finally {
@@ -143,6 +153,53 @@ describe('Translate window', () => {
 
         await screen.findByDisplayValue('hello world');
 
+        expect(fakeTauri.calls.filter((call) => call.cmd === 'fit_translate_window')).toEqual([]);
+    });
+
+    it('opens from its progress indicator to the remembered size once there is nothing to wait for', async () => {
+        fakeTauri.command('translate_window_waiting', () => true);
+        fakeTauri.store.set('translate_remember_window_size', true);
+        fakeTauri.store.set('translate_window_width', 598);
+        fakeTauri.store.set('translate_window_height', 528);
+        fakeTauri.store.set('translate_detect_engine', 'local');
+        render(
+            <Provider>
+                <NextUIProvider>
+                    <Translate />
+                </NextUIProvider>
+            </Provider>
+        );
+
+        // No text came, so no translation is on its way.
+        await vi.waitFor(() =>
+            expect(fakeTauri.calls.find((call) => call.cmd === 'fit_translate_window')?.args).toEqual({
+                width: 598,
+                height: 528,
+                glide: false,
+            })
+        );
+    });
+
+    it('waits as a progress indicator while the text is on its way', async () => {
+        fakeTauri.command('translate_window_waiting', () => true);
+        fakeTauri.command('test_mode', () => true);
+        fakeTauri.command('get_text', () => 'hello world');
+        fakeTauri.store.set('translate_remember_window_size', true);
+        fakeTauri.store.set('translate_detect_engine', 'local');
+        // The language of the text is never detected, so the text never gets to the card.
+        fakeTauri.command('lang_detect', () => new Promise(() => {}));
+        render(
+            <Provider>
+                <NextUIProvider>
+                    <Translate />
+                </NextUIProvider>
+            </Provider>
+        );
+
+        await screen.findByDisplayValue('hello world');
+        await vi.waitFor(() =>
+            expect(document.querySelector('img[src="logo/google.svg"].translate-progress-icon')).not.toBeNull()
+        );
         expect(fakeTauri.calls.filter((call) => call.cmd === 'fit_translate_window')).toEqual([]);
     });
 

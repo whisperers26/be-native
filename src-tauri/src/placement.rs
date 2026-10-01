@@ -33,12 +33,35 @@ fn overlap(a: Rect, b: Rect) -> i64 {
     width as i64 * height as i64
 }
 
+// `rect` with `margin` taken off each side
+pub fn inset(rect: Rect, margin: i32) -> Rect {
+    Rect {
+        x: rect.x + margin,
+        y: rect.y + margin,
+        width: (rect.width - 2 * margin).max(0),
+        height: (rect.height - 2 * margin).max(0),
+    }
+}
+
 // The top left corner nearest to (`x`, `y`) that keeps a window of `width` x `height` inside `bounds`
 pub fn inside(x: i32, y: i32, width: i32, height: i32, bounds: Rect) -> (i32, i32) {
     (
         keep_inside(x, width, bounds.x, bounds.right()),
         keep_inside(y, height, bounds.y, bounds.bottom()),
     )
+}
+
+// The rectangle part of the way from `from` to `to`: `from` at 0, `to` at 1. The way is fast at
+// first and slows down towards `to`.
+pub fn between(from: Rect, to: Rect, part: f64) -> Rect {
+    let eased = 1.0 - (1.0 - part.clamp(0.0, 1.0)).powi(3);
+    let mix = |a: i32, b: i32| a + ((b - a) as f64 * eased).round() as i32;
+    Rect {
+        x: mix(from.x, to.x),
+        y: mix(from.y, to.y),
+        width: mix(from.width, to.width),
+        height: mix(from.height, to.height),
+    }
 }
 
 // The top left corner for a window of `width` x `height` beside `anchor`, inside `bounds`.
@@ -116,6 +139,11 @@ mod tests {
     }
 
     #[test]
+    fn a_margin_comes_off_each_side() {
+        assert_eq!(inset(SCREEN, 12), rect(12, 12, 1896, 1056));
+    }
+
+    #[test]
     fn a_window_inside_the_screen_stays_where_it_is() {
         assert_eq!(inside(100, 200, 350, 420, SCREEN), (100, 200));
     }
@@ -123,6 +151,21 @@ mod tests {
     #[test]
     fn a_window_past_the_edges_moves_back_inside() {
         assert_eq!(inside(1700, 900, 350, 420, SCREEN), (1570, 660));
+    }
+
+    #[test]
+    fn the_way_between_two_rectangles_starts_at_one_and_ends_at_the_other() {
+        let from = rect(100, 200, 420, 240);
+        let to = rect(40, 260, 660, 450);
+        assert_eq!(between(from, to, 0.0), from);
+        assert_eq!(between(from, to, 1.0), to);
+        assert_eq!(between(from, to, 7.0), to);
+    }
+
+    #[test]
+    fn the_way_between_two_rectangles_slows_down() {
+        let half = between(rect(0, 0, 400, 200), rect(0, 0, 800, 200), 0.5);
+        assert_eq!(half, rect(0, 0, 750, 200));
     }
 
     #[test]

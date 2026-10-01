@@ -123,6 +123,7 @@
                 "mouse": "Follow the Mouse",
                 "pre_state": "Remember Position",
                 "remember_window_size": "Remember Window Size",
+                "window_animation": "Window Animations",
                 "close_on_blur": "Close window when focus lost",
                 "always_on_top": "Always on Top",
                 "hide_source": "Hide Source Area",

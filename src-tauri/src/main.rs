@@ -41,6 +41,9 @@ use window::fit_translate_window;
 use window::focus_window;
 use window::show_window;
 use window::test_mode;
+use window::translate_window_opened;
+use window::translate_window_origin;
+use window::translate_window_waiting;
 use window::updater_window;
 
 // Global AppHandle
@@ -161,6 +164,9 @@ fn main() {
             show_window,
             focus_window,
             fit_translate_window,
+            translate_window_waiting,
+            translate_window_origin,
+            translate_window_opened,
             test_mode,
             lang_detect,
             agent_cli_run,
