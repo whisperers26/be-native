@@ -59,7 +59,7 @@ To add a command, write a `#[tauri::command]` function in the module it belongs 
 
 ## Windows
 
-`build_window(label, title)` creates a hidden, frameless, transparent window (on macOS, with an overlay title bar) that loads `index.html` on the monitor under the mouse, or focuses the window if it already exists. The frontend shows the window when it is ready. Sizes: Config 800×600; Translate from `translate_window_width` and `translate_window_height` (350×420), at the cursor or at a saved position; Recognize from `recognize_window_width` and `recognize_window_height` (800×400); Updater 600×400; Screenshot full screen.
+`build_window(label, title)` creates a hidden, frameless, transparent window (on macOS, with an overlay title bar) that loads `index.html` on the monitor under the mouse, or focuses the window if it already exists. The frontend shows the window when it is ready. Sizes: Config 800×600; Translate from `translate_window_width` and `translate_window_height` (350×420), at the cursor or at a saved position; Recognize from `recognize_window_width` and `recognize_window_height` (800×400); Silent Recognize is never shown; Updater 600×400; Screenshot full screen.
 
 On Windows the Screenshot window is subclassed (`suppress_title_bar`) so that the system never paints its non-client area. Without that, activating the window paints an old-style title bar across the top of the screen, which shows whenever the WebView has not drawn over it yet.
 
@@ -68,17 +68,17 @@ On Windows the Screenshot window is subclassed (`suppress_title_bar`) so that th
 | Event | Direction | Payload |
 | --- | --- | --- |
 | `new_text` | Rust → translate window | The text, `[INPUT_TRANSLATE]` or `[IMAGE_TRANSLATE]` |
-| `new_image` | Rust → recognize window | `""`; the window re-reads the image |
+| `new_image` | Rust → recognize or silent_recognize window | `""`; the window re-reads the image |
 | `translate_auto_copy_changed` | Rust → all windows | The auto-copy mode, when changed from the tray |
 | `success` | Screenshot window → Rust | None; the region is saved, continue with OCR or image translation |
 
 ## Hotkeys
 
-The settings `hotkey_selection_translate`, `hotkey_input_translate`, `hotkey_ocr_recognize` and `hotkey_ocr_translate` are empty by default, so there are no shortcuts until the user sets them. They are registered at launch; if one fails, the ones after it are skipped.
+The settings `hotkey_selection_translate`, `hotkey_input_translate`, `hotkey_ocr_recognize`, `hotkey_ocr_translate` and `hotkey_ocr_copy` are empty by default, so there are no shortcuts until the user sets them. They are registered at launch; if one fails, the ones after it are skipped.
 
 ## Tray
 
-Menu: input translate, clipboard monitor (toggle), auto copy (source, target, both, off), OCR recognize, OCR translate, settings, check for updates, view log, restart, quit. On Windows a left click runs `tray_click_event` (default: open settings).
+Menu: input translate, clipboard monitor (toggle), auto copy (source, target, both, off), OCR recognize, OCR translate, OCR copy, settings, check for updates, view log, restart, quit. On Windows a left click runs `tray_click_event` (default: open settings).
 
 ## HTTP API
 
@@ -89,7 +89,8 @@ A server on `127.0.0.1:<server_port>` (default 60828) handles one request at a t
 | `/`, `/translate` | Translates the request body |
 | `/selection_translate`, `/input_translate` | Like the hotkeys |
 | `/ocr_recognize`, `/ocr_translate` | Screenshot, then OCR or image translation |
-| `/ocr_recognize?screenshot=false`, `/ocr_translate?screenshot=false` | The same, with an existing `pot_screenshot_cut.png` |
+| `/ocr_copy` | Screenshot, then OCR copied to the clipboard without a window |
+| `/ocr_recognize?screenshot=false`, `/ocr_translate?screenshot=false`, `/ocr_copy?screenshot=false` | The same, with an existing `pot_screenshot_cut.png` |
 | `/config` | Opens the Config window |
 
 Changing the port needs a restart. The API has no authentication.

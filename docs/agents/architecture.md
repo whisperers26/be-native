@@ -19,6 +19,7 @@ Rust creates windows on demand (`src-tauri/src/window.rs`), hidden; each shows i
 | `daemon` | Hidden static page created at launch; Rust uses it to find monitors |
 | `translate` | Results from every enabled translate service |
 | `recognize` | OCR of a screenshot region |
+| `silent_recognize` | Never shown: copies the text of a screenshot region and closes |
 | `screenshot` | Full-screen region picker (not on macOS, which uses `screencapture`) |
 | `config` | Settings |
 | `updater` | Update download and install |
@@ -31,6 +32,7 @@ Closing a window never quits the app; only Quit or Restart in the tray does. A s
 - **Input translation.** The same, with the text `[INPUT_TRANSLATE]`, which opens an empty input box.
 - **OCR.** Hotkey → Rust opens the `screenshot` window → it captures the monitor (`pot_screenshot.png`), the user drags a region, `cut_image` writes `pot_screenshot_cut.png`, and the window emits `success` → Rust opens `recognize` → it reads the image with `get_base64` and runs the chosen OCR service.
 - **Image translation.** The same capture, then `[IMAGE_TRANSLATE]` goes to the `translate` window, which runs OCR with the first OCR service and translates the text.
+- **Silent OCR copy.** The same capture, then Rust opens the `silent_recognize` window, which stays hidden, runs the first OCR service, writes the text to the clipboard and closes. Only a failure shows, as a notification.
 - **Clipboard monitor.** Toggled from the tray. Rust polls the clipboard every 500 ms and sends new text to the `translate` window.
 - **Local HTTP API.** `127.0.0.1:60828` lets other programs trigger the same actions; routes in [backend.md](backend.md).
 

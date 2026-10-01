@@ -29,6 +29,7 @@
 > - `v*` 태그를 푸시하면 서명된 설치 파일을 빌드해 GitHub 릴리스로 배포하며, 앱 내 업데이트는 업스트림 피드 대신 최신 릴리스를 읽습니다.
 > - 앱 이름을 Be Native로 바꾸고 새 아이콘을 넣었습니다. 디버그 빌드(`pnpm tauri dev`)는 "Be Native (Debug)"로 표시되며 시작 시 업데이트를 확인하지 않습니다.
 > - 화면 영역을 선택할 때 작은 십자 커서 대신 포인터를 지나는 가로선과 세로선을 표시합니다. 선은 한 모니터 안에만 그려지고, 포인터가 다른 모니터로 가면 따라갑니다.
+> - 조용한 문자 인식: 전용 단축키(트레이 메뉴와 HTTP API의 `/ocr_copy`로도 사용 가능)로 화면 영역을 선택하면 창을 띄우지 않고 인식한 텍스트를 클립보드에 복사합니다.
 
 <!-- fork:end -->
 
@@ -324,6 +325,8 @@ GET "/ocr_recognize?screenshot=false" => OCR without taking screenshot
 GET "/ocr_translate?screenshot=false" => Translate screenshot without taking screenshot
 GET "/ocr_recognize?screenshot=true" => OCR with screenshot
 GET "/ocr_translate?screenshot=true" => Translate screenshot
+GET "/ocr_copy" => Recognize a screenshot region and copy the text, without a window
+GET "/ocr_copy?screenshot=false" => Copy the text of an existing screenshot, without a window
 ```
 
 ## 예제:

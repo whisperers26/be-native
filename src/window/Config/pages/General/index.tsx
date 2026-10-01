@@ -468,6 +468,9 @@ export default function General() {
                                     <DropdownItem key='ocr_translate'>
                                         {t('config.general.event.ocr_translate')}
                                     </DropdownItem>
+                                    <DropdownItem key='ocr_copy'>
+                                        {t('config.general.event.ocr_copy')}
+                                    </DropdownItem>
                                     <DropdownItem key='disable'>{t('config.general.event.disable')}</DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
