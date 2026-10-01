@@ -9,7 +9,7 @@ read only the pages your task needs.
 Be Native, the owner's fork of [Pot](https://github.com/pot-app/pot-desktop),
 a cross-platform translation and OCR desktop app, continued after upstream was
 archived. It is a Tauri 1 app: a Rust backend in `src-tauri/` and a React 18
-frontend in `src/`.
+frontend in strict TypeScript in `src/`.
 
 ## Rules
 

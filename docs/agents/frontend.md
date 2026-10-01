@@ -1,6 +1,6 @@
 # Frontend
 
-The React 18 app in `src/`. Every window except the hidden `daemon` window runs this one bundle and picks what to render from its window label.
+The React 18 app in `src/`, written in strict TypeScript ([typescript.md](typescript.md)). Every window except the hidden `daemon` window runs this one bundle and picks what to render from its window label.
 
 Stack: React 18; Vite 5 (dev server on port 1420); NextUI 2.4 on Tailwind 3.4, with `next-themes` for dark mode; jotai for state inside a window; i18next for UI text; react-router 6 for the Config window's pages; and the Tauri 1 JavaScript API (`@tauri-apps/api`) plus the store, SQL, fs-watch, log and autostart plugin APIs.
 
