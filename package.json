@@ -14,7 +14,8 @@
         "check:docs": "tsx scripts/check-docs.ts",
         "test": "vitest run",
         "test:watch": "vitest",
-        "smoke": "tsx scripts/smoke.ts"
+        "smoke": "tsx scripts/smoke.ts",
+        "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json"
     },
     "dependencies": {
         "@nextui-org/react": "^2.4.8",
@@ -55,6 +56,12 @@
         "@testing-library/dom": "^10.4.2",
         "@testing-library/jest-dom": "7.0.1",
         "@testing-library/react": "16.3.3",
+        "@types/crypto-js": "^4.2.2",
+        "@types/md5": "^2.3.6",
+        "@types/node": "^22.20.4",
+        "@types/react": "^18.3.12",
+        "@types/react-beautiful-dnd": "^13.1.8",
+        "@types/react-dom": "^18.3.7",
         "@vitejs/plugin-react": "^4.3.3",
         "autoprefixer": "^10.4.20",
         "jsdom": "26.1.0",
