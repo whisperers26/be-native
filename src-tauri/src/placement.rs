@@ -33,6 +33,14 @@ fn overlap(a: Rect, b: Rect) -> i64 {
     width as i64 * height as i64
 }
 
+// The top left corner nearest to (`x`, `y`) that keeps a window of `width` x `height` inside `bounds`
+pub fn inside(x: i32, y: i32, width: i32, height: i32, bounds: Rect) -> (i32, i32) {
+    (
+        keep_inside(x, width, bounds.x, bounds.right()),
+        keep_inside(y, height, bounds.y, bounds.bottom()),
+    )
+}
+
 // The top left corner for a window of `width` x `height` beside `anchor`, inside `bounds`.
 //
 // The window goes right of the anchor, else left, below or above it: the first side with room for
@@ -105,6 +113,16 @@ mod tests {
             width,
             height,
         }
+    }
+
+    #[test]
+    fn a_window_inside_the_screen_stays_where_it_is() {
+        assert_eq!(inside(100, 200, 350, 420, SCREEN), (100, 200));
+    }
+
+    #[test]
+    fn a_window_past_the_edges_moves_back_inside() {
+        assert_eq!(inside(1700, 900, 350, 420, SCREEN), (1570, 660));
     }
 
     #[test]
