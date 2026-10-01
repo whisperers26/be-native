@@ -34,7 +34,6 @@ export default function General() {
     const [appFallbackFont, setAppFallbackFont] = useConfig('app_fallback_font', 'default');
     // The default is a number, but the menu hands back its item key, a string, so a saved size is either.
     const [appFontSize, setAppFontSize] = useConfig<number | string>('app_font_size', 16);
-    const [transparent, setTransparent] = useConfig('transparent', true);
     const [windowAnimation, setWindowAnimation] = useConfig('window_animation', true);
     const [devMode, setDevMode] = useConfig('dev_mode', false);
     const [trayClickEvent, setTrayClickEvent] = useConfig('tray_click_event', 'config');
@@ -475,17 +474,6 @@ export default function General() {
                                     <DropdownItem key='disable'>{t('config.general.event.disable')}</DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
-                        )}
-                    </div>
-                    <div className={`config-item ${osType === 'Darwin' && 'hidden'}`}>
-                        <h3>{t('config.general.transparent')}</h3>
-                        {transparent !== null && (
-                            <Switch
-                                isSelected={transparent}
-                                onValueChange={(v) => {
-                                    setTransparent(v);
-                                }}
-                            />
                         )}
                     </div>
                     <div className='config-item'>
