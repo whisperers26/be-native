@@ -22,14 +22,26 @@ import detect from '../../../../utils/lang_detect';
 import { store } from '../../../../utils/store';
 import { info } from 'tauri-plugin-log-api';
 import { debug } from 'tauri-plugin-log-api';
+import type { MutableRefObject } from 'react';
+import type { UnlistenFn } from '@tauri-apps/api/event';
+import type { PluginInfo, PluginList, RecognizeService, ServiceConfigMap, TtsService } from '../../../../types/service';
 
 export const sourceTextAtom = atom('');
 export const detectLanguageAtom = atom('');
 
-let unlisten = null;
+let unlisten: Promise<UnlistenFn> | null = null;
 let timer = null;
 
-export default function SourceArea(props) {
+interface SourceAreaProps {
+    pluginList: PluginList;
+    serviceInstanceConfigMap: ServiceConfigMap;
+}
+
+// The registries are looked up by a name known only at run time.
+type RecognizeServices = Record<string, RecognizeService>;
+type TtsServices = Record<string, TtsService>;
+
+export default function SourceArea(props: SourceAreaProps) {
     const { pluginList, serviceInstanceConfigMap } = props;
     const [appFontSize] = useConfig('app_font_size', 16);
     const [sourceText, setSourceText, syncSourceText] = useSyncAtom(sourceTextAtom);
@@ -42,14 +54,17 @@ export default function SourceArea(props) {
     const [ttsServiceList] = useConfig('tts_service_list', ['lingva_tts']);
     const [hideWindow] = useConfig('translate_hide_window', false);
     const [hideSource] = useConfig('hide_source', false);
-    const [ttsPluginInfo, setTtsPluginInfo] = useState();
+    const [ttsPluginInfo, setTtsPluginInfo] = useState<PluginInfo>();
     const [windowType, setWindowType] = useState('[SELECTION_TRANSLATE]');
     const toastStyle = useToastStyle();
     const { t } = useTranslation();
-    const textAreaRef = useRef();
+    // The textarea is always rendered, so the ref is set before any effect or handler runs.
+    const textAreaRef = useRef<HTMLTextAreaElement>() as MutableRefObject<HTMLTextAreaElement>;
     const speak = useVoice();
 
-    const handleNewText = async (text) => {
+    // handleNewText and handleSpeak run after the settings have been read, so they take values from useConfig (null
+    // until then) with `!`.
+    const handleNewText = async (text: string) => {
         text = text.trim();
         if (hideWindow) {
             appWindow.hide();
@@ -63,25 +78,26 @@ export default function SourceArea(props) {
             setWindowType('[INPUT_TRANSLATE]');
             appWindow.show();
             appWindow.setFocus();
+            // @ts-expect-error known bug (known-issues.md): the setter ignores the second argument
             setSourceText('', true);
         } else if (text === '[IMAGE_TRANSLATE]') {
             setWindowType('[IMAGE_TRANSLATE]');
-            const base64 = await invoke('get_base64');
-            const serviceInstanceKey = recognizeServiceList[0];
+            const base64 = await invoke<string>('get_base64');
+            const serviceInstanceKey = recognizeServiceList![0];
             if (getServiceSouceType(serviceInstanceKey) === ServiceSourceType.PLUGIN) {
-                if (recognizeLanguage in pluginList['recognize'][getServiceName(serviceInstanceKey)].language) {
+                if (recognizeLanguage! in pluginList['recognize'][getServiceName(serviceInstanceKey)].language) {
                     const pluginConfig = serviceInstanceConfigMap[serviceInstanceKey];
 
                     let [func, utils] = await invoke_plugin('recognize', getServiceName(serviceInstanceKey));
                     func(
                         base64,
-                        pluginList['recognize'][getServiceName(serviceInstanceKey)].language[recognizeLanguage],
+                        pluginList['recognize'][getServiceName(serviceInstanceKey)].language[recognizeLanguage!],
                         {
                             config: pluginConfig,
                             utils,
                         }
                     ).then(
-                        (v) => {
+                        (v: any) => {
                             let newText = v.trim();
                             if (deleteNewline) {
                                 newText = v.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
@@ -99,7 +115,7 @@ export default function SourceArea(props) {
                                 syncSourceText();
                             });
                         },
-                        (e) => {
+                        (e: any) => {
                             setSourceText(e.toString());
                         }
                     );
@@ -107,23 +123,29 @@ export default function SourceArea(props) {
                     setSourceText('Language not supported');
                 }
             } else {
-                if (recognizeLanguage in recognizeServices[getServiceName(serviceInstanceKey)].Language) {
+                if (
+                    recognizeLanguage! in
+                    (recognizeServices as RecognizeServices)[getServiceName(serviceInstanceKey)].Language
+                ) {
                     const instanceConfig = serviceInstanceConfigMap[serviceInstanceKey];
-                    recognizeServices[getServiceName(serviceInstanceKey)]
+                    // Only the system service can resolve to undefined, and only on an OS the app does not run on.
+                    (recognizeServices as RecognizeServices)[getServiceName(serviceInstanceKey)]
                         .recognize(
                             base64,
-                            recognizeServices[getServiceName(serviceInstanceKey)].Language[recognizeLanguage],
+                            (recognizeServices as RecognizeServices)[getServiceName(serviceInstanceKey)].Language[
+                                recognizeLanguage!
+                            ],
                             {
                                 config: instanceConfig,
                             }
                         )
                         .then(
                             (v) => {
-                                let newText = v.trim();
+                                let newText = v!.trim();
                                 if (deleteNewline) {
-                                    newText = v.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+                                    newText = v!.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
                                 } else {
-                                    newText = v.trim();
+                                    newText = v!.trim();
                                 }
                                 if (incrementalTranslate) {
                                     setSourceText((old) => {
@@ -165,7 +187,7 @@ export default function SourceArea(props) {
         }
     };
 
-    const keyDown = (event) => {
+    const keyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
             detect_language(sourceText).then(() => {
@@ -178,35 +200,36 @@ export default function SourceArea(props) {
     };
 
     const handleSpeak = async () => {
-        const instanceKey = ttsServiceList[0];
+        const instanceKey = ttsServiceList![0];
         let detected = detectLanguage;
         if (detected === '') {
             detected = await detect(sourceText);
             setDetectLanguage(detected);
         }
         if (getServiceSouceType(instanceKey) === ServiceSourceType.PLUGIN) {
-            if (!(detected in ttsPluginInfo.language)) {
+            if (!(detected in ttsPluginInfo!.language)) {
                 throw new Error('Language not supported');
             }
             const pluginConfig = serviceInstanceConfigMap[instanceKey];
             let [func, utils] = await invoke_plugin('tts', getServiceName(instanceKey));
-            let data = await func(sourceText, ttsPluginInfo.language[detected], {
+            let data = await func(sourceText, ttsPluginInfo!.language[detected], {
                 config: pluginConfig,
                 utils,
             });
             speak(data);
         } else {
-            if (!(detected in builtinTtsServices[getServiceName(instanceKey)].Language)) {
+            if (!(detected in (builtinTtsServices as TtsServices)[getServiceName(instanceKey)].Language)) {
                 throw new Error('Language not supported');
             }
             const instanceConfig = serviceInstanceConfigMap[instanceKey];
-            let data = await builtinTtsServices[getServiceName(instanceKey)].tts(
+            let data = await (builtinTtsServices as TtsServices)[getServiceName(instanceKey)].tts(
                 sourceText,
-                builtinTtsServices[getServiceName(instanceKey)].Language[detected],
+                (builtinTtsServices as TtsServices)[getServiceName(instanceKey)].Language[detected],
                 {
                     config: instanceConfig,
                 }
             );
+            // @ts-expect-error known bug (known-issues.md): lingva TTS returns undefined after an HTTP error
             speak(data);
         }
     };
@@ -218,7 +241,7 @@ export default function SourceArea(props) {
                     f();
                 });
             }
-            unlisten = listen('new_text', (event) => {
+            unlisten = listen<string>('new_text', (event) => {
                 appWindow.setFocus();
                 handleNewText(event.payload);
             });
@@ -243,7 +266,7 @@ export default function SourceArea(props) {
             recognizeServiceList !== null &&
             hideWindow !== null
         ) {
-            invoke('get_text').then((v) => {
+            invoke<string>('get_text').then((v) => {
                 handleNewText(v);
             });
         }
@@ -254,12 +277,12 @@ export default function SourceArea(props) {
         textAreaRef.current.style.height = textAreaRef.current.scrollHeight + 'px';
     }, [sourceText]);
 
-    const detect_language = async (text) => {
+    const detect_language = async (text: string) => {
         setDetectLanguage(await detect(text));
     };
 
-    let sourceTextChangeTimer = null;
-    const changeSourceText = async (text) => {
+    let sourceTextChangeTimer: ReturnType<typeof setTimeout> | null = null;
+    const changeSourceText = async (text: string) => {
         setDetectLanguage('');
         await setSourceText(text);
         if (dynamicTranslate) {
@@ -274,7 +297,7 @@ export default function SourceArea(props) {
         }
     }
 
-    const transformVarName = function (str) {
+    const transformVarName = function (str: string) {
         let str2 = str;
 
         // snake_case to SNAKE_CASE
@@ -363,8 +386,9 @@ export default function SourceArea(props) {
     }, [textAreaRef]);
 
 
+    // className is false or null while the source is shown; React leaves it out (and warns about false in development).
     return (
-        <div className={hideSource && windowType !== '[INPUT_TRANSLATE]' && 'hidden'}>
+        <div className={(hideSource && windowType !== '[INPUT_TRANSLATE]' && 'hidden') as string}>
             <Card
                 shadow='none'
                 className='bg-content1 rounded-[10px] mt-[1px] pb-0'
