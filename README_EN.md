@@ -34,6 +34,7 @@
 > - RapidOCR is a built-in OCR service: the PP-OCRv5 models run on your computer, fully offline, and read small text and tight selections that the system OCR misses (Simplified and Traditional Chinese, English and Japanese).
 > - The translation window sizes itself to its text: it shows everything without scrolling where it can, gets wider rather than tall and narrow for longer text, and never fills the screen. Turn on "Remember Window Size" to keep the size you give it instead, which it now reopens with exactly.
 > - Text that mixes languages is detected by its larger part, so mostly English text with some Chinese in it is translated instead of being taken for Chinese.
+> - Recognized and selected text has its wrapped lines merged by default: lines that were broken only because the text wrapped are joined, while paragraphs, headings and list items (bulleted, numbered or unmarked) keep their own lines. Words broken by a hyphen are put back together, and Chinese and Japanese are joined without spaces. It replaces Pot's "Delete Newline", which made everything one line and was off by default.
 
 <!-- fork:end -->
 
