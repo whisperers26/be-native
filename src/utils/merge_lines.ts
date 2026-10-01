@@ -70,9 +70,7 @@ function startsUppercase(line: string): boolean {
 
 // Whether `line` stops in the middle of a sentence: after a comma, or inside brackets.
 function unfinished(line: string): boolean {
-    return (
-        ENDS_COMMA.test(line) || BRACKETS.some(([open, close]) => line.lastIndexOf(open) > line.lastIndexOf(close))
-    );
+    return ENDS_COMMA.test(line) || BRACKETS.some(([open, close]) => line.lastIndexOf(open) > line.lastIndexOf(close));
 }
 
 // Whether the break between `line` and `next` is there only because the text wrapped. `startsItem` tells whether a

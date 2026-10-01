@@ -59,9 +59,7 @@ describe('mergeLines', () => {
                     'start it from the menu.'
                 )
             )
-        ).toBe(
-            lines('Getting started', 'Install the application from the releases page and start it from the menu.')
-        );
+        ).toBe(lines('Getting started', 'Install the application from the releases page and start it from the menu.'));
     });
 
     it('keeps list items that have no marker and no full stop', () => {
@@ -105,7 +103,9 @@ describe('mergeLines', () => {
     });
 
     it('keeps a blank line between blocks, and only one', () => {
-        expect(mergeLines(lines('First block.', '', '', 'Second block.'))).toBe(lines('First block.', '', 'Second block.'));
+        expect(mergeLines(lines('First block.', '', '', 'Second block.'))).toBe(
+            lines('First block.', '', 'Second block.')
+        );
     });
 
     it('trims the text and its lines, and makes runs of spaces one', () => {
@@ -180,7 +180,9 @@ describe('mergeLines', () => {
 
         it('takes a single number or letter with a full stop for part of the sentence', () => {
             expect(
-                mergeLines(lines('The meeting was moved from the first of May to May', '3. Everyone was told about it.'))
+                mergeLines(
+                    lines('The meeting was moved from the first of May to May', '3. Everyone was told about it.')
+                )
             ).toBe('The meeting was moved from the first of May to May 3. Everyone was told about it.');
             expect(
                 mergeLines(lines('The speech was given in the city of Berlin by John', 'F. Kennedy in the year 1963.'))
