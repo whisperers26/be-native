@@ -1,0 +1,137 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`openai translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "Arabic",
+    "auto": "Auto",
+    "de": "German",
+    "en": "English",
+    "es": "Spanish",
+    "fa": "Persian",
+    "fr": "French",
+    "he": "Hebrew",
+    "hi": "Hindi",
+    "id": "Indonesian",
+    "it": "Italian",
+    "ja": "Japanese",
+    "km": "Khmer",
+    "ko": "Korean",
+    "mn_cy": "Mongolian(Cyrillic)",
+    "mn_mo": "Mongolian",
+    "ms": "Malay",
+    "nb_no": "Norwegian Bokmål",
+    "nl": "Dutch",
+    "nn_no": "Norwegian Nynorsk",
+    "pl": "Polish",
+    "pt_br": "Brazilian Portuguese",
+    "pt_pt": "Portuguese",
+    "ru": "Russian",
+    "sv": "Swedish",
+    "th": "Thai",
+    "tr": "Turkish",
+    "uk": "Ukrainian",
+    "vi": "Vietnamese",
+    "yue": "Cantonese",
+    "zh_cn": "Simplified Chinese",
+    "zh_tw": "Traditional Chinese",
+  },
+  "info": {
+    "icon": "logo/openai.svg",
+    "name": "openai",
+  },
+}
+`;
+
+exports[`openai translate > request > azure: sends the api-key header, no model, and the URL as it is 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "frequency_penalty": 0,
+          "messages": [
+            {
+              "content": "Translate from Auto to German (detected: English).",
+              "role": "system",
+            },
+            {
+              "content": "Translate into German:
+"""
+hello
+"""",
+              "role": "user",
+            },
+          ],
+          "presence_penalty": 0,
+          "stream": false,
+          "temperature": 0.1,
+          "top_p": 0.99,
+        },
+        "type": "Json",
+      },
+      "headers": {
+        "Content-Type": "application/json",
+        "api-key": "test-key",
+      },
+      "method": "POST",
+    },
+    "url": "https://example.openai.azure.com/openai/deployments/gpt35/chat/completions?api-version=2023-05-15",
+  },
+]
+`;
+
+exports[`openai translate > with streaming > reads the events and passes the growing text to setResult 1`] = `
+[
+  {
+    "options": {
+      "body": "{"temperature":0.1,"top_p":0.99,"frequency_penalty":0,"presence_penalty":0,"stream":true,"messages":[{"role":"system","content":"Translate from Auto to German (detected: English)."},{"role":"user","content":"Translate into German:\\n\\"\\"\\"\\nhello\\n\\"\\"\\""}],"model":"gpt-3.5-turbo"}",
+      "headers": {
+        "Authorization": "Bearer test-key",
+        "Content-Type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://api.openai.com/v1/chat/completions",
+  },
+]
+`;
+
+exports[`openai translate > without streaming > posts the prompts with the bearer key and returns the reply without its quotes 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "frequency_penalty": 0,
+          "messages": [
+            {
+              "content": "Translate from Auto to German (detected: English).",
+              "role": "system",
+            },
+            {
+              "content": "Translate into German:
+"""
+hello
+"""",
+              "role": "user",
+            },
+          ],
+          "model": "gpt-3.5-turbo",
+          "presence_penalty": 0,
+          "stream": false,
+          "temperature": 0.1,
+          "top_p": 0.99,
+        },
+        "type": "Json",
+      },
+      "headers": {
+        "Authorization": "Bearer test-key",
+        "Content-Type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://api.openai.com/v1/chat/completions",
+  },
+]
+`;

@@ -1,0 +1,53 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`alibaba translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fa": "fa",
+    "fr": "fr",
+    "he": "he",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "ja",
+    "km": "km",
+    "ko": "ko",
+    "mn_mo": "mn",
+    "ms": "ms",
+    "nb_no": "no",
+    "nl": "nl",
+    "nn_no": "no",
+    "pl": "pl",
+    "pt_br": "pt",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "sv": "sv",
+    "th": "th",
+    "tr": "tr",
+    "vi": "vi",
+    "yue": "yue",
+    "zh_cn": "zh",
+    "zh_tw": "zh-tw",
+  },
+  "info": {
+    "icon": "logo/alibaba.svg",
+    "name": "alibaba",
+  },
+}
+`;
+
+exports[`alibaba translate > sends a signed GET with the timestamp, nonce and escaped text, and returns the trimmed result 1`] = `
+[
+  {
+    "options": {
+      "method": "GET",
+    },
+    "url": "http://mt.cn-hangzhou.aliyuncs.com/api/translate/web/general?AccessKeyId=test-id&Action=TranslateGeneral&Format=JSON&FormatType=text&Scene=general&SignatureMethod=HMAC-SHA1&SignatureNonce=112345000&SignatureVersion=1.0&SourceLanguage=en&SourceText=Hi!%20(it's%20*great*)%2C%201%2B1&TargetLanguage=zh&Timestamp=2026-01-02T03%3A04%3A05Z&Version=2018-10-12&Signature=ibdVXngTph08uFqX%2FXNXTTQbSSY%3D",
+  },
+]
+`;

@@ -1,0 +1,60 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`chatglm translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "Arabic",
+    "auto": "Auto",
+    "de": "German",
+    "en": "English",
+    "es": "Spanish",
+    "fa": "Persian",
+    "fr": "French",
+    "he": "Hebrew",
+    "hi": "Hindi",
+    "id": "Indonesian",
+    "it": "Italian",
+    "ja": "Japanese",
+    "km": "Khmer",
+    "ko": "Korean",
+    "mn_cy": "Mongolian(Cyrillic)",
+    "mn_mo": "Mongolian",
+    "ms": "Malay",
+    "nb_no": "Norwegian Bokmål",
+    "nl": "Dutch",
+    "nn_no": "Norwegian Nynorsk",
+    "pl": "Polish",
+    "pt_br": "Brazilian Portuguese",
+    "pt_pt": "Portuguese",
+    "ru": "Russian",
+    "sv": "Swedish",
+    "th": "Thai",
+    "tr": "Turkish",
+    "uk": "Ukrainian",
+    "vi": "Vietnamese",
+    "yue": "Cantonese",
+    "zh_cn": "Simplified Chinese",
+    "zh_tw": "Traditional Chinese",
+  },
+  "info": {
+    "icon": "logo/chatglm.png",
+    "name": "chatglm",
+  },
+}
+`;
+
+exports[`chatglm translate > streams the reply, passing the growing text with a trailing underscore to setResult 1`] = `
+[
+  {
+    "options": {
+      "body": "{"model":"glm-4-flash","messages":[{"role":"system","content":"Translate from Auto to Simplified Chinese. The detected language is English."},{"role":"user","content":"Translate into Simplified Chinese\\n\\"\\"\\"\\nhello\\n\\"\\"\\""}],"stream":true,"thinking":{"type":"disabled"}}",
+      "headers": {
+        "Authorization": "eyJhbGciOiJIUzI1NiIsInNpZ25fdHlwZSI6IlNJR04ifQ.eyJhcGlfa2V5IjoidGVzdC1pZCIsImV4cCI6MTc2NzMyMzEwNTY3OCwidGltZXN0YW1wIjoxNzY3MzIzMDQ1Njc4fQ.5-0EtPTSPDQyy6mjCfQrFI9mKWaNInQ-_nNZT2vsxfM",
+        "Content-Type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+  },
+]
+`;

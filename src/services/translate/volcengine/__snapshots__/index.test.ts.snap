@@ -1,0 +1,63 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`volcengine translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fa": "fa",
+    "fr": "fr",
+    "he": "he",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "ja",
+    "ko": "ko",
+    "mn_cy": "mn",
+    "ms": "ms",
+    "nb_no": "nb",
+    "nl": "nl",
+    "nn_no": "no",
+    "pl": "pl",
+    "pt_br": "pt",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "sv": "sv",
+    "th": "th",
+    "tr": "tr",
+    "uk": "uk",
+    "vi": "vi",
+    "zh_cn": "zh",
+    "zh_tw": "zh-Hant",
+  },
+  "info": {
+    "icon": "logo/volcengine.svg",
+    "name": "volcengine",
+  },
+}
+`;
+
+exports[`volcengine translate > posts an HMAC-SHA256 signed JSON body and returns the trimmed translations 1`] = `
+[
+  {
+    "options": {
+      "body": {
+        "payload": "{"TargetLanguage":"zh","TextList":["hello\\nworld"]}",
+        "type": "Text",
+      },
+      "headers": {
+        "Authorization": "HMAC-SHA256 Credential=test-access-key/20260102/cn-north-1/translate/request, SignedHeaders=content-type;host;x-content-sha256;x-date, Signature=da832b340570e9fc1bc4009d72c303c07b19ec3739253a681547e8d8fe14bba6",
+        "Content-Type": "application/json",
+        "Host": "open.volcengineapi.com",
+        "X-Content-Sha256": "9113956c73755058d8724ecf78443eec1dcee3f42f8089c5114db68216a1356d",
+        "X-Date": "20260102T030405Z",
+      },
+      "method": "POST",
+    },
+    "url": "https://open.volcengineapi.com/?Action=TranslateText&Version=2020-06-01",
+  },
+]
+`;

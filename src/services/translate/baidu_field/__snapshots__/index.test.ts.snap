@@ -1,0 +1,100 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`baidu_field translate > applies no default itself: without a field it signs and sends undefined 1`] = `
+[
+  {
+    "options": {
+      "query": {
+        "appid": "test-appid",
+        "domain": undefined,
+        "from": "zh",
+        "q": "你好",
+        "salt": "nanoid-fixed-id",
+        "sign": "d1d295831c2335c266d0a454d56bafbb",
+        "to": "en",
+      },
+    },
+    "url": "https://fanyi-api.baidu.com/api/trans/vip/fieldtranslate",
+  },
+]
+`;
+
+exports[`baidu_field translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "spa",
+    "fa": "per",
+    "fr": "fra",
+    "he": "heb",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "jp",
+    "km": "hkm",
+    "ko": "kor",
+    "ms": "may",
+    "nb_no": "nob",
+    "nl": "nl",
+    "nn_no": "nno",
+    "pl": "pl",
+    "pt_br": "pot",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "sv": "swe",
+    "th": "th",
+    "tr": "tr",
+    "uk": "ukr",
+    "vi": "vie",
+    "yue": "yue",
+    "zh_cn": "zh",
+    "zh_tw": "cht",
+  },
+  "info": {
+    "icon": "logo/baidu.svg",
+    "name": "baidu_field",
+  },
+}
+`;
+
+exports[`baidu_field translate > sends the md5-signed query with the default field as domain and joins the translated lines 1`] = `
+[
+  {
+    "options": {
+      "query": {
+        "appid": "test-appid",
+        "domain": "it",
+        "from": "zh",
+        "q": "你好
+世界",
+        "salt": "nanoid-fixed-id",
+        "sign": "64950c786defcee947e00846553a13f8",
+        "to": "en",
+      },
+    },
+    "url": "https://fanyi-api.baidu.com/api/trans/vip/fieldtranslate",
+  },
+]
+`;
+
+exports[`baidu_field translate > signs and sends another field the same way 1`] = `
+[
+  {
+    "options": {
+      "query": {
+        "appid": "test-appid",
+        "domain": "finance",
+        "from": "zh",
+        "q": "你好",
+        "salt": "nanoid-fixed-id",
+        "sign": "7eaac14be39a19b3348cff4fd8ce9f00",
+        "to": "en",
+      },
+    },
+    "url": "https://fanyi-api.baidu.com/api/trans/vip/fieldtranslate",
+  },
+]
+`;

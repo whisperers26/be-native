@@ -1,0 +1,54 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`lingva translate > encodes "/" in the text as "@@" in the path, then restores it in the translation 1`] = `
+[
+  {
+    "options": {
+      "method": "GET",
+    },
+    "url": "https://lingva.pot-app.com/api/v1/en/de/hello%40%40world%20%26%203%40%404",
+  },
+]
+`;
+
+exports[`lingva translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fa": "fa",
+    "fr": "fr",
+    "he": "he",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "ja",
+    "km": "km",
+    "ko": "ko",
+    "mn_cy": "mn",
+    "mn_mo": "mn",
+    "ms": "ms",
+    "nb_no": "no",
+    "nl": "nl",
+    "nn_no": "no",
+    "pl": "pl",
+    "pt_br": "pt",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "sv": "sv",
+    "th": "th",
+    "tr": "tr",
+    "uk": "uk",
+    "vi": "vi",
+    "zh_cn": "zh",
+    "zh_tw": "zh_HANT",
+  },
+  "info": {
+    "icon": "logo/lingva.svg",
+    "name": "lingva",
+  },
+}
+`;

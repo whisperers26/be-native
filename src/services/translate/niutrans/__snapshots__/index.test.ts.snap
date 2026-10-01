@@ -1,0 +1,67 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`niutrans translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fa": "fa",
+    "fr": "fr",
+    "he": "he",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "ja",
+    "km": "km",
+    "ko": "ko",
+    "mn_cy": "mn",
+    "mn_mo": "mo",
+    "ms": "ms",
+    "nb_no": "nb",
+    "nl": "nl",
+    "nn_no": "nn",
+    "pl": "pl",
+    "pt_br": "pt",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "sv": "sv",
+    "th": "th",
+    "tr": "tr",
+    "uk": "uk",
+    "vi": "vi",
+    "yue": "yue",
+    "zh_cn": "zh",
+    "zh_tw": "cht",
+  },
+  "info": {
+    "icon": "logo/niutrans.svg",
+    "name": "niutrans",
+  },
+}
+`;
+
+exports[`niutrans translate > posts the key and text as JSON over https and returns the trimmed translation 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "apikey": "test-apikey",
+          "from": "en",
+          "src_text": "hello",
+          "to": "zh",
+        },
+        "type": "Json",
+      },
+      "headers": {
+        "Content-Type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://api.niutrans.com/NiuTransServer/translation",
+  },
+]
+`;

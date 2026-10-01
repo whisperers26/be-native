@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ecdict translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "auto": "",
+    "en": "en",
+    "zh_cn": "zh",
+    "zh_tw": "zh",
+  },
+  "info": {
+    "icon": "logo/ecdict.svg",
+    "name": "ecdict",
+  },
+}
+`;
+
+exports[`ecdict translate > posts only the text as JSON and returns the response data as it is 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "text": "hello",
+        },
+        "type": "Json",
+      },
+      "method": "POST",
+    },
+    "url": "https://pot-app.com/api/dict",
+  },
+]
+`;

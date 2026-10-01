@@ -1,0 +1,80 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ollama translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "Arabic",
+    "auto": "Auto",
+    "de": "German",
+    "en": "English",
+    "es": "Spanish",
+    "fa": "Persian",
+    "fr": "French",
+    "he": "Hebrew",
+    "hi": "Hindi",
+    "id": "Indonesian",
+    "it": "Italian",
+    "ja": "Japanese",
+    "km": "Khmer",
+    "ko": "Korean",
+    "mn_cy": "Mongolian(Cyrillic)",
+    "mn_mo": "Mongolian",
+    "ms": "Malay",
+    "nb_no": "Norwegian Bokmål",
+    "nl": "Dutch",
+    "nn_no": "Norwegian Nynorsk",
+    "pl": "Polish",
+    "pt_br": "Brazilian Portuguese",
+    "pt_pt": "Portuguese",
+    "ru": "Russian",
+    "sv": "Swedish",
+    "th": "Thai",
+    "tr": "Turkish",
+    "uk": "Ukrainian",
+    "vi": "Vietnamese",
+    "yue": "Cantonese",
+    "zh_cn": "Simplified Chinese",
+    "zh_tw": "Traditional Chinese",
+  },
+  "info": {
+    "icon": "logo/ollama.png",
+    "name": "ollama",
+  },
+}
+`;
+
+exports[`ollama translate > with streaming > posts the prompts to /api/chat and passes the growing text to setResult 1`] = `
+[
+  {
+    "options": {
+      "body": "{"model":"gemma:2b","messages":[{"role":"system","content":"Translate from Auto to German (detected: English)."},{"role":"user","content":"Translate into German:\\n\\"\\"\\"\\nhello\\n\\"\\"\\""}],"stream":true}",
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "<ollama-js user agent>",
+      },
+      "method": "POST",
+      "signal": "<AbortSignal>",
+    },
+    "url": "http://localhost:11434/api/chat",
+  },
+]
+`;
+
+exports[`ollama translate > without streaming: sends stream false and returns the reply content without trimming it 1`] = `
+[
+  {
+    "options": {
+      "body": "{"model":"gemma:2b","messages":[{"role":"system","content":"Translate from Auto to German (detected: English)."},{"role":"user","content":"Translate into German:\\n\\"\\"\\"\\nhello\\n\\"\\"\\""}],"stream":false}",
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "<ollama-js user agent>",
+      },
+      "method": "POST",
+      "signal": undefined,
+    },
+    "url": "http://localhost:11434/api/chat",
+  },
+]
+`;

@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`bing_dict translate > collects pronunciations, quick explanations and the first inflection group 1`] = `
+[
+  {
+    "options": undefined,
+    "url": "https://www.bing.com/api/v6/dictionarywords/search?q=hello&appid=371E7B2AF0F9B84EC491D731DF90A55719C7D209&mkt=zh-cn&pname=bingdict",
+  },
+]
+`;
+
+exports[`bing_dict translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "auto": "auto",
+    "en": "en-us",
+    "zh_cn": "zh-cn",
+    "zh_tw": "zh-cn",
+  },
+  "info": {
+    "icon": "logo/bing.svg",
+    "name": "bing_dict",
+  },
+}
+`;

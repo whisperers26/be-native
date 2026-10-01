@@ -30,6 +30,19 @@ Bugs in code inherited from upstream, not fixed yet. Each one was confirmed by r
 - **iflytek sends its authorization unencoded.** The iflytek and iflytek_intsig OCR services put the base64 `authorization` (which can contain `+`, `/` and `=`) into the query string as it is; only `date` is URL-encoded.
 - **baidu_img's settings check misses an absent key.** It tests `appid === ''`, so a config without `appid` at all passes the check and the request is signed with `undefined`.
 - **Several default translate services fail today.** Checked on 2026-10-01: lingva (`lingva.pot-app.com` no longer resolves), ecdict (`pot-app.com/api/dict` answers 405), bing (its token endpoint answers 404, so "Get Token Failed"), and deepl's free endpoint (rate-limited with 429). Four of the six default translate services show errors out of the box.
+- **bing_dict sends the text unencoded.** It builds its URL with `q=${text}`, so an `&` or `#` in the text corrupts the query.
+- **baidu_field sends "undefined" without a field.** Its `'it'` default exists only in the settings form; a config without `field` signs and sends `undefined`.
+- **niutrans falls back to plain HTTP.** A config without `https` shows the switch as on, but the request goes to `http://`.
+- **openai doubles `/v1`.** A base URL ending in `/v1` becomes `…/v1/v1/chat/completions`.
+- **openai streaming can lose the whole reply.** After an event with empty `choices` (the shape of Azure's content-filter preamble), the buffer never parses again and the result is `''`.
+- **geminipro streaming mis-parses chunks.** Its greedy regex throws a `SyntaxError` on two parts in one read and on a part spread over three reads (`temp += str` re-adds `temp`); it collapses whitespace runs inside the text; and it calls `setResult` unguarded at the end (a `TypeError` with neither `setResult` nor text). Its streaming HTTP error message, like openai's, ends in "undefined" because a `Response` has no `.data`.
+- **chatglm streaming corrupts or drops text.** A delta without `content` appends "undefined"; a last event not followed by a blank line is dropped.
+- **The LLM services expand `$` patterns in the user's text.** chatglm, geminipro, ollama and openai fill prompts with `replaceAll('$text', text)`, so `$$`, `$&` and similar in the text are interpreted; the later `$from`, `$to` and `$detect` replacements also run inside the inserted text; and `$detect` becomes "undefined" when no detected language is passed.
+- **google's dictionary mode can throw.** It reads `result[0][1][3]` without a guard (a `TypeError` when there is no transliteration entry); a custom URL with a trailing slash requests `//translate_a/single`; any host beginning with "http" is taken to have a scheme.
+- **youdao throws on an empty `exam_type`.** It calls `reduce` without an initial value.
+- **transmart sends absent credentials as "undefined".** Its check is `!== ''`, so a config without `username` or `token` sends them as `undefined`.
+- **ollama rewrites the server URL.** A `requestPath` without a scheme gets `https://`, and the ollama client adds its default port to explicit URLs.
+- **deepl's free endpoint merges Portuguese variants.** `PT-BR` and `PT-PT` are both cut to `PT` by `slice(0, 2)`.
 
 ## Rust
 

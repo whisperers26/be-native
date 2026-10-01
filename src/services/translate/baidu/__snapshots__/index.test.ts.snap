@@ -1,0 +1,61 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`baidu translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "spa",
+    "fa": "per",
+    "fr": "fra",
+    "he": "heb",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "jp",
+    "km": "hkm",
+    "ko": "kor",
+    "ms": "may",
+    "nb_no": "nob",
+    "nl": "nl",
+    "nn_no": "nno",
+    "pl": "pl",
+    "pt_br": "pot",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "sv": "swe",
+    "th": "th",
+    "tr": "tr",
+    "uk": "ukr",
+    "vi": "vie",
+    "yue": "yue",
+    "zh_cn": "zh",
+    "zh_tw": "cht",
+  },
+  "info": {
+    "icon": "logo/baidu.svg",
+    "name": "baidu",
+  },
+}
+`;
+
+exports[`baidu translate > sends the md5-signed query and joins the translated lines 1`] = `
+[
+  {
+    "options": {
+      "query": {
+        "appid": "test-appid",
+        "from": "zh",
+        "q": "你好
+世界",
+        "salt": "nanoid-fixed-id",
+        "sign": "d244c8ac2db3106c44fd94e9fffcd217",
+        "to": "en",
+      },
+    },
+    "url": "https://fanyi-api.baidu.com/api/trans/vip/translate",
+  },
+]
+`;
