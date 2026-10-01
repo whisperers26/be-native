@@ -135,8 +135,9 @@ Rulings:
 Rulings:
 
 - **Replace is paste.** The selection lives in another app, and paste is the
-  one way every app accepts text. The clipboard's text is restored afterwards;
-  a non-text clipboard (an image) is not.
+  one way every app accepts text. The clipboard's text or image is restored afterwards.
+  A result is only copied when there is no selection to paste over or its
+  window does not get the focus back (added after the branch review).
 - **Keys are sent with `enigo`**, already in the dependency tree through
   `selection`.
 - **No tray entry.** Opening the tray menu takes the focus, and the selection

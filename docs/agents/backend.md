@@ -50,7 +50,7 @@
 | `lang_detect` | `text` | string | Offline language detection; an app language code, `en` if unsure |
 | `get_writing_text` | — | string | The text waiting for the writing window |
 | `fit_writing_window` | `height` | — | Give the calling (Writing) window this height, in logical pixels, at once. Its top left corner stays, unless the window would reach below its monitor's work area: then it moves up as far as that takes (`placement::inside`) |
-| `writing_replace` | `text` | — | Hide the Writing window, give the focus back to the window the selection was in (Windows; elsewhere hiding does), put `text` on the clipboard, send the paste shortcut (`enigo` on Windows, `osascript` on macOS, `xdotool` on Linux), put the clipboard's old text back and close the window. If the paste cannot be sent, the text stays on the clipboard and a notification says so. In test mode it only closes the window |
+| `writing_replace` | `text` | — | Hide the Writing window, give the focus back to the window the selection was in (Windows; elsewhere hiding does), put `text` on the clipboard, send the paste shortcut (`enigo` on Windows, `osascript` on macOS, `xdotool` on Linux), put back the text or image the clipboard held, and close the window. The text is only copied, and a notification says so, when there is no selection to paste over (a text from `/writing`), when that window is gone or does not get the focus back, or when the shortcut cannot be sent. A second call while one is under way does nothing, and the clipboard monitor does not read the clipboard meanwhile. In test mode it only closes the window |
 | `agent_cli_run` | `id`, `spec`, `prompt` | string | Runs one prompt in a Claude Code or Codex session of its own and returns the answer; emits `agent_cli_stream` meanwhile |
 | `set_proxy`, `unset_proxy` | — | bool | Set or clear the proxy environment variables. The frontend never calls them; the proxy is applied at launch |
 | `install_plugin` | `pathList` | number | Installs `.potext` files |
@@ -106,7 +106,7 @@ A server on `127.0.0.1:<server_port>` (default 60828) handles one request at a t
 | `/ocr_copy` | Screenshot, then OCR copied to the clipboard without a window |
 | `/ocr_recognize?screenshot=false`, `/ocr_translate?screenshot=false`, `/ocr_copy?screenshot=false` | The same, with an existing `pot_screenshot_cut.png` |
 | `/selection_writing` | Like the hotkey |
-| `/writing` | Improves the request body |
+| `/writing` | Improves the request body. There is no selection, so a result that is picked is copied, not pasted |
 | `/config` | Opens the Config window |
 | `/test_mode?on=true`, `/test_mode?on=false` | Debug builds only: turns test mode on or off ([testing.md](testing.md#test-mode)) |
 
