@@ -1,9 +1,14 @@
 import { fetch, Body } from '@tauri-apps/api/http';
 import { v4 as uuidv4 } from 'uuid';
+import type { TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to) {
+interface YandexResponse {
+    text?: string[];
+}
+
+export async function translate(text: string, from: string, to: string): Promise<TranslateResult> {
     const url = 'https://translate.yandex.net/api/v1/tr.json/translate';
-    const res = await fetch(url, {
+    const res = await fetch<YandexResponse>(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
