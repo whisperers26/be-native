@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { HiTranslate } from 'react-icons/hi';
 import { LuDelete } from 'react-icons/lu';
 import { invoke } from '@tauri-apps/api';
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useAtomValue } from 'jotai';
 import { getServiceName, getServiceSouceType, ServiceSourceType } from '../../../../utils/service_instance';
 import { useConfig, useSyncAtom, useVoice, useToastStyle } from '../../../../hooks';
 import { invoke_plugin } from '../../../../utils/invoke_plugin';
@@ -30,6 +30,8 @@ import type { PluginInfo, PluginList, RecognizeService, ServiceConfigMap, TtsSer
 
 export const sourceTextAtom = atom('');
 export const detectLanguageAtom = atom('');
+// The height the box around the text is kept to, in a window that fits itself to its content: null shows all the text.
+export const sourceHeightAtom = atom<number | null>(null);
 
 let unlisten: Promise<UnlistenFn> | null = null;
 let timer = null;
@@ -48,6 +50,7 @@ export default function SourceArea(props: SourceAreaProps) {
     const [appFontSize] = useConfig('app_font_size', 16);
     const [sourceText, setSourceText, syncSourceText] = useSyncAtom(sourceTextAtom);
     const [detectLanguage, setDetectLanguage] = useAtom(detectLanguageAtom);
+    const sourceHeight = useAtomValue(sourceHeightAtom);
     const [incrementalTranslate] = useConfig('incremental_translate', false);
     const [dynamicTranslate] = useConfig('dynamic_translate', false);
     const [mergeWrappedLines] = useConfig('translate_merge_lines', true);
@@ -404,9 +407,10 @@ export default function SourceArea(props: SourceAreaProps) {
                 className='bg-content1 rounded-[10px] mt-[1px] pb-0'
             >
                 <Toaster />
-                {/* A window that fits itself to its content shows the whole text; one of a fixed size keeps room for the results. */}
+                {/* A window that fits itself to its content says how much of the text to show; one of a fixed size keeps room for the results. */}
                 <CardBody
                     className={`bg-content1 p-[12px] pb-0 overflow-y-auto ${rememberWindowSize === false ? '' : 'max-h-[40vh]'}`}
+                    style={rememberWindowSize === false && sourceHeight !== null ? { maxHeight: sourceHeight } : undefined}
                 >
                     <textarea
                         autoFocus
