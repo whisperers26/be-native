@@ -16,7 +16,8 @@ if (import.meta.env.PROD) {
 
 initStore().then(async () => {
     await initEnv();
-    const rootElement = document.getElementById('root');
+    // index.html has the root element.
+    const rootElement = document.getElementById('root')!;
     const root = ReactDOM.createRoot(rootElement);
     root.render(
         <NextUIProvider>
