@@ -4,7 +4,7 @@
 
 | Tool | Version | Notes |
 | --- | --- | --- |
-| Node.js | `.node-version` (21); Node 22 also works | |
+| Node.js | `.node-version` (22) | |
 | pnpm | 10.14.0 | Pinned by `packageManager` in `package.json` |
 | Rust | stable (1.98.1 known to work) | Windows: the MSVC toolchain |
 | Windows extras | Visual Studio 2022 or newer with "Desktop development with C++"; WebView2 runtime | WebView2 ships with Windows 10 and 11 |

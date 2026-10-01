@@ -22,6 +22,7 @@
 > - The main branch is `main`; every change lands through a pull request.
 > - AI agents work from [AGENTS.md](./AGENTS.md) and the wiki in [docs/agents](./docs/agents/).
 > - CI checks every pull request (docs check and frontend build).
+> - Automated tests (Vitest) pin the frontend's behaviour: `pnpm test`.
 
 <!-- fork:end -->
 
@@ -430,7 +431,7 @@ windowrulev2 = move cursor 0 0, class:(pot), title:(Translator|PopClip|Screensho
 
 ### Requirements
 
-Node.js >= 18.0.0
+Node.js 22
 
 pnpm 10.14.0 (pinned by packageManager in package.json)
 

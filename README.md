@@ -22,6 +22,7 @@
 > - 主分支为 `main`，所有改动都通过 Pull Request 合并。
 > - AI 代理按照 [AGENTS.md](./AGENTS.md) 及 [docs/agents](./docs/agents/) 中的 wiki 工作。
 > - 每个 Pull Request 都会经过 CI 检查（文档检查和前端构建）。
+> - 前端行为由自动化测试（Vitest）固定，命令为 `pnpm test`。
 
 <!-- fork:end -->
 
@@ -432,7 +433,7 @@ windowrulev2 = move cursor 0 0, class:(pot), title:(Translator|PopClip|Screensho
 
 ### 环境要求
 
-Node.js >= 18.0.0
+Node.js 22
 
 pnpm 10.14.0（由 package.json 中的 packageManager 字段固定）
 
