@@ -62,6 +62,8 @@ class FakeTauri {
     files = new Map<string, string | number[]>();
     clipboard = '';
     os = { osType: 'Windows_NT', arch: 'x86_64', version: '10.0.26200', platform: 'win32', locale: 'en-US' };
+    /** The current window: its size in physical pixels and the scale of the monitor it is on. */
+    window = { size: { width: 800, height: 600 }, scaleFactor: 1 };
     sqlRows: unknown[] = [];
     update: null | Record<string, unknown> = null;
     calls: { cmd: string; args: Args }[] = [];
@@ -76,6 +78,7 @@ class FakeTauri {
         this.files.clear();
         this.clipboard = '';
         this.os = { osType: 'Windows_NT', arch: 'x86_64', version: '10.0.26200', platform: 'win32', locale: 'en-US' };
+        this.window = { size: { width: 800, height: 600 }, scaleFactor: 1 };
         this.sqlRows = [];
         this.update = null;
         this.calls = [];
@@ -210,13 +213,13 @@ class FakeTauri {
     private windowManage(type: string | undefined): unknown {
         switch (type) {
             case 'scaleFactor':
-                return 1;
+                return this.window.scaleFactor;
             case 'innerPosition':
             case 'outerPosition':
                 return { x: 0, y: 0 };
             case 'innerSize':
             case 'outerSize':
-                return { width: 800, height: 600 };
+                return this.window.size;
             case 'isFullscreen':
             case 'isMaximized':
             case 'isMinimized':
