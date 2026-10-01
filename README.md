@@ -442,13 +442,13 @@ Rust >= 1.80.0
 1. Clone 仓库
 
     ```bash
-    git clone https://github.com/pot-app/pot-desktop.git
+    git clone https://github.com/whisperers26/be-native.git
     ```
 
 2. 安装依赖
 
     ```bash
-    cd pot-desktop
+    cd be-native
     pnpm install
     ```
 

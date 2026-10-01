@@ -440,13 +440,13 @@ Rust >= 1.80.0
 1. repository을 복사합니다
 
     ```bash
-    git clone https://github.com/pot-app/pot-desktop.git
+    git clone https://github.com/whisperers26/be-native.git
     ```
 
 2. dependencies를 설치합니다
 
     ```bash
-    cd pot-desktop
+    cd be-native
     pnpm install
     ```
 

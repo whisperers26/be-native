@@ -440,13 +440,13 @@ Rust >= 1.80.0
 1. Clone the repository
 
     ```bash
-    git clone https://github.com/pot-app/pot-desktop.git
+    git clone https://github.com/whisperers26/be-native.git
     ```
 
 2. Install dependencies
 
     ```bash
-    cd pot-desktop
+    cd be-native
     pnpm install
     ```
 
