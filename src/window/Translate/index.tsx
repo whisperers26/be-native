@@ -213,9 +213,12 @@ export default function Translate() {
             }
             asked = null;
             const textAreas = Array.from(content.querySelectorAll('textarea'));
-            // The source text is the one that can be typed in; the box around it scrolls when its height is kept down.
-            const sourceBox = content.querySelector('textarea:not([readonly])')?.parentElement;
-            if (content.offsetHeight === 0 || !sourceBox) return;
+            // The source text is the one that can be typed in. When the box around it is kept short, the text is
+            // as short as the box and scrolls, so the height of all of it is the height it scrolls over.
+            const sourceText = content.querySelector<HTMLTextAreaElement>('textarea:not([readonly])');
+            const sourceBox = sourceText?.parentElement;
+            if (content.offsetHeight === 0 || !sourceText || !sourceBox) return;
+            const sourceHeight = sourceText.scrollHeight + sourceBox.clientHeight - sourceText.offsetHeight;
             const size = fitSize(
                 {
                     width: window.innerWidth,
@@ -225,10 +228,12 @@ export default function Translate() {
                         scroll.clientHeight +
                         content.offsetHeight -
                         sourceBox.clientHeight +
-                        sourceBox.scrollHeight,
-                    textHeights: textAreas.map((textArea) => textArea.offsetHeight),
-                    lineHeight: parseFloat(getComputedStyle(textAreas[0]).lineHeight) || 24,
-                    sourceHeight: sourceBox.scrollHeight,
+                        sourceHeight,
+                    textHeights: textAreas.map((textArea) =>
+                        textArea === sourceText ? textArea.scrollHeight : textArea.offsetHeight
+                    ),
+                    lineHeight: parseFloat(getComputedStyle(sourceText).lineHeight) || 24,
+                    sourceHeight,
                 },
                 limitsFor(window.screen),
                 fitAnew.current
@@ -240,6 +245,8 @@ export default function Translate() {
             if (size.width !== window.innerWidth || size.height !== window.innerHeight) {
                 asked = { width: size.width, height: size.height, at: performance.now() };
                 void invoke('fit_translate_window', { width: size.width, height: size.height });
+                // Measure again once the window is there: at a new width the text has wrapped differently.
+                fitTimeout = setTimeout(fit, 50);
             }
         };
         // The result cards open with an animation, so the content changes height many times in a row.

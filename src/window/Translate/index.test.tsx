@@ -106,6 +106,9 @@ describe('Translate window', () => {
         vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) {
             return this.tagName === 'TEXTAREA' ? 24 : 500;
         });
+        vi.spyOn(Element.prototype, 'scrollHeight', 'get').mockImplementation(function (this: Element) {
+            return this.tagName === 'TEXTAREA' ? 24 : 0;
+        });
         vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function (this: HTMLElement) {
             return this.className.includes('h-full overflow-y-auto') ? window.innerHeight - 35 : 0;
         });
