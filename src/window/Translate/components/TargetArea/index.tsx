@@ -580,7 +580,7 @@ export default function TargetArea(props: TargetAreaProps) {
                     </Button>
                 </div>
             </CardHeader>
-            <animated.div style={stage === 'shown' ? { ...springs } : { height: hide ? 0 : 'auto' }}>
+            <animated.div style={opensAnimated ? { ...springs } : { height: hide ? 0 : 'auto' }}>
                 <div ref={boundRef}>
                     {/* result content */}
                     <CardBody className={`p-[12px] pb-0 ${hide && 'h-0 p-0'}`}>
