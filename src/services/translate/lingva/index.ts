@@ -1,9 +1,14 @@
 import { fetch, Body } from '@tauri-apps/api/http';
+import type { TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to) {
+interface LingvaResponse {
+    translation?: string;
+}
+
+export async function translate(text: string, from: string, to: string): Promise<TranslateResult> {
     let plain_text = text.replaceAll('/', '@@');
     let encode_text = encodeURIComponent(plain_text);
-    const res = await fetch(`https://lingva.pot-app.com/api/v1/${from}/${to}/${encode_text}`, {
+    const res = await fetch<LingvaResponse>(`https://lingva.pot-app.com/api/v1/${from}/${to}/${encode_text}`, {
         method: 'GET',
     });
 
@@ -13,6 +18,7 @@ export async function translate(text, from, to) {
         if (translation) {
             return translation.replaceAll('@@', '/');
         } else {
+            // @ts-expect-error known bug (known-issues.md): result is the response object, which has no trim
             throw JSON.stringify(result.trim());
         }
     } else {
