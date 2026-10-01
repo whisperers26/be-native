@@ -1,0 +1,56 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`tencent translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fr": "fr",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "ja",
+    "ko": "ko",
+    "ms": "ms",
+    "pt_br": "pt",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "th": "th",
+    "tr": "tr",
+    "vi": "vi",
+    "zh_cn": "zh",
+    "zh_tw": "zh-TW",
+  },
+  "info": {
+    "icon": "logo/tencent.svg",
+    "name": "tencent",
+  },
+}
+`;
+
+exports[`tencent translate > posts a TC3-HMAC-SHA256 signed JSON body and returns the trimmed translation 1`] = `
+[
+  {
+    "options": {
+      "body": {
+        "payload": "{"SourceText":"hello","Source":"en","Target":"zh","ProjectId":0}",
+        "type": "Text",
+      },
+      "headers": {
+        "Authorization": "TC3-HMAC-SHA256 Credential=test-secret-id/2026-01-02/tmt/tc3_request, SignedHeaders=content-type;host, Signature=8fc79a6a478689d3d3094df9cf5669edd2434ad648b37dc4ba88a7b4bbaaa433",
+        "Host": "tmt.tencentcloudapi.com",
+        "X-TC-Action": "TextTranslate",
+        "X-TC-Region": "ap-beijing",
+        "X-TC-Timestamp": "1767323046",
+        "X-TC-Version": "2018-03-21",
+        "content-type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://tmt.tencentcloudapi.com",
+  },
+]
+`;
