@@ -6,6 +6,7 @@ Bugs in code inherited from upstream, not fixed yet. Each one was confirmed by r
 
 - **The language swap can throw.** In `src/window/Translate/components/LanguageArea`, the second-language branch of the swap calls `setTargetLanguage(secondLanguage)`, but the variable is named `translateSecondLanguage`, so that branch throws a `ReferenceError`.
 - **The Translate window never reloads plugins.** `src/window/Translate/` registers its `reload_plugin_list` listener only `if (!unlisten)`, but `unlisten` already holds the blur listener, so installing or removing a plugin does not reach an open Translate window.
+- **Saving the Translate window's position or size can throw.** `src/window/Translate/` reads `scaleFactor` from `currentMonitor()` without a check, but Tauri returns `null` when it cannot detect the monitor. The `TypeError` happens inside the debounced save, before anything is stored.
 - **The result spinner ignores dark mode.** `TargetArea` compares the `useTheme()` object with `'dark'`, so the spinner always uses the light colour.
 - **The second-language target is not checked.** `TargetArea` checks the selected target against the service's `Language`, then may switch to `translate_second_language` without checking that one; an unsupported second language reaches the service as `undefined`.
 - **Target auto-copy depends on list position.** Only the card at position 0 of `translate_service_list` copies the target text; if that instance is disabled, target auto-copy never happens.
