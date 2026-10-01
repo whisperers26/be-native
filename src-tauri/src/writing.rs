@@ -2,10 +2,13 @@
 // user picks there is pasted over the selection.
 
 use crate::placement::{beside, inside, Rect};
-use crate::window::{build_window, placement_point, set_rect, translate_area, PLACEMENT_GAP};
+use crate::window::{
+    build_window, placement_point, set_rect, test_mode, translate_area, PLACEMENT_GAP,
+};
 use crate::APP;
 use log::{info, warn};
 use std::sync::Mutex;
+use std::time::Duration;
 use tauri::api::notification::Notification;
 use tauri::{Manager, Window};
 
@@ -39,6 +42,75 @@ fn remember_source() {
 
 #[cfg(not(target_os = "windows"))]
 fn remember_source() {}
+
+// Give the focus back to the window the selection was in. Elsewhere than on Windows, hiding the
+// Writing window does that.
+#[cfg(target_os = "windows")]
+fn focus_source() {
+    use std::sync::atomic::Ordering;
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::UI::WindowsAndMessaging::{IsWindow, SetForegroundWindow};
+
+    let hwnd = HWND(SOURCE_WINDOW.load(Ordering::SeqCst) as _);
+    unsafe {
+        if IsWindow(hwnd).as_bool() {
+            let _ = SetForegroundWindow(hwnd);
+        } else {
+            warn!("The window the selection was in is gone");
+        }
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn focus_source() {}
+
+// Press the paste shortcut in the window that has the focus
+#[cfg(target_os = "windows")]
+fn paste() -> Result<(), String> {
+    use enigo::{
+        Direction::{Click, Press, Release},
+        Enigo, Key, Keyboard, Settings,
+    };
+
+    let mut enigo = Enigo::new(&Settings::default()).map_err(|e| e.to_string())?;
+    // A modifier still held down would make it another shortcut
+    for key in [Key::Control, Key::Alt, Key::Shift, Key::Meta] {
+        let _ = enigo.key(key, Release);
+    }
+    enigo.key(Key::Control, Press).map_err(|e| e.to_string())?;
+    let pressed = enigo.key(Key::V, Click).map_err(|e| e.to_string());
+    let _ = enigo.key(Key::Control, Release);
+    pressed
+}
+
+#[cfg(target_os = "macos")]
+fn paste() -> Result<(), String> {
+    run_paste_command(
+        "osascript",
+        &[
+            "-e",
+            "tell application \"System Events\" to keystroke \"v\" using command down",
+        ],
+    )
+}
+
+#[cfg(target_os = "linux")]
+fn paste() -> Result<(), String> {
+    run_paste_command("xdotool", &["key", "--clearmodifiers", "ctrl+v"])
+}
+
+#[cfg(not(target_os = "windows"))]
+fn run_paste_command(program: &str, args: &[&str]) -> Result<(), String> {
+    let status = std::process::Command::new(program)
+        .args(args)
+        .status()
+        .map_err(|e| format!("{program}: {e}"))?;
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("{program} ended with {status}"))
+    }
+}
 
 fn notify(title: &str, body: &str) {
     let app_handle = APP.get().unwrap();
@@ -150,4 +222,43 @@ pub fn fit_writing_window(window: Window, height: f64) {
             height,
         },
     );
+}
+
+// Put `text` in place of the selection: the app it was in gets the focus back and the text is
+// pasted there. The clipboard gets its old text back afterwards.
+#[tauri::command(async)]
+pub fn writing_replace(window: Window, text: String) -> Result<(), String> {
+    if test_mode() {
+        // A test has no selection, and must leave the owner's foreground app and clipboard alone
+        info!("Writing improvement: test mode, nothing is pasted");
+        let _ = window.close();
+        return Ok(());
+    }
+    let _ = window.hide();
+    focus_source();
+    // The app needs a moment to have the focus again
+    std::thread::sleep(Duration::from_millis(150));
+
+    let mut clipboard = arboard::Clipboard::new().map_err(|e| e.to_string())?;
+    let old_text = clipboard.get_text().ok();
+    clipboard.set_text(text).map_err(|e| e.to_string())?;
+    match paste() {
+        Ok(()) => {
+            // The app reads the clipboard when it handles the shortcut, which is not at once
+            std::thread::sleep(Duration::from_millis(300));
+            if let Some(old_text) = old_text {
+                let _ = clipboard.set_text(old_text);
+            }
+        }
+        Err(e) => {
+            // The text stays on the clipboard, to be pasted by hand
+            warn!("Writing improvement: paste failed: {}", e);
+            notify(
+                "Copied to the clipboard",
+                "It could not be pasted for you: paste it yourself.",
+            );
+        }
+    }
+    let _ = window.close();
+    Ok(())
 }
