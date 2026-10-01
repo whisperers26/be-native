@@ -1,7 +1,17 @@
 import { fetch } from '@tauri-apps/api/http';
+import type { DictionaryResult, TranslateResult } from '../../../types/service';
 const DISPLAY_FORMAT_DEFAULT = '发音, 快速释义, 变形';
 
-export async function translate(text, from, to) {
+interface MeaningGroup {
+    partsOfSpeech: { name: string; description?: string }[];
+    meanings: { richDefinitions: { fragments: { text: string }[] }[] }[];
+}
+
+interface BingDictResponse {
+    value: { meaningGroups: MeaningGroup[] }[];
+}
+
+export async function translate(text: string, from: string, to: string): Promise<TranslateResult> {
     if (from == 'auto') {
         if (/^[\u4e00-\u9fff]/.test(text)) {
             from = 'zh-cn';
@@ -17,7 +27,7 @@ export async function translate(text, from, to) {
     //     return '';
     // }
 
-    const res = await fetch(
+    const res = await fetch<BingDictResponse>(
         `https://www.bing.com/api/v6/dictionarywords/search?q=${text}&appid=371E7B2AF0F9B84EC491D731DF90A55719C7D209&mkt=zh-cn&pname=bingdict`
     );
     if (res.ok) {
@@ -27,7 +37,7 @@ export async function translate(text, from, to) {
             throw `Words not yet included: ${text}`;
         }
         const formats = DISPLAY_FORMAT_DEFAULT.trim().split(/,\s*/);
-        const formatGroups = meaningGroups.reduce(
+        const formatGroups = meaningGroups.reduce<Record<string, MeaningGroup[]>>(
             (acc, cur) => {
                 const group = acc[cur.partsOfSpeech?.[0]?.description || cur.partsOfSpeech?.[0]?.name];
                 if (Array.isArray(group)) {
@@ -35,12 +45,12 @@ export async function translate(text, from, to) {
                 }
                 return acc;
             },
-            formats.reduce((acc, cur) => {
+            formats.reduce<Record<string, MeaningGroup[]>>((acc, cur) => {
                 acc[cur] = [];
                 return acc;
             }, {})
         );
-        let target = { pronunciations: [], explanations: [], associations: [], sentence: [] };
+        let target: DictionaryResult = { pronunciations: [], explanations: [], associations: [], sentence: [] };
         for (const pronunciation of formatGroups['发音']) {
             target.pronunciations.push({
                 region: pronunciation.partsOfSpeech[0].name,
