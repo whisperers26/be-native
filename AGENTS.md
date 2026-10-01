@@ -40,7 +40,8 @@ frontend in `src/`.
 | `pnpm build` | Build the frontend into `dist/` |
 | `pnpm check:docs` | Check doc links, README fork sections, and this index |
 
-Before opening a PR, run `pnpm check:docs` and `pnpm build`.
+Before opening a PR, run `pnpm check:docs` and `pnpm build`; CI runs the same
+checks on every PR.
 
 ## Wiki
 
@@ -54,3 +55,4 @@ Before opening a PR, run `pnpm check:docs` and `pnpm build`.
 | [services.md](docs/agents/services.md) | Adding or changing a translate, OCR, TTS or collection service, or plugins |
 | [config-keys.md](docs/agents/config-keys.md) | Reading, adding or changing a setting |
 | [known-issues.md](docs/agents/known-issues.md) | Seeing odd behaviour, or about to fix a bug |
+| [ci.md](docs/agents/ci.md) | Changing CI, or a check failed on your PR |
