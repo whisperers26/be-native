@@ -42,6 +42,11 @@ pub static APP: OnceCell<tauri::AppHandle> = OnceCell::new();
 pub struct StringWrapper(pub Mutex<String>);
 
 fn main() {
+    let mut context = tauri::generate_context!();
+    // A debug build says so in its name, to tell it apart from an installed release.
+    if cfg!(debug_assertions) {
+        context.package_info_mut().name.push_str(" (Debug)");
+    }
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _, cwd| {
             Notification::new(&app.config().tauri.bundle.identifier)
@@ -150,7 +155,7 @@ fn main() {
             aliyun
         ])
         .on_system_tray_event(tray_event_handler)
-        .build(tauri::generate_context!())
+        .build(context)
         .expect("error while running tauri application")
         // 窗口关闭不退出
         .run(|_app_handle, event| {
