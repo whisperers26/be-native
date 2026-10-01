@@ -1,0 +1,54 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`volcengine_multi_lang OCR > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fr": "fr",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "ja",
+    "ko": "ko",
+    "ms": "ms",
+    "pt_br": "pt_br",
+    "pt_pt": "pt_pt",
+    "ru": "ru",
+    "th": "th",
+    "tr": "tr",
+    "vi": "vi",
+    "zh_cn": "zh_cn",
+    "zh_tw": "zh_tw",
+  },
+  "info": {
+    "icon": "logo/volcengine.svg",
+    "name": "volcengine_multi_lang_ocr",
+  },
+}
+`;
+
+exports[`volcengine_multi_lang OCR > posts a signed form body as text and joins the text of ocr_infos 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": "image_base64=aW1hZ2U%3D&approximate_pixel=0&mode=default&filter_thresh=80",
+        "type": "Text",
+      },
+      "headers": {
+        "Authorization": "HMAC-SHA256 Credential=test-access-key/20260102/cn-north-1/cv/request, SignedHeaders=content-type;host;x-content-sha256;x-date, Signature=93e353fc2b41ffa1f4821bacee86301af53602f1e519af19b412ab6447e320e2",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Host": "visual.volcengineapi.com",
+        "X-Content-Sha256": "ecd186ce72cd98ebe5e7a8581b5ad9046faf15d5c1c3cbcddac4b61ead4a019b",
+        "X-Date": "20260102T030405Z",
+      },
+      "method": "POST",
+    },
+    "url": "https://visual.volcengineapi.com/?Action=MultiLanguageOCR&Version=2022-08-31",
+  },
+]
+`;
