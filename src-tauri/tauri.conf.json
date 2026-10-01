@@ -7,7 +7,7 @@
         "withGlobalTauri": false
     },
     "package": {
-        "productName": "pot",
+        "productName": "Be Native",
         "version": "1.0.0"
     },
     "tauri": {
@@ -69,7 +69,7 @@
             "targets": "all",
             "identifier": "com.pot-app.desktop",
             "longDescription": "A cross-platform text translation and ocr software",
-            "shortDescription": "Pot App",
+            "shortDescription": "Be Native",
             "externalBin": [],
             "resources": [],
             "icon": [
