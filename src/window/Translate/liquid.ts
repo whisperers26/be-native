@@ -9,11 +9,12 @@ export interface Disc {
     size: number;
 }
 
-export interface LiquidFrame {
+// A type and not an interface, so that it is a keyframe of the Web Animations API as it is
+export type LiquidFrame = {
     offset: number;
     clipPath: string;
     easing: string;
-}
+};
 
 /** How far each side bows out (inwards when negative). */
 interface Bow {

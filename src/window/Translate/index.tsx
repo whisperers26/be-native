@@ -16,6 +16,7 @@ import SourceArea, { sourceHeightAtom, sourceTextAtom } from './components/Sourc
 import TargetArea from './components/TargetArea';
 import Progress from './components/Progress';
 import { fitSize, limitsFor, MIN_WIDTH } from './auto_size';
+import { liquidFrames } from './liquid';
 import {
     cardProgressAtom,
     DISC_SIZE,
@@ -88,10 +89,9 @@ void listen('tauri://move', () => {
 const TEST_MODE_SERVICE_LIST = ['google'];
 // What lies between the edge of the waiting window and the indicator's disc.
 const DISC_INSET = (WAITING_SIZE - DISC_SIZE) / 2;
-// How long the window takes to come out of its progress indicator, and the curve it follows: fast at first and
-// long in settling, as a sheet does on iOS. What the window shows lands with a slight bounce.
-const OPENING = 460;
-const UNFOLD = 'cubic-bezier(0.32, 0.72, 0, 1)';
+// How long the window takes to come out of its progress indicator, and the curve what it shows lands on: with a
+// slight bounce.
+const OPENING = 600;
 const LAND = 'cubic-bezier(0.34, 1.3, 0.64, 1)';
 
 export default function Translate() {
@@ -99,6 +99,10 @@ export default function Translate() {
     const [alwaysOnTop] = useConfig('translate_always_on_top', false);
     const [windowPosition] = useConfig('translate_window_position', 'smart');
     const [rememberWindowSize] = useConfig('translate_remember_window_size', false);
+    const [windowAnimation] = useConfig('translate_window_animation', true);
+    // The setting is read in the fit, which is set up before it may have changed.
+    const animationRef = useRef(true);
+    animationRef.current = windowAnimation !== false;
     const [configuredServiceInstanceList, setTranslateServiceInstanceList] = useConfig('translate_service_list', [
         'deepl',
         'bing',
@@ -260,13 +264,31 @@ export default function Translate() {
         });
         setStage('opening');
         await invoke('fit_translate_window', { ...size, glide: false });
-        // Two frames, so that the window has been drawn at its size before anything moves.
-        requestAnimationFrame(() => requestAnimationFrame(() => setUnfolded(true)));
-        setTimeout(() => {
+        const done = () => {
             setStage('shown');
             void invoke('translate_window_opened');
-        }, OPENING);
+        };
+        if (!animationRef.current) {
+            // One frame, so that the window has its size before what it shows fills it.
+            requestAnimationFrame(done);
+            return;
+        }
+        // Two frames, so that the window has been drawn at its size before anything moves.
+        requestAnimationFrame(() => requestAnimationFrame(() => setUnfolded(true)));
+        setTimeout(done, OPENING);
     };
+    // The disc the window comes out of, and the window's shape on the way: see liquid.ts.
+    const sheetRef = useRef<HTMLDivElement>(null);
+    const disc = { x: origin.x + DISC_INSET, y: origin.y + DISC_INSET, size: DISC_SIZE };
+    useEffect(() => {
+        if (!unfolded) return;
+        // The path is drawn by the page, a frame at a time, but it only cuts what is already drawn: the content
+        // is a layer of its own (it fades and scales), so nothing is laid out or painted again on the way.
+        sheetRef.current?.animate?.(liquidFrames(disc, layout.width, layout.height), {
+            duration: OPENING - 40,
+            fill: 'forwards',
+        });
+    }, [unfolded]);
     // A remembered size is the size the window opens to.
     useEffect(() => {
         if (stage !== 'waiting' || rememberWindowSize !== true) return;
@@ -352,7 +374,11 @@ export default function Translate() {
             // A height that is not a whole number of physical pixels comes back a pixel off.
             if (size.width !== window.innerWidth || Math.abs(size.height - window.innerHeight) > 1) {
                 asked = { width: size.width, height: size.height, at: performance.now() };
-                void invoke('fit_translate_window', { width: size.width, height: size.height });
+                void invoke('fit_translate_window', {
+                    width: size.width,
+                    height: size.height,
+                    glide: animationRef.current,
+                });
                 // Measure again once the window is there: at a new width the text has wrapped differently.
                 fitTimeout = setTimeout(fit, 50);
             }
@@ -482,12 +508,14 @@ export default function Translate() {
                         icons={progressIcons()}
                         origin={origin}
                         leaving={stage === 'opening'}
+                        animated={windowAnimation !== false}
                         onPress={() => setPressed(true)}
                     />
                 )}
                 {/* Until the window has opened, its content keeps the size it will open to: unseen at first, and
                     then cut to the indicator's disc, which widens into the window. */}
                 <div
+                    ref={sheetRef}
                     className={stage === 'shown' ? undefined : 'bg-background'}
                     style={
                         stage === 'shown'
@@ -499,14 +527,7 @@ export default function Translate() {
                                   width: layout.width,
                                   height: layout.height,
                                   visibility: stage === 'waiting' ? 'hidden' : 'visible',
-                                  clipPath: unfolded
-                                      ? 'inset(0px round 8px)'
-                                      : `inset(${origin.y + DISC_INSET}px ${
-                                            layout.width - origin.x - WAITING_SIZE + DISC_INSET
-                                        }px ${layout.height - origin.y - WAITING_SIZE + DISC_INSET}px ${
-                                            origin.x + DISC_INSET
-                                        }px round ${DISC_SIZE / 2}px)`,
-                                  transition: `clip-path ${OPENING - 40}ms ${UNFOLD}`,
+                                  clipPath: liquidFrames(disc, layout.width, layout.height)[0].clipPath,
                               }
                     }
                 >
@@ -521,7 +542,8 @@ export default function Translate() {
                                       opacity: unfolded ? 1 : 0,
                                       transform: unfolded ? 'none' : 'scale(0.92)',
                                       transformOrigin: `${origin.x + WAITING_SIZE / 2}px ${origin.y + WAITING_SIZE / 2}px`,
-                                      transition: `opacity 240ms ease-out 50ms, transform ${OPENING - 40}ms ${LAND}`,
+                                      willChange: 'opacity, transform',
+                                      transition: `opacity 260ms ease-out 140ms, transform ${OPENING - 80}ms ${LAND} 60ms`,
                                   }
                         }
                     >

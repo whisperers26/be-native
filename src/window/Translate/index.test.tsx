@@ -131,6 +131,7 @@ describe('Translate window', () => {
                 expect(fakeTauri.calls.find((call) => call.cmd === 'fit_translate_window')?.args).toEqual({
                     width: 420,
                     height: 535,
+                    glide: true,
                 })
             );
         } finally {
