@@ -32,7 +32,8 @@ export async function get() {
         ],
     });
 
-    if (selected !== null && selected.endsWith('zip')) {
+    // multiple is false, so the dialog answers with one path; open's type does not follow that option.
+    if (selected !== null && (selected as string).endsWith('zip')) {
         return await invoke('local', {
             operate: 'get',
             path: selected,
