@@ -11,15 +11,29 @@ import {
     getServiceName,
     getServiceSouceType,
 } from '../../../../../../utils/service_instance';
-import * as builtinServices from '../../../../../../services/collection';
+import * as builtinServices from '../../../../../../services/recognize';
+import { osType } from '../../../../../../utils/env';
 import { useConfig } from '../../../../../../hooks';
+import type { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
+import type { PluginConfigInfo, RecognizeService, ServiceConfig } from '../../../../../../types/service';
 
-export default function ServiceItem(props) {
+// The registry is looked up by a name known only at run time.
+type RecognizeServices = Record<string, RecognizeService>;
+
+// The drag handle's props, which the page spreads in, go to the handle.
+interface ServiceItemProps extends Partial<DraggableProvidedDragHandleProps> {
+    serviceInstanceKey: string;
+    pluginList: Record<string, PluginConfigInfo>;
+    deleteServiceInstance: (instanceKey: string) => void;
+    setCurrentConfigKey: (instanceKey: string) => void;
+    onConfigOpen: () => void;
+}
+
+export default function ServiceItem(props: ServiceItemProps) {
     const { serviceInstanceKey, pluginList, deleteServiceInstance, setCurrentConfigKey, onConfigOpen, ...drag } = props;
-
     const { t } = useTranslation();
 
-    const [serviceInstanceConfig, setServiceInstanceConfig] = useConfig(serviceInstanceKey, {});
+    const [serviceInstanceConfig, setServiceInstanceConfig] = useConfig<ServiceConfig>(serviceInstanceKey, {});
 
     const serviceSourceType = getServiceSouceType(serviceInstanceKey);
     const serviceName = getServiceName(serviceInstanceKey);
@@ -41,14 +55,18 @@ export default function ServiceItem(props) {
                     {serviceSourceType === ServiceSourceType.BUILDIN && (
                         <>
                             <img
-                                src={`${builtinServices[serviceName].info.icon}`}
+                                src={
+                                    serviceName === 'system'
+                                        ? `logo/${osType}.svg`
+                                        : (builtinServices as RecognizeServices)[serviceName].info.icon
+                                }
                                 className='h-[24px] w-[24px] my-auto'
                                 draggable={false}
                             />
                             <Spacer x={2} />
                             <h2 className='my-auto'>
                                 {serviceInstanceConfig[INSTANCE_NAME_CONFIG_KEY] ||
-                                    t(`services.collection.${serviceName}.title`)}
+                                    t(`services.recognize.${serviceName}.title`)}
                             </h2>
                         </>
                     )}
@@ -60,10 +78,7 @@ export default function ServiceItem(props) {
                                 draggable={false}
                             />
                             <Spacer x={2} />
-                            <h2 className='my-auto'>
-                                {serviceInstanceConfig[INSTANCE_NAME_CONFIG_KEY] ||
-                                    `${pluginList[serviceName].display} [${t('common.plugin')}]`}
-                            </h2>
+                            <h2 className='my-auto'>{`${serviceInstanceConfig[INSTANCE_NAME_CONFIG_KEY] || pluginList[serviceName].display} [${t('common.plugin')}]`}</h2>
                         </>
                     )}
                 </div>

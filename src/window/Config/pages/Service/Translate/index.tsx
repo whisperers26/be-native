@@ -11,8 +11,14 @@ import { useConfig, deleteKey } from '../../../../../hooks';
 import ServiceItem from './ServiceItem';
 import SelectModal from './SelectModal';
 import ConfigModal from './ConfigModal';
+import type { DropResult } from 'react-beautiful-dnd';
+import type { PluginConfigInfo } from '../../../../../types/service';
 
-export default function Recognize(props) {
+interface TranslateProps {
+    pluginList: Record<string, PluginConfigInfo>;
+}
+
+export default function Translate(props: TranslateProps) {
     const { pluginList } = props;
     const {
         isOpen: isSelectPluginOpen,
@@ -21,43 +27,50 @@ export default function Recognize(props) {
     } = useDisclosure();
     const { isOpen: isSelectOpen, onOpen: onSelectOpen, onOpenChange: onSelectOpenChange } = useDisclosure();
     const { isOpen: isConfigOpen, onOpen: onConfigOpen, onOpenChange: onConfigOpenChange } = useDisclosure();
-    const [currentConfigKey, setCurrentConfigKey] = useState('system');
+    const [currentConfigKey, setCurrentConfigKey] = useState('deepl');
     // now it's service instance list
-    const [recognizeServiceInstanceList, setRecognizeServiceInstanceList] = useConfig('recognize_service_list', [
-        'system',
-        'tesseract',
+    const [translateServiceInstanceList, setTranslateServiceInstanceList] = useConfig('translate_service_list', [
+        'deepl',
+        'bing',
+        'lingva',
+        'yandex',
+        'google',
+        'ecdict',
     ]);
 
     const { t } = useTranslation();
     const toastStyle = useToastStyle();
 
-    const reorder = (list, startIndex, endIndex) => {
+    const reorder = (list: string[], startIndex: number, endIndex: number) => {
         const result = Array.from(list);
         const [removed] = result.splice(startIndex, 1);
         result.splice(endIndex, 0, removed);
         return result;
     };
-    const onDragEnd = async (result) => {
+    // The list is null until the settings have been read. The three functions below run on a drag or a press on a
+    // card that is drawn from the list, or on a press in a dialog that opens after the page has loaded, so they take
+    // the list with `!`.
+    const onDragEnd = async (result: DropResult) => {
         if (!result.destination) return;
-        const items = reorder(recognizeServiceInstanceList, result.source.index, result.destination.index);
-        setRecognizeServiceInstanceList(items);
+        const items = reorder(translateServiceInstanceList!, result.source.index, result.destination.index);
+        setTranslateServiceInstanceList(items);
     };
 
-    const deleteServiceInstance = (instanceKey) => {
-        if (recognizeServiceInstanceList.length === 1) {
+    const deleteServiceInstance = (instanceKey: string) => {
+        if (translateServiceInstanceList!.length === 1) {
             toast.error(t('config.service.least'), { style: toastStyle });
             return;
         } else {
-            setRecognizeServiceInstanceList(recognizeServiceInstanceList.filter((x) => x !== instanceKey));
+            setTranslateServiceInstanceList(translateServiceInstanceList!.filter((x) => x !== instanceKey));
             deleteKey(instanceKey);
         }
     };
-    const updateServiceInstanceList = (instanceKey) => {
-        if (recognizeServiceInstanceList.includes(instanceKey)) {
+    const updateServiceInstanceList = (instanceKey: string) => {
+        if (translateServiceInstanceList!.includes(instanceKey)) {
             return;
         } else {
-            const newList = [...recognizeServiceInstanceList, instanceKey];
-            setRecognizeServiceInstanceList(newList);
+            const newList = [...translateServiceInstanceList!, instanceKey];
+            setTranslateServiceInstanceList(newList);
         }
     };
 
@@ -80,8 +93,8 @@ export default function Recognize(props) {
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
                             >
-                                {recognizeServiceInstanceList !== null &&
-                                    recognizeServiceInstanceList.map((x, i) => {
+                                {translateServiceInstanceList !== null &&
+                                    translateServiceInstanceList.map((x, i) => {
                                         return (
                                             <Draggable
                                                 key={x}
@@ -96,8 +109,8 @@ export default function Recognize(props) {
                                                         >
                                                             <ServiceItem
                                                                 {...provided.dragHandleProps}
-                                                                serviceInstanceKey={x}
                                                                 key={x}
+                                                                serviceInstanceKey={x}
                                                                 pluginList={pluginList}
                                                                 deleteServiceInstance={deleteServiceInstance}
                                                                 setCurrentConfigKey={setCurrentConfigKey}
@@ -136,7 +149,7 @@ export default function Recognize(props) {
                 onOpenChange={onSelectPluginOpenChange}
                 setCurrentConfigKey={setCurrentConfigKey}
                 onConfigOpen={onConfigOpen}
-                pluginType='recognize'
+                pluginType='translate'
                 pluginList={pluginList}
                 deleteService={deleteServiceInstance}
             />
@@ -148,8 +161,8 @@ export default function Recognize(props) {
             />
             <ConfigModal
                 serviceInstanceKey={currentConfigKey}
-                isOpen={isConfigOpen}
                 pluginList={pluginList}
+                isOpen={isConfigOpen}
                 onOpenChange={onConfigOpenChange}
                 updateServiceInstanceList={updateServiceInstanceList}
             />

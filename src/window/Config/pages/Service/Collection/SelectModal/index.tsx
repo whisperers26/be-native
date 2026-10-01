@@ -3,9 +3,20 @@ import { useTranslation } from 'react-i18next';
 import React from 'react';
 
 import { createServiceInstanceKey } from '../../../../../../utils/service_instance';
-import * as builtinServices from '../../../../../../services/tts';
+import * as builtinServices from '../../../../../../services/collection';
+import type { CollectionService } from '../../../../../../types/service';
 
-export default function SelectModal(props) {
+// The registry is looked up by a name known only at run time.
+type CollectionServices = Record<string, CollectionService>;
+
+interface SelectModalProps {
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    setCurrentConfigKey: (instanceKey: string) => void;
+    onConfigOpen: () => void;
+}
+
+export default function SelectModal(props: SelectModalProps) {
     const { isOpen, onOpenChange, setCurrentConfigKey, onConfigOpen } = props;
     const { t } = useTranslation();
 
@@ -31,13 +42,13 @@ export default function SelectModal(props) {
                                             }}
                                             startContent={
                                                 <img
-                                                    src={builtinServices[x].info.icon}
+                                                    src={(builtinServices as CollectionServices)[x].info.icon}
                                                     className='h-[24px] w-[24px] my-auto'
                                                 />
                                             }
                                         >
                                             <div className='w-full'>
-                                                {t(`services.tts.${builtinServices[x].info.name}.title`)}
+                                                {t(`services.collection.${(builtinServices as CollectionServices)[x].info.name}.title`)}
                                             </div>
                                         </Button>
                                     </div>

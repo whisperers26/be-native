@@ -1,16 +1,24 @@
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { Card, Spacer, Button, useDisclosure } from '@nextui-org/react';
+import toast, { Toaster } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 
+import { useToastStyle } from '../../../../../hooks';
 import SelectPluginModal from '../SelectPluginModal';
 import { osType } from '../../../../../utils/env';
 import { useConfig, deleteKey } from '../../../../../hooks';
 import ServiceItem from './ServiceItem';
 import SelectModal from './SelectModal';
 import ConfigModal from './ConfigModal';
+import type { DropResult } from 'react-beautiful-dnd';
+import type { PluginConfigInfo } from '../../../../../types/service';
 
-export default function Collection(props) {
+interface TtsProps {
+    pluginList: Record<string, PluginConfigInfo>;
+}
+
+export default function Tts(props: TtsProps) {
     const { pluginList } = props;
     const {
         isOpen: isSelectPluginOpen,
@@ -19,39 +27,49 @@ export default function Collection(props) {
     } = useDisclosure();
     const { isOpen: isSelectOpen, onOpen: onSelectOpen, onOpenChange: onSelectOpenChange } = useDisclosure();
     const { isOpen: isConfigOpen, onOpen: onConfigOpen, onOpenChange: onConfigOpenChange } = useDisclosure();
-    const [currentConfigKey, setCurrentConfigKey] = useState('anki');
+    const [currentConfigKey, setCurrentConfigKey] = useState('lingva_tts');
     // now it's service instance list
-    const [collectionServiceInstanceList, setCollectionServiceInstanceList] = useConfig('collection_service_list', []);
+    const [ttsServiceInstanceList, setTtsServiceInstanceList] = useConfig('tts_service_list', ['lingva_tts']);
 
     const { t } = useTranslation();
+    const toastStyle = useToastStyle();
 
-    const reorder = (list, startIndex, endIndex) => {
+    const reorder = (list: string[], startIndex: number, endIndex: number) => {
         const result = Array.from(list);
         const [removed] = result.splice(startIndex, 1);
         result.splice(endIndex, 0, removed);
         return result;
     };
-    const onDragEnd = async (result) => {
+    // The list is null until the settings have been read. The three functions below run on a drag or a press on a
+    // card that is drawn from the list, or on a press in a dialog that opens after the page has loaded, so they take
+    // the list with `!`.
+    const onDragEnd = async (result: DropResult) => {
         if (!result.destination) return;
-        const items = reorder(collectionServiceInstanceList, result.source.index, result.destination.index);
-        setCollectionServiceInstanceList(items);
+        const items = reorder(ttsServiceInstanceList!, result.source.index, result.destination.index);
+        setTtsServiceInstanceList(items);
     };
 
-    const deleteServiceInstance = (instanceKey) => {
-        setCollectionServiceInstanceList(collectionServiceInstanceList.filter((x) => x !== instanceKey));
-        deleteKey(instanceKey);
-    };
-    const updateServiceInstanceList = (instanceKey) => {
-        if (collectionServiceInstanceList.includes(instanceKey)) {
+    const deleteServiceInstance = (instanceKey: string) => {
+        if (ttsServiceInstanceList!.length === 1) {
+            toast.error(t('config.service.least'), { style: toastStyle });
             return;
         } else {
-            const newList = [...collectionServiceInstanceList, instanceKey];
-            setCollectionServiceInstanceList(newList);
+            setTtsServiceInstanceList(ttsServiceInstanceList!.filter((x) => x !== instanceKey));
+            deleteKey(instanceKey);
+        }
+    };
+    const updateServiceInstanceList = (instanceKey: string) => {
+        if (ttsServiceInstanceList!.includes(instanceKey)) {
+            return;
+        } else {
+            const newList = [...ttsServiceInstanceList!, instanceKey];
+            setTtsServiceInstanceList(newList);
         }
     };
 
     return (
         <>
+            <Toaster />
             <Card
                 className={`${
                     osType === 'Linux' ? 'h-[calc(100vh-140px)]' : 'h-[calc(100vh-120px)]'
@@ -68,8 +86,8 @@ export default function Collection(props) {
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
                             >
-                                {collectionServiceInstanceList !== null &&
-                                    collectionServiceInstanceList.map((x, i) => {
+                                {ttsServiceInstanceList !== null &&
+                                    ttsServiceInstanceList.map((x, i) => {
                                         return (
                                             <Draggable
                                                 key={x}
@@ -124,7 +142,7 @@ export default function Collection(props) {
                 onOpenChange={onSelectPluginOpenChange}
                 setCurrentConfigKey={setCurrentConfigKey}
                 onConfigOpen={onConfigOpen}
-                pluginType='collection'
+                pluginType='tts'
                 pluginList={pluginList}
                 deleteService={deleteServiceInstance}
             />

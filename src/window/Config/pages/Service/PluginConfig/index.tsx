@@ -9,10 +9,18 @@ import { open } from '@tauri-apps/api/shell';
 import React from 'react';
 
 import { useConfig } from '../../../../../hooks';
+import type { PluginConfigInfo, ServiceConfig, ServiceConfigProps } from '../../../../../types/service';
 
-export function PluginConfig(props) {
+// ServiceConfigProps leaves name and pluginList optional, because the built-in forms do not read them. This form does,
+// and the settings dialog always passes them.
+interface PluginConfigProps extends ServiceConfigProps {
+    name: string;
+    pluginList: Record<string, PluginConfigInfo>;
+}
+
+export function PluginConfig(props: PluginConfigProps) {
     const { instanceKey, updateServiceList, onClose, name, pluginList } = props;
-    const [pluginConfig, setPluginConfig] = useConfig(instanceKey, {}, { sync: false });
+    const [pluginConfig, setPluginConfig] = useConfig<ServiceConfig>(instanceKey, {}, { sync: false });
     const { t } = useTranslation();
 
     return (
@@ -135,7 +143,9 @@ export function PluginConfig(props) {
                     fullWidth
                     color='primary'
                     onPress={() => {
-                        setPluginConfig(pluginConfig, true);
+                        // pluginConfig is null only until the settings have been read, just after the dialog opens;
+                        // Save is pressed after that.
+                        setPluginConfig(pluginConfig!, true);
                         updateServiceList(instanceKey);
                         onClose();
                     }}

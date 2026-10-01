@@ -5,8 +5,20 @@ import React from 'react';
 import * as builtinServices from '../../../../../../services/translate';
 import { PluginConfig } from '../../PluginConfig';
 import { ServiceSourceType, getServiceName, getServiceSouceType, whetherPluginService } from '../../../../../../utils/service_instance';
+import type { PluginConfigInfo, TranslateService } from '../../../../../../types/service';
 
-export default function ConfigModal(props) {
+// The registry is looked up by a name known only at run time.
+type TranslateServices = Record<string, TranslateService>;
+
+interface ConfigModalProps {
+    serviceInstanceKey: string;
+    pluginList: Record<string, PluginConfigInfo>;
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    updateServiceInstanceList: (instanceKey: string) => void;
+}
+
+export default function ConfigModal(props: ConfigModalProps) {
     const { serviceInstanceKey, pluginList, isOpen, onOpenChange, updateServiceInstanceList } = props;
 
     const serviceSourceType = getServiceSouceType(serviceInstanceKey)
@@ -14,7 +26,7 @@ export default function ConfigModal(props) {
     const serviceName = getServiceName(serviceInstanceKey)
 
     const { t } = useTranslation();
-    const ConfigComponent = pluginServiceFlag ? PluginConfig : builtinServices[serviceName].Config;
+    const ConfigComponent = pluginServiceFlag ? PluginConfig : (builtinServices as TranslateServices)[serviceName].Config;
 
     return pluginServiceFlag && !(serviceName in pluginList) ? (
         <></>
@@ -31,7 +43,7 @@ export default function ConfigModal(props) {
                             {serviceSourceType === ServiceSourceType.BUILDIN && (
                                 <>
                                     <img
-                                        src={builtinServices[serviceName].info.icon}
+                                        src={(builtinServices as TranslateServices)[serviceName].info.icon}
                                         className='h-[24px] w-[24px] my-auto'
                                         draggable={false}
                                     />

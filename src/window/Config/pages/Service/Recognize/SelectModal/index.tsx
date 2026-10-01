@@ -5,8 +5,19 @@ import React from 'react';
 import { createServiceInstanceKey } from '../../../../../../utils/service_instance';
 import * as builtinServices from '../../../../../../services/recognize';
 import { osType } from '../../../../../../utils/env';
+import type { RecognizeService } from '../../../../../../types/service';
 
-export default function SelectModal(props) {
+// The registry is looked up by a name known only at run time.
+type RecognizeServices = Record<string, RecognizeService>;
+
+interface SelectModalProps {
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    setCurrentConfigKey: (instanceKey: string) => void;
+    onConfigOpen: () => void;
+}
+
+export default function SelectModal(props: SelectModalProps) {
     const { isOpen, onOpenChange, setCurrentConfigKey, onConfigOpen } = props;
     const { t } = useTranslation();
 
@@ -35,14 +46,14 @@ export default function SelectModal(props) {
                                                     src={
                                                         x === 'system'
                                                             ? `logo/${osType}.svg`
-                                                            : builtinServices[x].info.icon
+                                                            : (builtinServices as RecognizeServices)[x].info.icon
                                                     }
                                                     className='h-[24px] w-[24px] my-auto'
                                                 />
                                             }
                                         >
                                             <div className='w-full'>
-                                                {t(`services.recognize.${builtinServices[x].info.name}.title`)}
+                                                {t(`services.recognize.${(builtinServices as RecognizeServices)[x].info.name}.title`)}
                                             </div>
                                         </Button>
                                     </div>

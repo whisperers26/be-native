@@ -1,5 +1,4 @@
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Spacer } from '@nextui-org/react';
-
 import { useTranslation } from 'react-i18next';
 import React from 'react';
 
@@ -9,19 +8,29 @@ import {
     getServiceSouceType,
     whetherPluginService,
 } from '../../../../../../utils/service_instance';
-import * as builtinServices from '../../../../../../services/recognize';
-import { osType } from '../../../../../../utils/env';
+import * as builtinServices from '../../../../../../services/tts';
 import { PluginConfig } from '../../PluginConfig';
+import type { PluginConfigInfo, TtsService } from '../../../../../../types/service';
 
-export default function ConfigModal(props) {
+// The registry is looked up by a name known only at run time.
+type TtsServices = Record<string, TtsService>;
+
+interface ConfigModalProps {
+    serviceInstanceKey: string;
+    pluginList: Record<string, PluginConfigInfo>;
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    updateServiceInstanceList: (instanceKey: string) => void;
+}
+
+export default function ConfigModal(props: ConfigModalProps) {
     const { serviceInstanceKey, pluginList, isOpen, onOpenChange, updateServiceInstanceList } = props;
 
     const serviceSourceType = getServiceSouceType(serviceInstanceKey);
     const pluginServiceFlag = whetherPluginService(serviceInstanceKey);
     const serviceName = getServiceName(serviceInstanceKey);
-
     const { t } = useTranslation();
-    const ConfigComponent = pluginServiceFlag ? PluginConfig : builtinServices[serviceName].Config;
+    const ConfigComponent = pluginServiceFlag ? PluginConfig : (builtinServices as TtsServices)[serviceName].Config;
 
     return pluginServiceFlag && !(serviceName in pluginList) ? (
         <></>
@@ -38,16 +47,12 @@ export default function ConfigModal(props) {
                             {serviceSourceType === ServiceSourceType.BUILDIN && (
                                 <>
                                     <img
-                                        src={
-                                            serviceName === 'system'
-                                                ? `logo/${osType}.svg`
-                                                : builtinServices[serviceName].info.icon
-                                        }
+                                        src={(builtinServices as TtsServices)[serviceName].info.icon}
                                         className='h-[24px] w-[24px] my-auto'
                                         draggable={false}
                                     />
                                     <Spacer x={2} />
-                                    {t(`services.recognize.${serviceName}.title`)}
+                                    {t(`services.tts.${serviceName}.title`)}
                                 </>
                             )}
                             {pluginServiceFlag && (
@@ -67,7 +72,7 @@ export default function ConfigModal(props) {
                             <ConfigComponent
                                 name={serviceName}
                                 instanceKey={serviceInstanceKey}
-                                pluginType='recognize'
+                                pluginType='translate'
                                 pluginList={pluginList}
                                 updateServiceList={updateServiceInstanceList}
                                 onClose={onClose}
