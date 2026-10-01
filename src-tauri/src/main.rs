@@ -38,6 +38,7 @@ use updater::check_update;
 use window::config_window;
 use window::cursor_position;
 use window::fit_translate_window;
+use window::translate_window_waiting;
 use window::focus_window;
 use window::show_window;
 use window::test_mode;
@@ -161,6 +162,7 @@ fn main() {
             show_window,
             focus_window,
             fit_translate_window,
+            translate_window_waiting,
             test_mode,
             lang_detect,
             agent_cli_run,

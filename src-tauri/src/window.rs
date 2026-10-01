@@ -299,9 +299,16 @@ const TRANSLATE_AUTO_SIZE: (i64, i64) = (420, 240);
 static TRANSLATE_PLACED: std::sync::Mutex<Option<(Rect, (i32, i32))>> =
     std::sync::Mutex::new(None);
 
+// The size the Translate window opens at while its text is recognized and translated, in logical
+// pixels: room for a round progress indicator. The window asks for its real size, through
+// `fit_translate_window`, once it has something to show.
+const TRANSLATE_WAITING_SIZE: (i64, i64) = (88, 88);
+// Whether the Translate window is still at its waiting size, without a shadow
+static TRANSLATE_WAITING: AtomicBool = AtomicBool::new(false);
+
 // `region` is what the text came from, if it came from a place on the screen. The `smart` position
-// puts the window beside it.
-fn translate_window(region: Option<Rect>) -> Window {
+// puts the window beside it. `waiting` opens the window at its waiting size.
+fn translate_window(region: Option<Rect>, waiting: bool) -> Window {
     // Mouse physical position
     let mut mouse_position = placement_point();
     let (window, exists) = build_window("translate", "Translate");
@@ -315,7 +322,13 @@ fn translate_window(region: Option<Rect>) -> Window {
         Some(v) => v.as_bool().unwrap_or(false),
         None => false,
     };
-    let (width, height) = if remember_size {
+    TRANSLATE_WAITING.store(waiting, Ordering::SeqCst);
+    let (width, height) = if waiting {
+        // A square shadow around a round indicator would show the window it sits in
+        #[cfg(not(target_os = "linux"))]
+        set_shadow(&window, false).unwrap_or_default();
+        TRANSLATE_WAITING_SIZE
+    } else if remember_size {
         let width = match get("translate_window_width") {
             Some(v) => v.as_i64().unwrap(),
             None => {
@@ -425,6 +438,12 @@ fn translate_window(region: Option<Rect>) -> Window {
     window
 }
 
+// Whether the Translate window was opened at its waiting size and has not asked for its size yet
+#[tauri::command]
+pub fn translate_window_waiting() -> bool {
+    TRANSLATE_WAITING.load(Ordering::SeqCst)
+}
+
 // How long the Translate window takes to get to a new size and place
 const FIT_DURATION: std::time::Duration = std::time::Duration::from_millis(160);
 // Counts the fits asked for: one that is under way stops when a newer one starts
@@ -485,6 +504,10 @@ pub fn fit_translate_window(window: Window, width: f64, height: f64) {
     let height = (height * scale).ceil() as i32;
     let area = translate_area(&monitor);
 
+    if TRANSLATE_WAITING.swap(false, Ordering::SeqCst) {
+        #[cfg(not(target_os = "linux"))]
+        set_shadow(&window, true).unwrap_or_default();
+    }
     let fit = FIT_COUNT.fetch_add(1, Ordering::SeqCst) + 1;
     // On its way to where it was placed, the window is not there yet, but it has not been moved
     let on_its_way = FIT_UNDER_WAY.swap(true, Ordering::SeqCst);
@@ -549,7 +572,8 @@ pub fn selection_translate() {
         state.0.lock().unwrap().replace_range(.., &text);
     }
 
-    let window = translate_window(None);
+    // With nothing selected there is nothing to wait for
+    let window = translate_window(None, !text.trim().is_empty());
     window.emit("new_text", text).unwrap();
 }
 
@@ -562,7 +586,7 @@ pub fn input_translate() {
         .lock()
         .unwrap()
         .replace_range(.., "[INPUT_TRANSLATE]");
-    let window = translate_window(None);
+    let window = translate_window(None, false);
     let position_type = match get("translate_window_position") {
         Some(v) => v.as_str().unwrap().to_string(),
         None => "smart".to_string(),
@@ -579,7 +603,7 @@ pub fn text_translate(text: String) {
     // Clear State
     let state: tauri::State<StringWrapper> = app_handle.state();
     state.0.lock().unwrap().replace_range(.., &text);
-    let window = translate_window(None);
+    let window = translate_window(None, !text.trim().is_empty());
     window.emit("new_text", text).unwrap();
 }
 
@@ -593,7 +617,7 @@ pub fn image_translate() {
         .replace_range(.., "[IMAGE_TRANSLATE]");
     // In test mode the window stays on the secondary monitor, wherever the region was
     let region = crate::screenshot::take_region().filter(|_| !TEST_MODE.load(Ordering::Relaxed));
-    let window = translate_window(region);
+    let window = translate_window(region, true);
     window.emit("new_text", "[IMAGE_TRANSLATE]").unwrap();
 }
 
