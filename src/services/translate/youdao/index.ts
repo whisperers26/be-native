@@ -1,8 +1,30 @@
 import { fetch } from '@tauri-apps/api/http';
 import CryptoJS from 'crypto-js';
 import { nanoid } from 'nanoid';
+import type { DictionaryResult, TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+interface YoudaoResponse {
+    isWord?: boolean;
+    // present when isWord is true
+    basic: {
+        'uk-phonetic'?: string;
+        'uk-speech': string;
+        'us-phonetic'?: string;
+        'us-speech': string;
+        phonetic?: string;
+        explains: string[];
+        wfs?: { wf: { name: string; value: string } }[];
+        exam_type?: string[];
+    };
+    translation?: string[];
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     text = text.trim();
     const { config } = options;
 
@@ -14,7 +36,7 @@ export async function translate(text, from, to, options = {}) {
     const str1 = appkey + truncate(text) + salt + curtime + key;
     const sign = CryptoJS.SHA256(str1).toString(CryptoJS.enc.Hex);
 
-    let res = await fetch(url, {
+    let res = await fetch<YoudaoResponse>(url, {
         method: 'GET',
         query: {
             q: text,
@@ -30,11 +52,11 @@ export async function translate(text, from, to, options = {}) {
     if (res.ok) {
         let result = res.data;
         if (result['isWord']) {
-            let target = { pronunciations: [], explanations: [], associations: [], sentence: [] };
+            let target: DictionaryResult = { pronunciations: [], explanations: [], associations: [], sentence: [] };
             let basic = result['basic'];
 
             if (basic['uk-phonetic']) {
-                let speech = await fetch(basic['uk-speech'], { method: 'GET', responseType: 3 });
+                let speech = await fetch<number[]>(basic['uk-speech'], { method: 'GET', responseType: 3 });
                 target['pronunciations'].push({
                     region: 'UK',
                     symbol: basic['uk-phonetic'],
@@ -42,7 +64,7 @@ export async function translate(text, from, to, options = {}) {
                 });
             }
             if (basic['us-phonetic']) {
-                let speech = await fetch(basic['us-speech'], { method: 'GET', responseType: 3 });
+                let speech = await fetch<number[]>(basic['us-speech'], { method: 'GET', responseType: 3 });
                 target['pronunciations'].push({
                     region: 'US',
                     symbol: basic['us-phonetic'],
@@ -93,7 +115,7 @@ export async function translate(text, from, to, options = {}) {
     }
 }
 
-function truncate(q) {
+function truncate(q: string) {
     var len = q.length;
     if (len <= 20) return q;
     return q.substring(0, 10) + len + q.substring(len - 10, len);
