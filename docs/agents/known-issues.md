@@ -64,6 +64,7 @@ Bugs in code inherited from upstream, not fixed yet. Each one was confirmed by r
 
 ## Rust
 
+- **Windows are the wrong size on a monitor with another scale.** A window is created on the primary monitor and then moved to the monitor it belongs on. `translate_window` and `recognize_window` size it in physical pixels for the target monitor's scale, and the move then rescales it again by the ratio of the two scales and adds the size of a title bar and borders the window does not have. Seen on Windows 11 on 2026-10-01 (primary at 200%, secondary at 150%): the Translate window comes out at about three quarters of its size, with its controls cut off. With `translate_remember_window_size` on, that size is saved, so the window shrinks further each time it opens there (test mode does not save it).
 - **A wrongly typed setting panics.** Rust reads settings with `as_bool()`, `as_i64()` or `as_str()` followed by `unwrap()`; a value of another type panics, at launch if it is read during setup. Example: with the proxy enabled and a host set, an empty or non-numeric `proxy_port` (the settings page's default is `''`) crashes the app at launch.
 - **Offline detection never returns Ukrainian.** The `lang_detect` command builds its detector without Ukrainian (only the warm-up includes it), so `uk` is never returned.
 - **One bad HTTP request stops the API.** A non-UTF-8 request body, or a failed response, panics the server thread; the HTTP API stays down until restart.
