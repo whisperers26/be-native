@@ -69,6 +69,24 @@ describe('Translate window', () => {
         expect(fakeTauri.store.has('translate_window_position_x')).toBe(false);
     });
 
+    it('saves the size in logical pixels, rounded, by the scale of the window', async () => {
+        fakeTauri.store.set('translate_remember_window_size', true);
+        fakeTauri.store.set('translate_detect_engine', 'local');
+        // 350 x 528 logical pixels at 125%: Windows rounds 437.5 up
+        fakeTauri.window = { size: { width: 438, height: 660 }, scaleFactor: 1.25 };
+        render(
+            <NextUIProvider>
+                <Translate />
+            </NextUIProvider>
+        );
+        await screen.findByText('Google');
+
+        fakeTauri.emit('tauri://resize', null);
+
+        await vi.waitFor(() => expect(fakeTauri.store.get('translate_window_width')).toBe(350));
+        expect(fakeTauri.store.get('translate_window_height')).toBe(528);
+    });
+
     it('shows text that arrives from Rust in the source box', async () => {
         fakeTauri.command('get_text', () => 'hello world');
         fakeTauri.command('lang_detect', () => 'en');
