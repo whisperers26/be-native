@@ -4,13 +4,17 @@ import { useGetState } from './useGetState';
 import { store } from '../utils/store';
 import { debounce } from '../utils';
 
-export const useConfig = (key, defaultValue, options = {}) => {
-    const [property, setPropertyState, getProperty] = useGetState(null);
+export const useConfig = <T>(
+    key: string,
+    defaultValue: T,
+    options: { sync?: boolean } = {}
+): [T | null, (value: T, forceSync?: boolean) => void, () => T | null] => {
+    const [property, setPropertyState, getProperty] = useGetState<T | null>(null);
     const { sync = true } = options;
 
     // 同步到Store (State -> Store)
     const syncToStore = useCallback(
-        debounce((v) => {
+        debounce((v: T) => {
             store.set(key, v);
             store.save();
             let eventKey = key.replaceAll('.', '_').replaceAll('@', ':');
@@ -20,11 +24,11 @@ export const useConfig = (key, defaultValue, options = {}) => {
     );
 
     // 同步到State (Store -> State)
-    const syncToState = useCallback((v) => {
+    const syncToState = useCallback((v: T | null) => {
         if (v !== null) {
             setPropertyState(v);
         } else {
-            store.get(key).then((v) => {
+            store.get<T>(key).then((v) => {
                 if (v === null) {
                     setPropertyState(defaultValue);
                     store.set(key, defaultValue);
@@ -36,7 +40,7 @@ export const useConfig = (key, defaultValue, options = {}) => {
         }
     }, []);
 
-    const setProperty = useCallback((v, forceSync = false) => {
+    const setProperty = useCallback((v: T, forceSync = false) => {
         setPropertyState(v);
         const isSync = forceSync || sync;
         isSync && syncToStore(v);
@@ -46,7 +50,7 @@ export const useConfig = (key, defaultValue, options = {}) => {
     useEffect(() => {
         syncToState(null);
         const eventKey = key.replaceAll('.', '_').replaceAll('@', ':');
-        const unlisten = listen(`${eventKey}_changed`, (e) => {
+        const unlisten = listen<T>(`${eventKey}_changed`, (e) => {
             syncToState(e.payload);
         });
         return () => {
@@ -59,7 +63,8 @@ export const useConfig = (key, defaultValue, options = {}) => {
     return [property, setProperty, getProperty];
 };
 
-export const deleteKey = (key) => {
+export const deleteKey = (key: string) => {
+    // @ts-expect-error store.has() returns a promise that is never awaited, so the condition is always true
     if (store.has(key)) {
         store.delete(key);
         store.save();
