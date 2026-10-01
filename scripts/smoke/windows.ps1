@@ -3,7 +3,7 @@
     Window helpers for the real-app smoke test (scripts/smoke.ts). Windows only.
 
 .DESCRIPTION
-    -Action list     JSON array of top-level windows owned by processes named "pot":
+    -Action list     JSON array of top-level windows owned by processes named "Be Native":
                      handle, title, visible, processPath.
     -Action capture  Saves the window's (-Handle) own pixels to -Path (PNG). The window draws itself, so
                      other windows covering it do not show, and it is not brought to the front.
@@ -53,7 +53,7 @@ public static class SmokeWin32 {
 
 function Get-PotWindows {
     $pots = @{}
-    foreach ($process in Get-Process -Name pot -ErrorAction SilentlyContinue) {
+    foreach ($process in Get-Process -Name 'Be Native' -ErrorAction SilentlyContinue) {
         $pots[[uint32]$process.Id] = $process.Path
     }
     $windows = New-Object System.Collections.ArrayList
