@@ -86,7 +86,10 @@ export function fitSize(measured: Measured, limits: Limits, fromLeastWidth = fal
         return { width, height: Math.round(Math.min(height, limits.maxHeight)) };
     }
     const least = Math.min(measured.sourceHeight, SOURCE_LINES * lineHeight + SOURCE_PADDING);
-    const sourceHeight = Math.max(least, measured.sourceHeight - Math.max(0, height - limits.maxHeight));
+    const room = measured.sourceHeight - Math.max(0, height - limits.maxHeight);
+    // Whole lines, so that the last one showing is not cut through
+    const lineRoom = SOURCE_PADDING + Math.floor((room - SOURCE_PADDING) / lineHeight) * lineHeight;
+    const sourceHeight = room >= measured.sourceHeight ? measured.sourceHeight : Math.max(least, lineRoom);
     height -= measured.sourceHeight - sourceHeight;
     return {
         width,

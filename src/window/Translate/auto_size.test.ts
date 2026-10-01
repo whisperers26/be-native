@@ -42,8 +42,8 @@ describe('the size the Translate window gives itself', () => {
             LIMITS
         );
 
-        // 350 px too tall, and the source text gives them all up
-        expect(size).toEqual({ width: 900, height: 720, sourceHeight: 142 });
+        // 350 px too tall: the source text gives them up, and a little more to end on a whole line
+        expect(size).toEqual({ width: 900, height: 710, sourceHeight: 132 });
     });
 
     it('leaves the source text three lines, and then the window scrolls', () => {
