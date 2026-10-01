@@ -1,8 +1,18 @@
 import { fetch } from '@tauri-apps/api/http';
 import { nanoid } from 'nanoid';
 import md5 from 'md5';
+import type { TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+interface BaiduResponse {
+    trans_result?: { dst: string }[];
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     const { config } = options;
 
     const { appid, secret } = config;
@@ -17,7 +27,8 @@ export async function translate(text, from, to, options = {}) {
     const str = appid + text + salt + secret;
     const sign = md5(str);
 
-    let res = await fetch(url, {
+    // @ts-expect-error Tauri's FetchOptions requires a method, but fetch defaults to GET without one
+    let res = await fetch<BaiduResponse>(url, {
         query: {
             q: text,
             from: from,
