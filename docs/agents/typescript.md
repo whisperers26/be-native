@@ -22,10 +22,12 @@ Two settings exist to keep the migration behaviour-free:
 - `strict` everywhere. `any` only for data whose shape the app does not control (HTTP responses, plugin code loaded with `eval`) and for gaps in third-party types; prefer a small local interface where the code reads only a few fields.
 - Type-only escape hatches are fine because they emit nothing: `as` (`options: TranslateOptions = {} as TranslateOptions`), the non-null `!` (`document.getElementById('root')!`), and `satisfies`.
 - `@ts-expect-error` needs a comment saying why. Do not put it inside an object literal: esbuild keeps a comment that stands before a property, so the output changes; use an `as` cast on the value there.
-- Keep every line break where it was. esbuild keeps the layout of call arguments, object and array literals and import lists, so re-wrapping them, by hand or with a formatter, changes the output.
+- Keep the line breaks of call arguments, object and array literals and import lists: esbuild keeps their layout, so re-wrapping them, by hand or with a formatter, changes the output. A parameter list that grew too long with its types may be wrapped (esbuild prints parameters on one line); `pnpm check:transpile` shows any wrap that does change the output.
 - Declare class fields with `declare` (`declare voice: string;`). With `useDefineForClassFields`, a plain field declaration is emitted as a field set to `undefined`.
 - Type an HTTP reply with the `fetch` type argument (`fetch<DeepLResponse>(url, options)`), not with a cast on `res.data`.
-- Tauri's `fetch` types require `method`, but at run time it defaults to GET. Where the code leaves `method` out, leave it out and mark the call with `@ts-expect-error` and that reason: adding `method: 'GET'` changes the output.
+- Tauri's `fetch` types require `method` in the options, but at run time it defaults to GET. Where the code passes options without `method`, leave it out and mark the call with `@ts-expect-error` and that reason: adding `method: 'GET'` changes the output. A call without options (`fetch(url)`) needs nothing.
+- Give `useConfig` a type argument when its default does not show the stored type: an empty `[]` or `{}` (`useConfig<string[]>(key, [])`), or a value whose type changes once edited (anki's `port` is a number by default and a string after the user types one).
+- DOM calls that cannot tell the element type return a base type: `createElement('CANVAS')` gives an `HTMLElement` (TypeScript maps only lowercase tag names) and `querySelector('.x')` an `Element`. Use the type argument (`querySelector<HTMLElement>('.x')`) or an `as` cast.
 
 ## Proving a migration changed nothing
 
@@ -47,7 +49,7 @@ Every migration PR shows three things:
 | --- | --- | --- |
 | L0 | Toolchain, `check:transpile` | Done |
 | L1 | `src/utils`, `src/hooks`, `src/i18n`, `src/types` | Done |
-| L2 | `src/services` | In progress (translate services done) |
+| L2 | `src/services` | Done |
 | L3 | `src/components`, `src/window` | Pending |
 | L4 | `src/main`, `src/App`, `index.html`, Vite and Tailwind configs; `allowJs` off | Pending |
 

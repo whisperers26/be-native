@@ -19,15 +19,13 @@ import * as _geminipro from './geminipro';
 import * as _ollama from './ollama';
 import * as _ecdict from './ecdict';
 import * as _lingva from './lingva';
-import type { ServiceConfigComponent, ServiceInfo, TranslateOptions, TranslateResult } from '../../types/service';
+import type { ServiceModule, TranslateOptions, TranslateResult } from '../../types/service';
 
 // What every module here provides (docs/agents/services.md). `satisfies` checks it and emits nothing.
-interface TranslateService {
-    info: ServiceInfo;
+type TranslateService = ServiceModule<{
     Language: Record<string, string>;
-    Config: ServiceConfigComponent;
     translate: (text: string, from: string, to: string, options: TranslateOptions) => Promise<TranslateResult>;
-}
+}>;
 
 export const deepl = _deepl satisfies TranslateService;
 export const bing = _bing satisfies TranslateService;

@@ -29,6 +29,7 @@ Bugs in code inherited from upstream, not fixed yet. Each one was confirmed by r
 - **The DeepL API check uses a comma operator.** `(result.translations, result.translations[0])` only tests its second operand.
 - **Lingva TTS fails silently.** On an HTTP error it returns `undefined` instead of throwing.
 - **Anki errors are ignored.** The `error` field of AnkiConnect's replies is never checked.
+- **A failed audio download leaves a URL as the voice.** cambridge_dict replaces each pronunciation's audio URL with the downloaded bytes only when the request succeeds, so after a failure `voice` is still the URL (its test pins this). The Anki collection spreads `voice` into `String.fromCharCode`, so it sends one NUL character per character of the URL as the note's audio.
 - **QR code OCR can hang.** The image loader has no `onerror`, so an unreadable image never settles; an image with zero width or height never settles either.
 - **iflytek sends its authorization unencoded.** The iflytek and iflytek_intsig OCR services put the base64 `authorization` (which can contain `+`, `/` and `=`) into the query string as it is; only `date` is URL-encoded.
 - **baidu_img's settings check misses an absent key.** It tests `appid === ''`, so a config without `appid` at all passes the check and the request is signed with `undefined`.

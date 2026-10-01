@@ -48,3 +48,9 @@ export interface ServiceConfigProps {
 }
 
 export type ServiceConfigComponent = ComponentType<ServiceConfigProps>;
+
+/**
+ * What a built-in service module exports. `Members` adds what its kind needs: the main function, and
+ * `Language` for every kind but collection. Each registry checks its modules against it with `satisfies`.
+ */
+export type ServiceModule<Members> = { info: ServiceInfo; Config: ServiceConfigComponent } & Members;
