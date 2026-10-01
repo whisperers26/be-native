@@ -7,7 +7,7 @@ Built-in translation, OCR ("recognize"), text-to-speech and collection (word boo
 | Kind | Registry | Main function | Built-ins |
 | --- | --- | --- | --- |
 | translate | `src/services/translate/index` | `translate(text, from, to, options)` | 23 |
-| recognize | `src/services/recognize/index` | `recognize(base64, language, options)` | 15 |
+| recognize | `src/services/recognize/index` | `recognize(base64, language, options)` | 16 |
 | tts | `src/services/tts/index` | `tts(text, lang, options)` | 1 |
 | collection | `src/services/collection/index` | `collection(source, target, options)` | 2 |
 
@@ -46,7 +46,7 @@ The types live in `src/types/service.ts`: `ServiceModule` is what every module p
 
 The usual form calls `useConfig(instanceKey, { instanceName: t('services.<kind>.<name>.title'), ...defaults }, { sync: false })`. On submit it runs the service once with a canned input (translate: `'hello'` from `auto` to `zh_cn`); only if that succeeds does it save with `setConfig(config, true)`, call `updateServiceList(instanceKey)`, and `onClose()`.
 
-Services with no settings (bing, yandex, bing_dict, cambridge_dict, ecdict and lingva for translate; system, tesseract and qrcode for OCR) call `updateServiceList('<name>')` with the bare name, so each has at most one instance.
+Services with no settings (bing, yandex, bing_dict, cambridge_dict, ecdict and lingva for translate; system, tesseract, rapidocr and qrcode for OCR) call `updateServiceList('<name>')` with the bare name, so each has at most one instance.
 
 ## Instances
 
@@ -66,7 +66,7 @@ Services with no settings (bing, yandex, bing_dict, cambridge_dict, ecdict and l
 ## Unusual services
 
 - Not using HTTP at all: claude_code and codex (`invoke('agent_cli_run')`, see above).
-- Not using Tauri's `fetch`: chatglm (global `fetch`), openai and geminipro when streaming (`window.fetch`), ollama (the `ollama/browser` package), tesseract (`tesseract.js`, with its worker and core in `public/`), qrcode (canvas and `jsqr`), system OCR (`invoke('system_ocr')`).
+- Not using Tauri's `fetch`: chatglm (global `fetch`), openai and geminipro when streaming (`window.fetch`), ollama (the `ollama/browser` package), tesseract (`tesseract.js`, with its worker and core in `public/`), rapidocr (ONNX Runtime and models in `public/rapidocr/`, see below), qrcode (canvas and `jsqr`), system OCR (`invoke('system_ocr')`).
 - Reading the cut screenshot from disk instead of using the `base64` argument: baidu_img_ocr, simple_latex_ocr, and system OCR (in Rust).
 - Signing requests with the current time or random values: alibaba, baidu and baidu_field, tencent (translate and OCR), volcengine (translate and OCR), the three iflytek OCR services, youdao, chatglm (a JWT signed with `jose`), deepl's free endpoint.
 
@@ -82,6 +82,17 @@ Services with no settings (bing, yandex, bing_dict, cambridge_dict, ecdict and l
 - **Calling.** `runAgentCli(spec, prompt, setResult)` invokes `agent_cli_run` with a fresh id and listens for `agent_cli_stream` events `{ id, text }`, the text so far, which it passes to `setResult` with a `_` cursor. Errors (tool not found, not signed in, unknown model) reject with the tool's own message.
 - **The executable** is the `command` setting, or, when that is empty, `claude` or `codex` found on `PATH`, in `~/.local/bin`, in `%APPDATA%\npm` (Windows) or in `/usr/local/bin` and `/opt/homebrew/bin` (elsewhere).
 - Instance settings: `command`, `model`, `effort`, `systemPrompt`. Rust reads them from the store to start the waiting session, so a change to their names needs both sides.
+
+## RapidOCR
+
+`rapidocr` is offline OCR with the PP-OCRv5 mobile models, the ones RapidOCR ships, run in the window with ONNX Runtime's WebAssembly build through the `esearch-ocr` package. Nothing leaves the computer and nothing is downloaded at run time.
+
+- **Files.** Everything it loads is in `public/rapidocr/`, committed (about 35 MB) and served as it is: `ort.wasm.bundle.min.mjs` and `ort-wasm-simd-threaded.wasm` (copied from `node_modules/onnxruntime-web/dist/`, version 1.30.0, which is a dev dependency for its types and as the source of these two files), and `ppocr_v5_mobile_det.onnx`, `ppocr_v5_mobile_rec.onnx` and `ppocrv5_dict.txt` (from `ppocr_v5_mobile.zip` in release 4.0.0 of `xushengfeng/eSearch-OCR`). To update the runtime, bump the dev dependency and copy the two files again.
+- **Why the runtime is not bundled.** `src/services/recognize/rapidocr/runtime.ts` imports the `.mjs` at run time by its full URL. Bundling it would put it through the build's `safari11` target on macOS and Linux, and Vite's dev server refuses to serve a file from `public/` as a module when it is imported by path.
+- **One model, few languages.** The model reads Simplified and Traditional Chinese, English and Japanese at once, so `Language` has only `auto`, `zh_cn`, `zh_tw`, `en` and `ja`, and the language argument is ignored. Other languages need other recognition models, which are not bundled.
+- **Margin.** The image is drawn onto a canvas 16 px larger on each side, filled with the colour of its corner pixel, because text detection misses text that touches the image edge (a tight selection around one word). Enlarging small text as well was tried and dropped: it made the model lose the spaces between words.
+- **Output.** One line per line of text, in the library's reading order (columns, then paragraphs, then lines).
+- **Cost.** The engine (runtime plus models) is loaded once per window and kept. Measured on Windows through the silent OCR copy action, a small selection took about 1.2 s from the request to the text on the clipboard, including opening the hidden window and loading the engine. It runs on one thread: more need `SharedArrayBuffer`, which the app's windows do not have.
 
 ## External plugins
 
