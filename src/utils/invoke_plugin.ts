@@ -6,13 +6,13 @@ import { http } from "@tauri-apps/api";
 import CryptoJS from "crypto-js";
 import { osType } from "./env";
 
-export async function invoke_plugin(pluginType, pluginName) {
+export async function invoke_plugin(pluginType: string, pluginName: string) {
     let configDir = await appConfigDir();
     let cacheDir = await appCacheDir();
     let pluginDir = await join(configDir, "plugins", pluginType, pluginName);
     let entryFile = await join(pluginDir, "main.js");
     let script = await readTextFile(entryFile);
-    async function run(cmdName, args) {
+    async function run(cmdName: string, args: string[]) {
         return await invoke("run_binary", {
             pluginType,
             pluginName,
@@ -32,5 +32,5 @@ export async function invoke_plugin(pluginType, pluginName) {
         pluginDir, // String
         osType,// "Windows_NT", "Darwin", "Linux"
     }
-    return [eval(`${script} ${pluginType}`), utils];
+    return [eval(`${script} ${pluginType}`), utils] as [any, typeof utils];
 }
