@@ -59,9 +59,10 @@ export default function Progress(props: ProgressProps) {
                     className={`relative rounded-full bg-content1 shadow-md ${animated && 'translate-progress-breathe'}`}
                     style={{ width: DISC, height: DISC }}
                 >
-                    {/* Each arc is a layer of its own that turns as a whole. The compositor turns a layer without
-                        the page's thread, which is busy laying out the window while the indicator shows; an arc
-                        animated inside one picture stood still for as long as that took. */}
+                    {/* Each arc is a picture in a box of its own, and the box turns. The compositor turns a box
+                        without the page's thread, which recognition in the window (RapidOCR) keeps busy for as long
+                        as it takes. It does not do that for an svg element itself, let alone for an arc inside
+                        one: animated there, the ring stood still until the text was recognized. */}
                     <svg
                         className='absolute inset-0 text-default-200'
                         {...ring}
@@ -71,27 +72,31 @@ export default function Progress(props: ProgressProps) {
                             stroke='currentColor'
                         />
                     </svg>
-                    <svg
-                        className='absolute inset-0 text-secondary translate-progress-back'
-                        {...ring}
-                    >
-                        <circle
-                            {...circle}
-                            stroke='currentColor'
-                            strokeOpacity={0.45}
-                            strokeDasharray={`${ROUND * 0.16} ${ROUND * 0.84}`}
-                        />
-                    </svg>
-                    <svg
-                        className='absolute inset-0 text-primary translate-progress-arc'
-                        {...ring}
-                    >
-                        <circle
-                            {...circle}
-                            stroke='currentColor'
-                            strokeDasharray={`${ROUND * 0.3} ${ROUND * 0.7}`}
-                        />
-                    </svg>
+                    <div className='absolute inset-0 translate-progress-back'>
+                        <svg
+                            className='absolute inset-0 text-secondary'
+                            {...ring}
+                        >
+                            <circle
+                                {...circle}
+                                stroke='currentColor'
+                                strokeOpacity={0.45}
+                                strokeDasharray={`${ROUND * 0.16} ${ROUND * 0.84}`}
+                            />
+                        </svg>
+                    </div>
+                    <div className='absolute inset-0 translate-progress-arc'>
+                        <svg
+                            className='absolute inset-0 text-primary'
+                            {...ring}
+                        >
+                            <circle
+                                {...circle}
+                                stroke='currentColor'
+                                strokeDasharray={`${ROUND * 0.3} ${ROUND * 0.7}`}
+                            />
+                        </svg>
+                    </div>
                     {icon !== undefined && (
                         <img
                             // A new key makes a new element, which plays the entry animation: the icons take turns.
