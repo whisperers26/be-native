@@ -46,3 +46,4 @@ Before opening a PR, run `pnpm check:docs` and `pnpm build`.
 | --- | --- |
 | [git-workflow.md](docs/agents/git-workflow.md) | Branching, committing, opening or merging a PR |
 | [setup-and-run.md](docs/agents/setup-and-run.md) | Installing tools, running or building the app, finding its files |
+| [config-keys.md](docs/agents/config-keys.md) | Reading, adding or changing a setting |
