@@ -12,7 +12,7 @@ vi.hoisted(() => {
 import Page from './index';
 
 describe('Hotkey settings page', () => {
-    it('shows the four global shortcuts', async () => {
+    it('shows the five global shortcuts', async () => {
         render(
             <NextUIProvider>
                 <MemoryRouter>
@@ -25,6 +25,7 @@ describe('Hotkey settings page', () => {
         expect(await screen.findByText('Text Translation')).toBeInTheDocument();
         expect(await screen.findByText('Text Recognition')).toBeInTheDocument();
         expect(await screen.findByText('Screenshot Translation')).toBeInTheDocument();
+        expect(await screen.findByText('Silent Text Recognition (copy only)')).toBeInTheDocument();
         expect(fakeTauri.unhandled).toEqual([]);
     });
 });
