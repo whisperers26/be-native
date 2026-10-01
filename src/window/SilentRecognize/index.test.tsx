@@ -58,7 +58,7 @@ describe('SilentRecognize window', () => {
 
     it('uses the recognition language and the newline setting', async () => {
         fakeTauri.store.set('recognize_language', 'en');
-        fakeTauri.store.set('recognize_delete_newline', true);
+        fakeTauri.store.set('recognize_merge_lines', true);
         fakeTauri.command('get_base64', () => 'aW1hZ2U=');
         fakeTauri.command('system_ocr', () => 'trans-\nlated text\nhere');
         render(<SilentRecognize />);

@@ -24,7 +24,7 @@ async function recognize(): Promise<string> {
     const base64 = await invoke<string>('get_base64');
     const serviceInstanceList = (await store.get<string[]>('recognize_service_list')) ?? ['system', 'tesseract'];
     const language = (await store.get<string>('recognize_language')) ?? 'auto';
-    const deleteNewline = (await store.get<boolean>('recognize_delete_newline')) ?? false;
+    const mergeWrappedLines = (await store.get<boolean>('recognize_merge_lines')) ?? false;
     const instanceKey = serviceInstanceList[0];
     const config = (await store.get<ServiceConfig>(instanceKey)) ?? {};
     const serviceName = getServiceName(instanceKey);
@@ -44,7 +44,7 @@ async function recognize(): Promise<string> {
     }
 
     text = (text ?? '').trim();
-    if (deleteNewline) {
+    if (mergeWrappedLines) {
         text = mergeLines(text);
     }
     if (text === '') throw t('silent_recognize.no_text');

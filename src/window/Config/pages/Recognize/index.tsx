@@ -14,7 +14,7 @@ import { useConfig } from '../../../../hooks';
 
 export default function Recognize() {
     const [recognizeLanguage, setRecognizeLanguage] = useConfig('recognize_language', 'auto');
-    const [deleteNewline, setDeleteNewline] = useConfig('recognize_delete_newline', false);
+    const [mergeWrappedLines, setMergeWrappedLines] = useConfig('recognize_merge_lines', false);
     const [autoCopy, setAutoCopy] = useConfig('recognize_auto_copy', false);
     const [hideWindow, setHideWindow] = useConfig('recognize_hide_window', false);
     const [closeOnBlur, setCloseOnBlur] = useConfig('recognize_close_on_blur', false);
@@ -47,11 +47,11 @@ export default function Recognize() {
                 </div>
                 <div className='config-item'>
                     <h3 className='my-auto mx-0'>{t('config.recognize.delete_newline')}</h3>
-                    {deleteNewline !== null && (
+                    {mergeWrappedLines !== null && (
                         <Switch
-                            isSelected={deleteNewline}
+                            isSelected={mergeWrappedLines}
                             onValueChange={(v) => {
-                                setDeleteNewline(v);
+                                setMergeWrappedLines(v);
                             }}
                         />
                     )}

@@ -33,7 +33,7 @@ interface TextAreaProps {
 export default function TextArea(props: TextAreaProps) {
     const { serviceInstanceConfigMap } = props;
     const [autoCopy] = useConfig('recognize_auto_copy', false);
-    const [deleteNewline] = useConfig('recognize_delete_newline', false);
+    const [mergeWrappedLines] = useConfig('recognize_merge_lines', false);
     const [hideWindow] = useConfig('recognize_hide_window', false);
     const recognizeFlag = useAtomValue(recognizeFlagAtom);
     const currentServiceInstanceKey = useAtomValue(currentServiceInstanceKeyAtom);
@@ -56,7 +56,7 @@ export default function TextArea(props: TextAreaProps) {
             base64 !== '' &&
             currentServiceInstanceKey &&
             autoCopy !== null &&
-            deleteNewline !== null &&
+            mergeWrappedLines !== null &&
             hideWindow !== null
         ) {
             setLoading(true);
@@ -74,7 +74,7 @@ export default function TextArea(props: TextAreaProps) {
                             (v: any) => {
                                 if (recognizeId !== id) return;
                                 v = v.trim();
-                                if (deleteNewline) {
+                                if (mergeWrappedLines) {
                                     v = mergeLines(v);
                                 }
                                 setText(v);
@@ -122,7 +122,7 @@ export default function TextArea(props: TextAreaProps) {
                                 // Only the system service can resolve to undefined, and only on an OS the app does
                                 // not run on.
                                 v = v!.trim();
-                                if (deleteNewline) {
+                                if (mergeWrappedLines) {
                                     v = mergeLines(v);
                                 }
                                 setText(v);
@@ -150,7 +150,7 @@ export default function TextArea(props: TextAreaProps) {
                 }
             }
         }
-    }, [base64, currentServiceInstanceKey, language, recognizeFlag, autoCopy, deleteNewline, hideWindow]);
+    }, [base64, currentServiceInstanceKey, language, recognizeFlag, autoCopy, mergeWrappedLines, hideWindow]);
 
     // known bug (known-issues.md): the Card's radius is none, sm, md or lg, so '10' falls back to lg; the cast keeps
     // the value as it is.
