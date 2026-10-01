@@ -45,6 +45,9 @@ fn http_handle(request: Request) {
         "/ocr_translate?screenshot=false" => handle_ocr_translate(request),
         "/ocr_recognize?screenshot=true" => handle_ocr_recognize(request),
         "/ocr_translate?screenshot=true" => handle_ocr_translate(request),
+        "/ocr_copy" => handle_ocr_copy(request),
+        "/ocr_copy?screenshot=false" => handle_ocr_copy(request),
+        "/ocr_copy?screenshot=true" => handle_ocr_copy(request),
         _ => warn!("Unknown request url: {}", request.url()),
     }
 }
@@ -85,6 +88,15 @@ fn handle_ocr_translate(request: Request) {
         image_translate();
     } else {
         ocr_translate();
+    }
+    response_ok(request);
+}
+
+fn handle_ocr_copy(request: Request) {
+    if request.url().ends_with("false") {
+        silent_recognize_window();
+    } else {
+        ocr_copy();
     }
     response_ok(request);
 }
