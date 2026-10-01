@@ -38,7 +38,7 @@ frontend in strict TypeScript in `src/`.
 | `pnpm build` | Build the frontend into `dist/` |
 | `pnpm test` | Run the unit and component tests (Vitest) |
 | `pnpm typecheck` | Type-check the app, tests and scripts (TypeScript, strict) |
-| `pnpm check:transpile` | Prove a TypeScript migration changed types only ([typescript.md](docs/agents/typescript.md)) |
+| `pnpm check:transpile` | Prove a change touched types only ([typescript.md](docs/agents/typescript.md)) |
 | `pnpm smoke` | Check the running app's windows (Windows; start the app first) |
 | `pnpm check:docs` | Check doc links, README fork sections, and this index |
 
@@ -56,7 +56,7 @@ Before opening a PR, run `pnpm check:docs`, `pnpm typecheck`, `pnpm test` and
 | [backend.md](docs/agents/backend.md) | Changing Rust: commands, windows, tray, hotkeys, HTTP API, OCR, backup |
 | [services.md](docs/agents/services.md) | Adding or changing a translate, OCR, TTS or collection service, or plugins |
 | [testing.md](docs/agents/testing.md) | Writing or running tests, or a test failed |
-| [typescript.md](docs/agents/typescript.md) | Converting a file to TypeScript, or a type error blocks you |
+| [typescript.md](docs/agents/typescript.md) | Writing or typing code in `src/`, or a type error blocks you |
 | [config-keys.md](docs/agents/config-keys.md) | Reading, adding or changing a setting |
 | [known-issues.md](docs/agents/known-issues.md) | Seeing odd behaviour, or about to fix a bug |
 | [ci.md](docs/agents/ci.md) | Changing CI, or a check failed on your PR |
