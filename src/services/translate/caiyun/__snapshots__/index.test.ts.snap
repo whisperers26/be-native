@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`caiyun translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "auto": "auto",
+    "en": "en",
+    "ja": "ja",
+    "zh_cn": "zh",
+    "zh_tw": "zh",
+  },
+  "info": {
+    "icon": "logo/caiyun.svg",
+    "name": "caiyun",
+  },
+}
+`;
+
+exports[`caiyun translate > posts a JSON body with the token header and returns the first target 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "detect": true,
+          "request_id": "demo",
+          "source": [
+            "hello",
+          ],
+          "trans_type": "auto2zh",
+        },
+        "type": "Json",
+      },
+      "headers": {
+        "content-type": "application/json",
+        "x-authorization": "token test-token",
+      },
+      "method": "POST",
+    },
+    "url": "https://api.interpreter.caiyunai.com/v1/translator",
+  },
+]
+`;
