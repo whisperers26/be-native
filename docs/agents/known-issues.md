@@ -66,7 +66,6 @@ Bugs in code inherited from upstream, not fixed yet. Each one was confirmed by r
 
 - **A wrongly typed setting panics.** Rust reads settings with `as_bool()`, `as_i64()` or `as_str()` followed by `unwrap()`; a value of another type panics, at launch if it is read during setup. Example: with the proxy enabled and a host set, an empty or non-numeric `proxy_port` (the settings page's default is `''`) crashes the app at launch.
 - **Offline detection never returns Ukrainian.** The `lang_detect` command builds its detector without Ukrainian (only the warm-up includes it), so `uk` is never returned.
-- **A cancelled screenshot leaves its listener behind.** The `success` listener on the screenshot window is removed only when it fires, and Tauri 1 keeps a closed window's listeners; after a cancelled capture, a later successful one can also run the stale action.
 - **One bad HTTP request stops the API.** A non-UTF-8 request body, or a failed response, panics the server thread; the HTTP API stays down until restart.
 - **Deleted settings can come back.** The frontend and Rust each cache `config.json`, and a reload merges into the cache instead of replacing it, so a key deleted by one side is written back by the other side's next save.
 - **Two unused imports.** `src-tauri/src/window.rs` imports `std::fs` and `dirs::cache_dir` without using them, which causes two compiler warnings.
