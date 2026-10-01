@@ -12,8 +12,10 @@ export type ServiceConfig = Record<string, any>;
 export interface DictionaryResult {
     pronunciations: { region?: string; symbol: string; voice: string | number[] }[];
     explanations: { trait: string; explains: string[] }[];
-    associations: string[];
-    sentence: { source: string; target?: string }[];
+    /** cambridge_dict leaves this out. */
+    associations?: string[];
+    /** cambridge_dict leaves this out. */
+    sentence?: { source: string; target?: string }[];
 }
 
 export type TranslateResult = string | DictionaryResult;

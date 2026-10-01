@@ -20,8 +20,12 @@ Two settings exist to keep the migration behaviour-free:
 
 - Types only. A conversion adds annotations and nothing else: no new default values, `?.`, `??`, guards, enums, or reformatting. If a fix seems needed, record the bug in [known-issues.md](known-issues.md) and fix it in its own PR.
 - `strict` everywhere. `any` only for data whose shape the app does not control (HTTP responses, plugin code loaded with `eval`) and for gaps in third-party types; prefer a small local interface where the code reads only a few fields.
-- Type-only escape hatches are fine because they emit nothing: `as` (`options: TranslateOptions = {} as TranslateOptions`, `res.data as DeepLResponse`), the non-null `!` (`document.getElementById('root')!`), and `satisfies`.
+- Type-only escape hatches are fine because they emit nothing: `as` (`options: TranslateOptions = {} as TranslateOptions`), the non-null `!` (`document.getElementById('root')!`), and `satisfies`.
 - `@ts-expect-error` needs a comment saying why. Do not put it inside an object literal: esbuild keeps a comment that stands before a property, so the output changes; use an `as` cast on the value there.
+- Keep every line break where it was. esbuild keeps the layout of call arguments, object and array literals and import lists, so re-wrapping them, by hand or with a formatter, changes the output.
+- Declare class fields with `declare` (`declare voice: string;`). With `useDefineForClassFields`, a plain field declaration is emitted as a field set to `undefined`.
+- Type an HTTP reply with the `fetch` type argument (`fetch<DeepLResponse>(url, options)`), not with a cast on `res.data`.
+- Tauri's `fetch` types require `method`, but at run time it defaults to GET. Where the code leaves `method` out, leave it out and mark the call with `@ts-expect-error` and that reason: adding `method: 'GET'` changes the output.
 
 ## Proving a migration changed nothing
 
@@ -43,7 +47,7 @@ Every migration PR shows three things:
 | --- | --- | --- |
 | L0 | Toolchain, `check:transpile` | Done |
 | L1 | `src/utils`, `src/hooks`, `src/i18n`, `src/types` | Done |
-| L2 | `src/services` | Pending |
+| L2 | `src/services` | In progress (translate services done) |
 | L3 | `src/components`, `src/window` | Pending |
 | L4 | `src/main`, `src/App`, `index.html`, Vite and Tailwind configs; `allowJs` off | Pending |
 
