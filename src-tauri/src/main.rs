@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod agent_cli;
 mod backup;
 mod clipboard;
 mod cmd;
@@ -15,6 +16,7 @@ mod tray;
 mod updater;
 mod window;
 
+use agent_cli::agent_cli_run;
 use backup::*;
 use clipboard::*;
 use cmd::*;
@@ -150,6 +152,7 @@ fn main() {
             screenshot,
             cursor_position,
             lang_detect,
+            agent_cli_run,
             webdav,
             local,
             install_plugin,
