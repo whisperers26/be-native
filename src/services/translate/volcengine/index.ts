@@ -1,7 +1,17 @@
 import { fetch } from '@tauri-apps/api/http';
 import CryptoJS from 'crypto-js';
+import type { TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+interface VolcengineResponse {
+    TranslationList?: { Translation?: string }[];
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     const { config } = options;
 
     const { appid, secret } = config;
@@ -52,7 +62,7 @@ export async function translate(text, from, to, options = {}) {
     };
 
     // 签名
-    const signed_headers = {
+    const signed_headers: Record<string, string> = {
         // key is lower case and sorted
         'content-type': 'application/json',
         host: host,
@@ -106,7 +116,7 @@ export async function translate(text, from, to, options = {}) {
     // 发送请求
     let url = schema + '://' + host + path + '?' + 'Action=TranslateText&Version=' + serviceVersion;
 
-    let res = await fetch(url, {
+    let res = await fetch<VolcengineResponse>(url, {
         method: method,
         headers: headers,
         body: { type: 'Text', payload: bodyStr },
