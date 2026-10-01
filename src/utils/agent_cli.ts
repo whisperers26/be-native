@@ -98,3 +98,17 @@ export async function runAgentCli(
         unlisten();
     }
 }
+
+/** A model the model field suggests: `label` is what the list shows, `value` is what the tool is started with. */
+export interface AgentCliModel {
+    label: string;
+    value: string;
+}
+
+/** The models of Claude Code, by their exact names. The field still takes any other name. */
+export const CLAUDE_CODE_MODELS: AgentCliModel[] = [
+    { label: 'Haiku 4.5', value: 'claude-haiku-4-5-20251001' },
+    { label: 'Sonnet 5.5', value: 'claude-sonnet-5-5' },
+    { label: 'Opus 5.5', value: 'claude-opus-5-5' },
+    { label: 'Fable 5.1', value: 'claude-fable-5-1' },
+];
