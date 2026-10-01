@@ -63,7 +63,8 @@ export default function SourceArea(props: SourceAreaProps) {
     const speak = useVoice();
 
     // handleNewText and handleSpeak run after the settings have been read, so they take values from useConfig (null
-    // until then) with `!`.
+    // until then) with `!`. handleSpeak takes ttsPluginInfo the same way, but it never arrives for an uninstalled
+    // plugin (known-issues.md).
     const handleNewText = async (text: string) => {
         text = text.trim();
         if (hideWindow) {
