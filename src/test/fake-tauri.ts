@@ -124,7 +124,7 @@ class FakeTauri {
                 break;
             case 'App':
                 if (cmd === 'getAppVersion') return '3.0.7';
-                if (cmd === 'getAppName') return 'pot';
+                if (cmd === 'getAppName') return 'Be Native';
                 if (cmd === 'getTauriVersion') return '1.8.1';
                 if (cmd === 'show' || cmd === 'hide') return null;
                 break;
