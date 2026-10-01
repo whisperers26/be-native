@@ -2,21 +2,33 @@ import { fetch } from '@tauri-apps/api/http';
 import hmacSHA256 from 'crypto-js/hmac-sha256';
 import hashSHA256 from 'crypto-js/sha256';
 import hex from 'crypto-js/enc-hex';
+import type { TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+type WordArray = ReturnType<typeof hmacSHA256>;
+
+interface TencentResponse {
+    Response?: { TargetText?: string; Source?: string };
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     const { config } = options;
 
     const { secret_id, secret_key } = config;
 
-    function sha256(message, secret = '') {
+    function sha256(message: string, secret: string | WordArray = '') {
         return hmacSHA256(message, secret);
     }
 
-    function getHash(message) {
+    function getHash(message: string) {
         return hashSHA256(message).toString();
     }
 
-    function getDate(timestamp) {
+    function getDate(timestamp: number) {
         const date = new Date(timestamp * 1000);
         const year = date.getUTCFullYear();
         const month = ('0' + (date.getUTCMonth() + 1)).slice(-2);
@@ -92,7 +104,7 @@ export async function translate(text, from, to, options = {}) {
         'Signature=' +
         signature;
 
-    let res = await fetch('https://' + endpoint, {
+    let res = await fetch<TencentResponse>('https://' + endpoint, {
         method: 'POST',
         headers: {
             Authorization: authorization,
