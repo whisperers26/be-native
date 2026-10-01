@@ -56,15 +56,29 @@ function blob(left: number, top: number, right: number, bottom: number, radius: 
     ].join(' ');
 }
 
-// How far each step has got: the sides near the disc are there early, the far ones run behind, bowed out, and
-// swing back a little past flat before they come to rest.
-const STEPS = [
-    { offset: 0, near: 0, far: 0, radius: 1, bowNear: 0, bowFar: 0 },
-    { offset: 0.24, near: 0.55, far: 0.2, radius: 1.5, bowNear: 4, bowFar: 10 },
-    { offset: 0.56, near: 1, far: 0.86, radius: 1.3, bowNear: 0, bowFar: 16 },
-    { offset: 0.8, near: 1, far: 1, radius: 0.6, bowNear: 0, bowFar: -6 },
-    { offset: 1, near: 1, far: 1, radius: 0, bowNear: 0, bowFar: 0 },
-];
+// How many steps the way is cut into. The shape is worked out anew for each, from curves that run through the whole
+// way, and between two steps so close a straight line will do. Keyframes that each ease in and out, however few,
+// bring the shape to rest at every one of them, which shows as a stutter.
+const FRAMES = 30;
+
+const clamp = (n: number) => Math.min(1, Math.max(0, n));
+// Fast at first and ever slower: the way of something let go
+const settle = (n: number) => 1 - (1 - clamp(n)) ** 3;
+// Up from nothing and back to nothing
+const swell = (n: number) => Math.sin(Math.PI * clamp(n));
+
+// Where the shape is at `t`, from 0 to 1. The sides near the disc are home by half way. The far ones are home at
+// four fifths, bowed out on the way, and then swing in a little and back.
+function shapeAt(t: number) {
+    return {
+        near: settle(t / 0.5),
+        far: settle(t / 0.8),
+        // A drop is rounder than the disc it comes from, and the window's corners are sharper
+        radius: (1 + 0.5 * swell(t / 0.5)) * (1 - settle(t / 0.85)),
+        bowNear: 4 * swell(t / 0.5),
+        bowFar: t < 0.8 ? 16 * swell(t / 0.8) : -6 * swell((t - 0.8) / 0.2),
+    };
+}
 
 /** The keyframes of the clip path of a window of `width` x `height` as it comes out of `disc`. */
 export function liquidFrames(disc: Disc, width: number, height: number): LiquidFrame[] {
@@ -72,12 +86,14 @@ export function liquidFrames(disc: Disc, width: number, height: number): LiquidF
     // The side of each pair with more of the window beyond it is the far one.
     const rightFar = width - start.right >= start.left;
     const bottomFar = height - start.bottom >= start.top;
-    return STEPS.map((step) => {
+    return Array.from({ length: FRAMES + 1 }, (_, i) => {
+        const offset = i / FRAMES;
+        const step = shapeAt(offset);
         const part = (far: boolean) => (far ? step.far : step.near);
         const bow = (far: boolean) => (far ? step.bowFar : step.bowNear);
         return {
-            offset: step.offset,
-            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            offset,
+            easing: 'linear',
             clipPath: `path('${blob(
                 start.left * (1 - part(!rightFar)),
                 start.top * (1 - part(!bottomFar)),
