@@ -106,7 +106,7 @@
                 "history_disable": "Disable History",
                 "incremental_translate": "Incremental Translation",
                 "dynamic_translate": "Dynamic Translation",
-                "delete_newline": "Delete Newline",
+                "delete_newline": "Merge Wrapped Lines",
                 "remember_language": "Remember Target Language",
                 "font_size": {
                     "title": "Font Size",
@@ -141,7 +141,7 @@
                 "label": "Recognize",
                 "title": "Recognition Settings",
                 "language": "Recognition Language",
-                "delete_newline": "Auto Delete Newline",
+                "delete_newline": "Merge Wrapped Lines",
                 "auto_copy": "Auto Copy",
                 "close_on_blur": "Close window when focus lost",
                 "hide_window": "Hide Recognition Window"
@@ -488,7 +488,7 @@
             "speak": "Speak",
             "copy": "Copy",
             "retry": "Try again",
-            "delete_newline": "Delete Newline",
+            "delete_newline": "Merge Wrapped Lines",
             "translate_back": "Translation back to the original"
         },
         "recognize": {
@@ -496,7 +496,7 @@
             "translate": "Translate",
             "copy_img": "Copy Image",
             "copy_text": "Copy",
-            "delete_newline": "Delete Newline",
+            "delete_newline": "Merge Wrapped Lines",
             "delete_space": "Delete Space"
         },
         "silent_recognize": {

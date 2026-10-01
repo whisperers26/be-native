@@ -106,7 +106,7 @@
                 "history_disable": "停用歷史記錄",
                 "incremental_translate": "增量翻譯",
                 "dynamic_translate": "動態翻譯",
-                "delete_newline": "自動刪除換行",
+                "delete_newline": "智慧合併換行",
                 "remember_language": "記住目標語言",
                 "window_position": "視窗位置",
                 "smart": "智慧",
@@ -141,7 +141,7 @@
                 "label": "文字辨識",
                 "title": "文字辨識設定",
                 "language": "辨識語言",
-                "delete_newline": "自動刪除換行",
+                "delete_newline": "智慧合併換行",
                 "auto_copy": "自動複製",
                 "close_on_blur": "失去焦點時關閉視窗",
                 "hide_window": "隱藏辨識視窗"
@@ -485,7 +485,7 @@
             "speak": "朗讀",
             "copy": "複製",
             "retry": "重試",
-            "delete_newline": "刪除換行",
+            "delete_newline": "合併換行",
             "translate_back": "翻譯回原文"
         },
         "recognize": {
@@ -493,7 +493,7 @@
             "translate": "翻譯",
             "copy_img": "複製圖片",
             "copy_text": "複製",
-            "delete_newline": "刪除換行",
+            "delete_newline": "合併換行",
             "delete_space": "刪除空格"
         },
         "silent_recognize": {

@@ -22,7 +22,7 @@ describe('Recognize settings page', () => {
         );
 
         expect(await screen.findByText('Recognition Language')).toBeInTheDocument();
-        expect(await screen.findByText('Auto Delete Newline')).toBeInTheDocument();
+        expect(await screen.findByText('Merge Wrapped Lines')).toBeInTheDocument();
         expect(await screen.findByText('Close window when focus lost')).toBeInTheDocument();
         expect(await screen.findByText('Hide Recognition Window')).toBeInTheDocument();
         expect(fakeTauri.unhandled).toEqual([]);

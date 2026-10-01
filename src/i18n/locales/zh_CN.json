@@ -106,7 +106,7 @@
                 "history_disable": "禁用历史记录",
                 "incremental_translate": "增量翻译",
                 "dynamic_translate": "动态翻译",
-                "delete_newline": "自动删除换行",
+                "delete_newline": "智能合并换行",
                 "remember_language": "记住目标语言",
                 "font_size": {
                     "title": "字体大小",
@@ -141,7 +141,7 @@
                 "label": "文字识别",
                 "title": "文字识别",
                 "language": "识别语言",
-                "delete_newline": "自动删除换行",
+                "delete_newline": "智能合并换行",
                 "auto_copy": "自动复制",
                 "close_on_blur": "失去焦点时关闭窗口",
                 "hide_window": "隐藏识别窗口"
@@ -488,7 +488,7 @@
             "speak": "朗读",
             "copy": "复制",
             "retry": "重试",
-            "delete_newline": "删除换行",
+            "delete_newline": "合并换行",
             "translate_back": "翻译回原文"
         },
         "recognize": {
@@ -496,7 +496,7 @@
             "translate": "翻译",
             "copy_img": "复制图片",
             "copy_text": "复制",
-            "delete_newline": "删除换行",
+            "delete_newline": "合并换行",
             "delete_space": "删除空格"
         },
         "silent_recognize": {
