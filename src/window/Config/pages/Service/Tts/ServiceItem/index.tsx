@@ -13,12 +13,26 @@ import {
 } from '../../../../../../utils/service_instance';
 import * as builtinServices from '../../../../../../services/tts';
 import { useConfig } from '../../../../../../hooks';
+import type { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
+import type { PluginConfigInfo, ServiceConfig, TtsService } from '../../../../../../types/service';
 
-export default function ServiceItem(props) {
+// The registry is looked up by a name known only at run time.
+type TtsServices = Record<string, TtsService>;
+
+// The drag handle's props, which the page spreads in, go to the handle.
+interface ServiceItemProps extends Partial<DraggableProvidedDragHandleProps> {
+    serviceInstanceKey: string;
+    pluginList: Record<string, PluginConfigInfo>;
+    deleteServiceInstance: (instanceKey: string) => void;
+    setCurrentConfigKey: (instanceKey: string) => void;
+    onConfigOpen: () => void;
+}
+
+export default function ServiceItem(props: ServiceItemProps) {
     const { serviceInstanceKey, pluginList, deleteServiceInstance, setCurrentConfigKey, onConfigOpen, ...drag } = props;
     const { t } = useTranslation();
 
-    const [serviceInstanceConfig, setServiceInstanceConfig] = useConfig(serviceInstanceKey, {});
+    const [serviceInstanceConfig, setServiceInstanceConfig] = useConfig<ServiceConfig>(serviceInstanceKey, {});
 
     const serviceSourceType = getServiceSouceType(serviceInstanceKey);
     const serviceName = getServiceName(serviceInstanceKey);
@@ -40,7 +54,7 @@ export default function ServiceItem(props) {
                     {serviceSourceType === ServiceSourceType.BUILDIN && (
                         <>
                             <img
-                                src={`${builtinServices[serviceName].info.icon}`}
+                                src={`${(builtinServices as TtsServices)[serviceName].info.icon}`}
                                 className='h-[24px] w-[24px] my-auto'
                                 draggable={false}
                             />
