@@ -9,8 +9,6 @@
         "build": "vite build",
         "preview": "vite preview",
         "tauri": "tauri",
-        "updater": "node updater/updater.mjs",
-        "updater:fixRuntime": "node updater/updater-for-fix-runtime.mjs",
         "check:docs": "tsx scripts/check-docs.ts",
         "test": "vitest run",
         "test:watch": "vitest",
