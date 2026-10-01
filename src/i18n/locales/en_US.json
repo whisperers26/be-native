@@ -452,6 +452,20 @@
                     "name": "Collection Name",
                     "token": "Token"
                 }
+            },
+            "writing": {
+                "model": "Model",
+                "request_path": "Request Path",
+                "api_key": "API Key",
+                "instructions": "Instructions",
+                "llm7": {
+                    "title": "LLM7 (free)",
+                    "description": "LLM7.io is a free online service that needs no account or key. The text you improve is sent to llm7.io. It can be slow when it is busy."
+                },
+                "openai": {
+                    "title": "OpenAI",
+                    "description": "Any OpenAI-compatible chat API, with your own key: OpenAI, or another provider's or a local server's compatible endpoint."
+                }
             }
         },
         "translate": {

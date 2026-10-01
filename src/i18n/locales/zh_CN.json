@@ -452,6 +452,20 @@
                     "name": "生词本名称",
                     "token": "Token"
                 }
+            },
+            "writing": {
+                "model": "模型",
+                "request_path": "请求地址",
+                "api_key": "API Key",
+                "instructions": "指令",
+                "llm7": {
+                    "title": "LLM7（免费）",
+                    "description": "LLM7.io 是免费的在线服务，无需账号或密钥。要润色的文字会发送到 llm7.io。繁忙时可能较慢。"
+                },
+                "openai": {
+                    "title": "OpenAI",
+                    "description": "任何兼容 OpenAI 的对话接口，使用你自己的密钥：OpenAI，或其他服务商、本地服务的兼容接口。"
+                }
             }
         },
         "translate": {
