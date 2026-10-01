@@ -157,7 +157,8 @@
                 "ocr_copy": "Silent Text Recognition (copy only)",
                 "is_register": "The hotkey is already registered",
                 "success": "Hotkey register success",
-                "set_hotkey": "Press to Set Hotkey"
+                "set_hotkey": "Press to Set Hotkey",
+                "selection_writing": "Writing Improvement"
             },
             "service": {
                 "label": "Service",
@@ -174,7 +175,8 @@
                 "install_plugin": "Install Plugin",
                 "view_plugin_list": "View Plugin List",
                 "uninstall_success": "Plugin Uninstall Successfully",
-                "homepage": "Homepage"
+                "homepage": "Homepage",
+                "writing": "Writing"
             },
             "history": {
                 "label": "History",
@@ -188,6 +190,19 @@
                 "check_update": "Check Update",
                 "view_log": "View Log",
                 "view_config": "View Config"
+            },
+            "writing": {
+                "label": "Writing",
+                "title": "Writing Settings",
+                "tones": "Tones",
+                "tones_description": "The Tones button of the writing window asks for one rewrite in each of these. The instruction is what the service is told.",
+                "tone_name": "Name",
+                "tone_instruction": "Instruction",
+                "add_tone": "Add Tone",
+                "remove_tone": "Remove",
+                "reset_tones": "Reset to Defaults",
+                "window_animation": "Window Animations",
+                "close_on_blur": "Close window when focus lost"
             }
         },
         "updater": {
@@ -452,6 +467,29 @@
                     "name": "Collection Name",
                     "token": "Token"
                 }
+            },
+            "writing": {
+                "model": "Model",
+                "request_path": "Request Path",
+                "api_key": "API Key",
+                "instructions": "Instructions",
+                "llm7": {
+                    "title": "LLM7 (free)",
+                    "description": "LLM7.io is a free online service that works without an account or a key. The text you improve is sent to llm7.io. Without a token it answers only a few requests before it makes you wait a minute or more, so several results at once (the tones) arrive one after another and may take a while. A free token from dash.llm7.io, entered as the API key, allows 60 requests a minute."
+                },
+                "openai": {
+                    "title": "OpenAI",
+                    "description": "Any OpenAI-compatible chat API, with your own key: OpenAI, or another provider's or a local server's compatible endpoint."
+                },
+                "claude_code": {
+                    "title": "Claude Code"
+                },
+                "codex": {
+                    "title": "Codex"
+                },
+                "agent_cli": {
+                    "description": "Rewrites with the {{tool}} command-line tool installed and signed in on this computer, so rewrites use that account's subscription. Every rewrite runs in a session of its own; one is kept waiting in the background so answers arrive quickly."
+                }
             }
         },
         "translate": {
@@ -475,6 +513,14 @@
         "silent_recognize": {
             "failed": "Text recognition failed",
             "no_text": "No text found"
+        },
+        "writing": {
+            "tones": "Tones",
+            "custom_prompt": "Custom Prompt",
+            "custom_placeholder": "What should change? For example: make it shorter",
+            "enter": "Enter",
+            "replace": "Click to replace",
+            "no_service": "No writing service is switched on. Add one in the settings, under Service."
         }
     }
 }

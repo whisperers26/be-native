@@ -82,3 +82,35 @@ html {
         transform: scale(1) rotate(0);
     }
 }
+
+/* The Writing window's box while its rewrite is on its way (src/window/Writing/ResultCard): grey bars where the
+   lines of text will be, and a light that runs across them. */
+.writing-skeleton {
+    overflow: hidden;
+    border-radius: 6px;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 0.4em,
+        hsl(var(--nextui-default-300) / 0.7) 0.4em,
+        hsl(var(--nextui-default-300) / 0.7) 1.1em,
+        transparent 1.1em,
+        transparent 1.5em
+    );
+}
+.writing-skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, hsl(var(--nextui-background) / 0.75) 50%, transparent 80%);
+    will-change: transform;
+    animation: writing-skeleton-sweep 1.3s ease-in-out infinite;
+}
+@keyframes writing-skeleton-sweep {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}

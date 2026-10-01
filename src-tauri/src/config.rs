@@ -96,6 +96,7 @@ pub fn check_service_available() -> Result<(), Error> {
     ];
     let builtin_tts_list: Vec<&str> = vec!["lingva_tts"];
     let builtin_collection_list: Vec<&str> = vec!["anki", "eudic"];
+    let builtin_writing_list: Vec<&str> = vec!["llm7", "openai", "claude_code", "codex"];
 
     let plugin_recognize_list: Vec<String> = get_plugin_list("recognize").unwrap_or_default();
     let plugin_translate_list: Vec<String> = get_plugin_list("translate").unwrap_or_default();
@@ -135,6 +136,16 @@ pub fn check_service_available() -> Result<(), Error> {
             builtin_collection_list,
             plugin_collection_list,
             "collection_service_list",
+        );
+    }
+    // Writing services have no plugins
+    if let Some(writing_service_list) = get("writing_service_list") {
+        let writing_service_list: Vec<String> = serde_json::from_value(writing_service_list)?;
+        check_available(
+            writing_service_list,
+            builtin_writing_list,
+            vec![],
+            "writing_service_list",
         );
     }
     Ok(())

@@ -13,6 +13,7 @@ Stack: React 18; Vite 5 (dev server on port 1420); NextUI 2.4 on Tailwind 3.4, w
 | Label | Component | Opened by |
 | --- | --- | --- |
 | `translate` | `src/window/Translate/` | Selection, input and image translation, the HTTP API, the clipboard monitor |
+| `writing` | `src/window/Writing/` | The writing improvement hotkey, the HTTP API |
 | `recognize` | `src/window/Recognize/` | OCR after a screenshot, the HTTP API |
 | `silent_recognize` | `src/window/SilentRecognize/` | The silent OCR copy hotkey, the tray, the HTTP API |
 | `screenshot` | `src/window/Screenshot/` | The OCR and image translation hotkeys (not on macOS) |
@@ -32,9 +33,9 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 | `src/main`, `src/App` | Boot and choosing the window component |
 | `src/window/<Name>/` | One directory per window; subcomponents in subdirectories |
 | `src/components/WindowControl/` | Minimise, maximise and close buttons for frameless windows (hidden on macOS) |
-| `src/components/AgentCliConfig/` | The settings form shared by the Claude Code and Codex translate services |
+| `src/components/AgentCliConfig/` | The settings form shared by the Claude Code and Codex services, for translation and for writing (`kind`) |
 | `src/hooks/` | `useConfig`, `useGetState`, `useSyncAtom`, `useToastStyle`, `useVoice` |
-| `src/utils/` | Store and env setup, `debounce`, language detection, language tables, service instance keys, the plugin loader, the Claude Code and Codex session helper (`agent_cli`), `showWindow`, `focusWindow` and `isTestMode` (`window`): a window shows and focuses itself through these, never `appWindow.show()` or `appWindow.setFocus()`, so that [test mode](testing.md#test-mode) can keep it in the background |
+| `src/utils/` | Store and env setup, `debounce`, language detection, language tables, service instance keys, the plugin loader, the Claude Code and Codex session helper (`agent_cli`), the writing prompt and the default tones (`writing_prompt`, `writing_tones`), `showWindow`, `focusWindow` and `isTestMode` (`window`): a window shows and focuses itself through these, never `appWindow.show()` or `appWindow.setFocus()`, so that [test mode](testing.md#test-mode) can keep it in the background |
 | `src/i18n/` | i18next setup and `locales/*.json` |
 | `src/types/` | Shared TypeScript types; so far the service types (`service.ts`) |
 | `src/services/` | Built-in services: [services.md](services.md) |
@@ -54,6 +55,15 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 - Auto-copy (`translate_auto_copy`) is skipped while the clipboard monitor is on.
 - The window closes when it loses focus, unless `translate_close_on_blur` is off or the window is pinned (`translate_always_on_top`). Position and size can be remembered.
 
+## Writing window
+
+- Text arrives through `invoke('get_writing_text')` when the window mounts, and through the `new_writing_text` event afterwards. New text starts the window over: its boxes are keyed by a count of the texts, so the old ones are unmounted and their late answers dropped.
+- `results.ts` says which boxes there are, each one request to one service (`ResultSpec`): the default rewrite from each enabled instance of `writing_service_list`; after a press on Tones, every tone of `writing_tones` from every service, tone by tone; after a custom prompt (the Enter key or the Enter button), that request from every service. The later boxes are kept in the order they were asked for, so no box ever moves.
+- A box (`ResultCard`) asks its service when it appears ([services.md](services.md)), shows shimmering bars as tall as the original text while it waits, then the rewrite, or the error with a retry button. A click on a finished box, or Enter on it, calls `writing_replace` with its text; the copy button copies instead. It aborts its request's `signal` when it is unmounted or retried.
+- Growth. Every box and the custom prompt's input sit in a `Grow`, which animates its height to that of what it holds (260 ms), from nothing when it first shows. A `ResizeObserver` on the content asks Rust for the window's height (`fit_writing_window`) on every change, which during such an animation is every frame: one request at a time, each for the height of that moment. Rust keeps the window's top left corner and moves it up only when the bottom of the work area is in the way, so the window grows downwards with its content. The window shows itself after the first fit. At 80% of the work area's height it stops growing, and the content scrolls, to the newest boxes. Until then the content never scrolls: a scrollbar that came and went would rewrap the text. `writing_window_animation` off makes boxes and window take their size at once.
+- The window closes when it loses focus (`writing_close_on_blur`) unless pinned, on Escape, and after a replace.
+- In test mode it asks `llm7` alone, whatever `writing_service_list` holds ([testing.md](testing.md#test-mode)).
+
 ## Other windows
 
 - **Recognize**: shows the cut screenshot (`invoke('get_base64')`, refreshed on `new_image`) and runs OCR with the chosen instance and language (defaults: the first in `recognize_service_list`, and `recognize_language`). Its Translate button posts the text to the app's own HTTP API (`/translate`).
@@ -66,9 +76,10 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 | --- | --- |
 | General | Autostart, update check, HTTP port, UI language, theme, fonts, tray click (Windows), transparency, dev mode, proxy |
 | Translate | Default languages, detection engine, auto-copy, history, incremental and dynamic translation, window behaviour |
+| Writing | The tones (name and instruction each), window animations, close on blur |
 | Recognize | Default OCR language and window behaviour |
-| Hotkey | The five global shortcuts |
-| Service | Instances per kind (translate, OCR, TTS, collection), their settings, external plugins |
+| Hotkey | The six global shortcuts |
+| Service | Instances per kind (translate, writing, OCR, TTS, collection), their settings, external plugins |
 | History | Browse, edit and clear the translation history; send entries to collections |
 | About | Version, links, update check, the log and config folders |
 
@@ -83,7 +94,7 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 ## Talking to Rust
 
 - Commands: `invoke('<name>', args)` from `@tauri-apps/api/tauri`. What each one does: [backend.md](backend.md).
-- Events listened to: `new_text`, `new_image`, `agent_cli_stream`, `reload_plugin_list`, `<key>_changed`, and Tauri's `tauri://blur`, `tauri://focus`, `tauri://move`, `tauri://resize`, `tauri://update-download-progress`.
+- Events listened to: `new_text`, `new_writing_text`, `new_image`, `agent_cli_stream`, `reload_plugin_list`, `<key>_changed`, and Tauri's `tauri://blur`, `tauri://focus`, `tauri://move`, `tauri://resize`, `tauri://update-download-progress`.
 - Events emitted: `<key>_changed`, `success` (Screenshot), `reload_plugin_list` (plugin install and uninstall).
 - Requests to outside services go through Tauri's HTTP client (`fetch` from `@tauri-apps/api/http`), which runs in Rust, so CORS does not apply.
 

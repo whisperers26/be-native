@@ -20,6 +20,7 @@ import {
     runAgentCli,
     translationPrompt,
 } from '../../utils/agent_cli';
+import { DEFAULT_WRITING_PROMPT, writingMessage } from '../../utils/writing_prompt';
 import { INSTANCE_NAME_CONFIG_KEY } from '../../utils/service_instance';
 import { useConfig } from '../../hooks/useConfig';
 import { useToastStyle } from '../../hooks';
@@ -34,7 +35,21 @@ interface AgentCliConfigProps extends ServiceConfigProps {
     efforts: string[];
     defaultModel: string;
     defaultEffort: string;
+    /** What the service does with the tool, which decides its instructions and the form's test run. */
+    kind?: keyof typeof kinds;
 }
+
+// The built-in instructions of each kind of service, and the prompt its form tests the settings with.
+const kinds = {
+    translate: {
+        systemPrompt: DEFAULT_SYSTEM_PROMPT,
+        testPrompt: translationPrompt('hello', Language.auto, Language.zh_cn),
+    },
+    writing: {
+        systemPrompt: DEFAULT_WRITING_PROMPT,
+        testPrompt: writingMessage('hello'),
+    },
+};
 
 const inputClassNames = {
     base: 'justify-between',
@@ -42,18 +57,19 @@ const inputClassNames = {
     mainWrapper: 'max-w-[50%]',
 };
 
-/** The settings form of the services that translate through a command-line tool (Claude Code, Codex). */
+/** The settings form of the services that work through a command-line tool (Claude Code, Codex). */
 export default function AgentCliConfig(props: AgentCliConfigProps) {
     const { instanceKey, updateServiceList, onClose, provider, models, efforts, defaultModel, defaultEffort } = props;
+    const kind = props.kind ?? 'translate';
     const { t } = useTranslation();
     const [config, setConfig] = useConfig(
         instanceKey,
         {
-            [INSTANCE_NAME_CONFIG_KEY]: t(`services.translate.${provider}.title`),
+            [INSTANCE_NAME_CONFIG_KEY]: t(`services.${kind}.${provider}.title`),
             command: '',
             model: defaultModel,
             effort: defaultEffort,
-            systemPrompt: DEFAULT_SYSTEM_PROMPT,
+            systemPrompt: kinds[kind].systemPrompt,
         },
         { sync: false }
     );
@@ -66,10 +82,7 @@ export default function AgentCliConfig(props: AgentCliConfigProps) {
                 onSubmit={(e) => {
                     e.preventDefault();
                     setIsLoading(true);
-                    runAgentCli(
-                        agentCliSpec(provider, config),
-                        translationPrompt('hello', Language.auto, Language.zh_cn)
-                    ).then(
+                    runAgentCli(agentCliSpec(provider, config), kinds[kind].testPrompt).then(
                         () => {
                             setIsLoading(false);
                             setConfig(config, true);
@@ -85,8 +98,8 @@ export default function AgentCliConfig(props: AgentCliConfigProps) {
             >
                 <Toaster />
                 <p className='text-[12px] text-default-700'>
-                    {t('services.translate.agent_cli.description', {
-                        tool: t(`services.translate.${provider}.title`),
+                    {t(`services.${kind}.agent_cli.description`, {
+                        tool: t(`services.${kind}.${provider}.title`),
                     })}
                 </p>
                 <div className='config-item'>

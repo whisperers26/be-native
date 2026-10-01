@@ -204,7 +204,7 @@ fn whole_monitor(monitor: &Monitor) -> Rect {
 
 // The physical position that decides where a new window goes: the mouse, or in test mode the
 // centre of the secondary monitor, which keeps the windows off the screen the owner works on
-fn placement_point() -> Position {
+pub(crate) fn placement_point() -> Position {
     if TEST_MODE.load(Ordering::Relaxed) {
         return secondary_monitor_centre();
     }
@@ -218,7 +218,7 @@ fn placement_point() -> Position {
 }
 
 // Creating a window on the mouse monitor
-fn build_window(label: &str, title: &str) -> (Window, bool) {
+pub(crate) fn build_window(label: &str, title: &str) -> (Window, bool) {
     let mouse_position = placement_point();
     let current_monitor = get_current_monitor(mouse_position.x, mouse_position.y);
     let position = current_monitor.position();
@@ -279,12 +279,12 @@ pub fn config_window() {
 }
 
 // The gap between a window and what it is placed beside, in logical pixels
-const PLACEMENT_GAP: f64 = 8.0;
+pub(crate) const PLACEMENT_GAP: f64 = 8.0;
 // The room the Translate window leaves between itself and the edges of the monitor's usable area
 const EDGE_MARGIN: f64 = 12.0;
 
-// Where the Translate window may be on a monitor
-fn translate_area(monitor: &Monitor) -> Rect {
+// Where the Translate window, and the Writing window, may be on a monitor
+pub(crate) fn translate_area(monitor: &Monitor) -> Rect {
     inset(
         usable_area(monitor),
         (EDGE_MARGIN * monitor.scale_factor()) as i32,
@@ -453,7 +453,7 @@ static FIT_UNDER_WAY: AtomicBool = AtomicBool::new(false);
 // Move and resize a window in one step, in physical pixels, so that it is never seen with a new
 // place and its old size
 #[cfg(target_os = "windows")]
-fn set_rect(window: &Window, rect: Rect) {
+pub(crate) fn set_rect(window: &Window, rect: Rect) {
     use windows::Win32::Foundation::HWND;
     use windows::Win32::UI::WindowsAndMessaging::{
         SetWindowPos, SWP_NOACTIVATE, SWP_NOOWNERZORDER, SWP_NOZORDER,
@@ -477,7 +477,7 @@ fn set_rect(window: &Window, rect: Rect) {
 }
 
 #[cfg(not(target_os = "windows"))]
-fn set_rect(window: &Window, rect: Rect) {
+pub(crate) fn set_rect(window: &Window, rect: Rect) {
     window
         .set_size(tauri::PhysicalSize::new(rect.width, rect.height))
         .unwrap_or_default();

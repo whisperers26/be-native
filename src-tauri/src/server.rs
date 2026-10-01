@@ -1,5 +1,6 @@
 use crate::config::{get, set};
 use crate::window::*;
+use crate::writing::{selection_writing, text_writing};
 use log::{info, warn};
 use std::thread;
 use tauri::api::notification;
@@ -48,6 +49,8 @@ fn http_handle(request: Request) {
         "/ocr_copy" => handle_ocr_copy(request),
         "/ocr_copy?screenshot=false" => handle_ocr_copy(request),
         "/ocr_copy?screenshot=true" => handle_ocr_copy(request),
+        "/writing" => handle_writing(request),
+        "/selection_writing" => handle_selection_writing(request),
         "/test_mode?on=true" | "/test_mode?on=false" if cfg!(debug_assertions) => {
             handle_test_mode(request)
         }
@@ -101,6 +104,19 @@ fn handle_ocr_copy(request: Request) {
     } else {
         ocr_copy();
     }
+    response_ok(request);
+}
+
+fn handle_writing(mut request: Request) {
+    let mut content = String::new();
+    // A body that is not text improves nothing
+    let _ = request.as_reader().read_to_string(&mut content);
+    text_writing(content);
+    response_ok(request);
+}
+
+fn handle_selection_writing(request: Request) {
+    selection_writing();
     response_ok(request);
 }
 

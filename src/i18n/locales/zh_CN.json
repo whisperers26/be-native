@@ -157,7 +157,8 @@
                 "ocr_copy": "静默文字识别（仅复制）",
                 "is_register": "快捷键已被注册",
                 "success": "快捷键注册成功",
-                "set_hotkey": "按下按键设置快捷键"
+                "set_hotkey": "按下按键设置快捷键",
+                "selection_writing": "写作润色"
             },
             "service": {
                 "label": "服务设置",
@@ -174,7 +175,8 @@
                 "install_plugin": "安装外部插件",
                 "view_plugin_list": "查看插件列表",
                 "uninstall_success": "插件卸载成功",
-                "homepage": "插件主页"
+                "homepage": "插件主页",
+                "writing": "写作"
             },
             "history": {
                 "label": "历史记录",
@@ -188,6 +190,19 @@
                 "check_update": "检查更新",
                 "view_log": "查看日志",
                 "view_config": "查看配置文件"
+            },
+            "writing": {
+                "label": "写作",
+                "title": "写作润色设置",
+                "tones": "语气",
+                "tones_description": "写作窗口的“语气”按钮会按下面每一种语气各改写一次。“指令”是发给服务的说明。",
+                "tone_name": "名称",
+                "tone_instruction": "指令",
+                "add_tone": "添加语气",
+                "remove_tone": "删除",
+                "reset_tones": "恢复默认",
+                "window_animation": "窗口动画",
+                "close_on_blur": "失去焦点时关闭窗口"
             }
         },
         "updater": {
@@ -452,6 +467,29 @@
                     "name": "生词本名称",
                     "token": "Token"
                 }
+            },
+            "writing": {
+                "model": "模型",
+                "request_path": "请求地址",
+                "api_key": "API Key",
+                "instructions": "指令",
+                "llm7": {
+                    "title": "LLM7（免费）",
+                    "description": "LLM7.io 是免费的在线服务，无需账号或密钥即可使用。要润色的文字会发送到 llm7.io。没有令牌时，它只响应少量请求，之后需要等待一分钟或更久，因此同时请求多个结果（各种语气）时会依次返回，可能需要等待。在 dash.llm7.io 免费申请令牌并填入 API Key 后，每分钟可请求 60 次。"
+                },
+                "openai": {
+                    "title": "OpenAI",
+                    "description": "任何兼容 OpenAI 的对话接口，使用你自己的密钥：OpenAI，或其他服务商、本地服务的兼容接口。"
+                },
+                "claude_code": {
+                    "title": "Claude Code"
+                },
+                "codex": {
+                    "title": "Codex"
+                },
+                "agent_cli": {
+                    "description": "使用本机已安装并登录的 {{tool}} 命令行工具润色，使用该账号的订阅额度。每次润色都在独立的会话中进行；后台始终预先准备好一个会话，因此响应很快。"
+                }
             }
         },
         "translate": {
@@ -475,6 +513,14 @@
         "silent_recognize": {
             "failed": "文字识别失败",
             "no_text": "没有识别到文字"
+        },
+        "writing": {
+            "tones": "语气",
+            "custom_prompt": "自定义提示",
+            "custom_placeholder": "想怎么改？例如：改得更简短",
+            "enter": "确定",
+            "replace": "点击替换",
+            "no_service": "没有启用的写作润色服务。请在设置的“服务”中添加。"
         }
     }
 }

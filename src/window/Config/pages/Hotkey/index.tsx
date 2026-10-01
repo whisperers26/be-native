@@ -52,6 +52,7 @@ export default function Hotkey() {
     const [ocrRecognize, setOcrRecognize] = useConfig('hotkey_ocr_recognize', '');
     const [ocrTranslate, setOcrTranslate] = useConfig('hotkey_ocr_translate', '');
     const [ocrCopy, setOcrCopy] = useConfig('hotkey_ocr_copy', '');
+    const [selectionWriting, setSelectionWriting] = useConfig('hotkey_selection_writing', '');
 
     const { t } = useTranslation();
     const toastStyle = useToastStyle();
@@ -266,6 +267,37 @@ export default function Hotkey() {
                                     className={`${ocrCopy === '' && 'hidden'}`}
                                     onPress={() => {
                                         registerHandler('hotkey_ocr_copy', ocrCopy);
+                                    }}
+                                >
+                                    {t('common.ok')}
+                                </Button>
+                            }
+                        />
+                    )}
+                </div>
+                <div className='config-item'>
+                    <h3 className='my-auto'>{t('config.hotkey.selection_writing')}</h3>
+                    {selectionWriting !== null && (
+                        <Input
+                            type='hotkey'
+                            variant='bordered'
+                            value={selectionWriting}
+                            label={t('config.hotkey.set_hotkey')}
+                            className='max-w-[50%]'
+                            onKeyDown={(e) => {
+                                keyDown(e, setSelectionWriting);
+                            }}
+                            onFocus={() => {
+                                unregister(selectionWriting);
+                                setSelectionWriting('');
+                            }}
+                            endContent={
+                                <Button
+                                    size='sm'
+                                    variant='flat'
+                                    className={`${selectionWriting === '' && 'hidden'}`}
+                                    onPress={() => {
+                                        registerHandler('hotkey_selection_writing', selectionWriting);
                                     }}
                                 >
                                     {t('common.ok')}

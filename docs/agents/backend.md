@@ -16,7 +16,8 @@
 | `screenshot` | Captures one monitor to `pot_screenshot.png` |
 | `system_ocr` | OS OCR: Windows.Media.Ocr, a bundled macOS helper, or Linux `tesseract` |
 | `lang_detect` | Offline language detection (lingua) |
-| `agent_cli` | Claude Code and Codex sessions for the translate services of the same names ([services.md](services.md)) |
+| `agent_cli` | Claude Code and Codex sessions for the translate and writing services of the same names ([services.md](services.md)) |
+| `writing` | Writing improvement: the selected text, the Writing window and its height, pasting a result over the selection |
 | `cmd` | Other commands: text state, store reload, image cut, base64 and copy, proxy, plugin install and run, fonts, devtools |
 | `updater` | Update check at launch |
 | `error` | The `Error` type commands return; sent to JavaScript as its message |
@@ -47,6 +48,9 @@
 | `copy_img` | `width`, `height` | — | Copies the cut image to the clipboard |
 | `system_ocr` | `lang` | string | OS OCR of `pot_screenshot_cut.png`; the text has one line per line read |
 | `lang_detect` | `text` | string | Offline language detection; an app language code, `en` if unsure |
+| `get_writing_text` | — | string | The text waiting for the writing window |
+| `fit_writing_window` | `height` | — | Give the calling (Writing) window this height, in logical pixels, at once. Its top left corner stays, unless the window would reach below its monitor's work area: then it moves up as far as that takes (`placement::inside`) |
+| `writing_replace` | `text` | — | Hide the Writing window, give the focus back to the window the selection was in (Windows; elsewhere hiding does), put `text` on the clipboard, send the paste shortcut (`enigo` on Windows, `osascript` on macOS, `xdotool` on Linux), put back the text or image the clipboard held, and close the window. The text is only copied, and a notification says so, when there is no selection to paste over (a text from `/writing`), when that window is gone or does not get the focus back, or when the shortcut cannot be sent. A second call while one is under way does nothing, and the clipboard monitor does not read the clipboard meanwhile. In test mode it only closes the window |
 | `agent_cli_run` | `id`, `spec`, `prompt` | string | Runs one prompt in a Claude Code or Codex session of its own and returns the answer; emits `agent_cli_stream` meanwhile |
 | `set_proxy`, `unset_proxy` | — | bool | Set or clear the proxy environment variables. The frontend never calls them; the proxy is applied at launch |
 | `install_plugin` | `pathList` | number | Installs `.potext` files |
@@ -63,7 +67,7 @@ To add a command, write a `#[tauri::command]` function in the module it belongs 
 
 ## Windows
 
-`build_window(label, title)` creates a hidden, frameless, transparent window (on macOS, with an overlay title bar) that loads `index.html` on the monitor under the mouse, or focuses the window if it already exists. The frontend shows the window when it is ready, through `show_window` and `focus_window`. In test mode ([testing.md](testing.md#test-mode)) the window goes to the centre of the secondary monitor instead, and is neither focused nor activated. Sizes: Config 800×600; Translate from `translate_window_width` and `translate_window_height` (350×420) when `translate_remember_window_size` is on, otherwise 420×240 until the window fits itself to its content ([frontend.md](frontend.md#translate-window)); a window opened for a text or a screenshot starts 88×88 and without a shadow instead, to wait in as a progress indicator, until it has opened (`translate_window_opened`); the window stays 12 px off the edges of the monitor's work area when the `smart` position places it and when it fits itself; placed by `translate_window_position` (below) and sized after it is placed; Recognize from `recognize_window_width` and `recognize_window_height` (800×400); Silent Recognize is never shown; Updater 600×400; Screenshot full screen.
+`build_window(label, title)` creates a hidden, frameless, transparent window (on macOS, with an overlay title bar) that loads `index.html` on the monitor under the mouse, or focuses the window if it already exists. The frontend shows the window when it is ready, through `show_window` and `focus_window`. In test mode ([testing.md](testing.md#test-mode)) the window goes to the centre of the secondary monitor instead, and is neither focused nor activated. Sizes: Config 800×600; Translate from `translate_window_width` and `translate_window_height` (350×420) when `translate_remember_window_size` is on, otherwise 420×240 until the window fits itself to its content ([frontend.md](frontend.md#translate-window)); a window opened for a text or a screenshot starts 88×88 and without a shadow instead, to wait in as a progress indicator, until it has opened (`translate_window_opened`); the window stays 12 px off the edges of the monitor's work area when the `smart` position places it and when it fits itself; placed by `translate_window_position` (below) and sized after it is placed; Writing 460×120 beside the cursor (`placement::beside` with the cursor as anchor), until the window gives itself the height of what it shows ([frontend.md](frontend.md#writing-window)); Recognize from `recognize_window_width` and `recognize_window_height` (800×400); Silent Recognize is never shown; Updater 600×400; Screenshot full screen.
 
 The `smart` position puts the Translate window beside what the text came from: the region of a screenshot translation (`cut_image` records it, `image_translate` takes it), otherwise the cursor. `placement::beside` picks the corner: right of the anchor, else left, below or above, the first side with room inside the monitor's work area (the whole monitor off Windows); if no side has room, where the window covers the least of the anchor, and over the middle of an anchor it cannot get out of. It is arithmetic on numbers the app already has, so it costs no extra call or window move. Input translation centres the window, as with `mouse`.
 
@@ -74,6 +78,7 @@ On Windows the Screenshot window is subclassed (`suppress_title_bar`) so that th
 | Event | Direction | Payload |
 | --- | --- | --- |
 | `new_text` | Rust → translate window | The text, `[INPUT_TRANSLATE]` or `[IMAGE_TRANSLATE]` |
+| `new_writing_text` | Rust → writing window | The text to improve |
 | `new_image` | Rust → recognize or silent_recognize window | `""`; the window re-reads the image |
 | `translate_auto_copy_changed` | Rust → all windows | The auto-copy mode, when changed from the tray |
 | `agent_cli_stream` | Rust → the window that called `agent_cli_run` | `{ id, text }`: the answer so far |
@@ -81,7 +86,9 @@ On Windows the Screenshot window is subclassed (`suppress_title_bar`) so that th
 
 ## Hotkeys
 
-The settings `hotkey_selection_translate`, `hotkey_input_translate`, `hotkey_ocr_recognize`, `hotkey_ocr_translate` and `hotkey_ocr_copy` are empty by default, so there are no shortcuts until the user sets them. They are registered at launch; if one fails, the ones after it are skipped.
+The settings `hotkey_selection_translate`, `hotkey_input_translate`, `hotkey_ocr_recognize`, `hotkey_ocr_translate`, `hotkey_ocr_copy` and `hotkey_selection_writing` are empty by default, so there are no shortcuts until the user sets them. They are registered at launch; if one fails, the ones after it are skipped.
+
+The writing hotkey (`writing::selection_writing`) reads the selection as selection translation does. With nothing selected it shows a notification and opens no window. The tray has no entry for it: opening the tray menu takes the focus, and the selection with it.
 
 ## Tray
 
@@ -98,6 +105,8 @@ A server on `127.0.0.1:<server_port>` (default 60828) handles one request at a t
 | `/ocr_recognize`, `/ocr_translate` | Screenshot, then OCR or image translation |
 | `/ocr_copy` | Screenshot, then OCR copied to the clipboard without a window |
 | `/ocr_recognize?screenshot=false`, `/ocr_translate?screenshot=false`, `/ocr_copy?screenshot=false` | The same, with an existing `pot_screenshot_cut.png` |
+| `/selection_writing` | Like the hotkey |
+| `/writing` | Improves the request body. There is no selection, so a result that is picked is copied, not pasted |
 | `/config` | Opens the Config window |
 | `/test_mode?on=true`, `/test_mode?on=false` | Debug builds only: turns test mode on or off ([testing.md](testing.md#test-mode)) |
 

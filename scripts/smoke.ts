@@ -17,7 +17,7 @@ import { classifyLogLines } from './smoke/log';
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const HELPER = join(ROOT, 'scripts', 'smoke', 'windows.ps1');
 const DEV_BINARY = join('src-tauri', 'target', 'debug', 'Be Native.exe');
-const APP_TITLES = ['Config', 'Translate', 'Recognize', 'Screenshot', 'Updater'];
+const APP_TITLES = ['Config', 'Translate', 'Recognize', 'Screenshot', 'Updater', 'Writing'];
 const APP_DIR = 'com.pot-app.desktop';
 const CONFIG_FILE = join(process.env.APPDATA ?? '', APP_DIR, 'config.json');
 // The log is named after the app, and a debug build's name ends in " (Debug)".
@@ -124,6 +124,13 @@ const scenarios: Scenario[] = [
         name: 'input',
         title: 'Translate',
         request: (api) => fetch(`${api}/input_translate`),
+    },
+    {
+        // The box of the free service is there before it has answered, so this does not depend on its answer.
+        name: 'writing',
+        title: 'Writing',
+        expectText: 'LLM7',
+        request: (api) => fetch(`${api}/writing`, { method: 'POST', body: 'me and him goes to the store yesterday' }),
     },
     {
         // No text check: the Recognize window opened this way stays in its loading state

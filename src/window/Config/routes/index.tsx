@@ -2,6 +2,7 @@ import { Navigate } from 'react-router-dom';
 
 import Translate from '../pages/Translate';
 import Recognize from '../pages/Recognize';
+import Writing from '../pages/Writing';
 import General from '../pages/General';
 import Service from '../pages/Service';
 import History from '../pages/History';
@@ -16,6 +17,10 @@ const routes = [
     {
         path: '/translate',
         element: <Translate />,
+    },
+    {
+        path: '/writing',
+        element: <Writing />,
     },
     {
         path: '/recognize',

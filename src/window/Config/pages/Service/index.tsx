@@ -9,6 +9,7 @@ import Translate from './Translate';
 import Recognize from './Recognize';
 import Collection from './Collection';
 import Tts from './Tts';
+import Writing from './Writing';
 import { ServiceType } from '../../../../utils/service_instance';
 import type { UnlistenFn } from '@tauri-apps/api/event';
 import type { PluginConfigList } from '../../../../types/service';
@@ -71,6 +72,12 @@ export default function Service() {
                     title={t(`config.service.translate`)}
                 >
                     <Translate pluginList={pluginList[ServiceType.TRANSLATE]} />
+                </Tab>
+                <Tab
+                    key='writing'
+                    title={t(`config.service.writing`)}
+                >
+                    <Writing />
                 </Tab>
                 <Tab
                     key='recognize'
