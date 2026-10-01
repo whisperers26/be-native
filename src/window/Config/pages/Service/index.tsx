@@ -10,16 +10,18 @@ import Recognize from './Recognize';
 import Collection from './Collection';
 import Tts from './Tts';
 import { ServiceType } from '../../../../utils/service_instance';
+import type { UnlistenFn } from '@tauri-apps/api/event';
+import type { PluginConfigList } from '../../../../types/service';
 
-let unlisten = null;
+let unlisten: Promise<UnlistenFn> | null = null;
 
 export default function Service() {
-    const [pluginList, setPluginList] = useState(null);
+    const [pluginList, setPluginList] = useState<PluginConfigList | null>(null);
     const { t } = useTranslation();
 
     const loadPluginList = async () => {
         const serviceTypeList = ['translate', 'tts', 'recognize', 'collection'];
-        let temp = {};
+        let temp: PluginConfigList = {};
         for (const serviceType of serviceTypeList) {
             temp[serviceType] = {};
             if (await exists(`plugins/${serviceType}`, { dir: BaseDirectory.AppConfig })) {
@@ -37,7 +39,8 @@ export default function Service() {
                         );
                         pluginInfo.icon = convertFileSrc(iconPath);
                     }
-                    temp[serviceType][plugin.name] = pluginInfo;
+                    // readDir lists children, and every child has a name.
+                    temp[serviceType][plugin.name!] = pluginInfo;
                 }
             }
         }
