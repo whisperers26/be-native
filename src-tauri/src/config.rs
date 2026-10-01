@@ -90,6 +90,8 @@ pub fn check_service_available() -> Result<(), Error> {
         "volcengine",
         "yandex",
         "youdao",
+        "claude_code",
+        "codex",
     ];
     let builtin_tts_list: Vec<&str> = vec!["lingva_tts"];
     let builtin_collection_list: Vec<&str> = vec!["anki", "eudic"];
