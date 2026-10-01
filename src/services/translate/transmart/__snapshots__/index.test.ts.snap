@@ -1,0 +1,61 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`transmart translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fr": "fr",
+    "id": "id",
+    "it": "it",
+    "ja": "ja",
+    "km": "km",
+    "ko": "ko",
+    "ms": "ms",
+    "pt_br": "pt",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "th": "th",
+    "tr": "tr",
+    "vi": "vi",
+    "zh_cn": "zh",
+    "zh_tw": "zh-TW",
+  },
+  "info": {
+    "icon": "logo/transmart.svg",
+    "name": "transmart",
+  },
+}
+`;
+
+exports[`transmart translate > posts the text as JSON without credentials when username and token are empty 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "header": {
+            "fn": "auto_translation",
+          },
+          "source": {
+            "lang": "en",
+            "text_list": [
+              "hello",
+            ],
+          },
+          "target": {
+            "lang": "zh",
+          },
+          "type": "plain",
+        },
+        "type": "Json",
+      },
+      "method": "POST",
+    },
+    "url": "https://transmart.qq.com/api/imt",
+  },
+]
+`;
