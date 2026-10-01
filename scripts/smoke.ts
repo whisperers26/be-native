@@ -11,6 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { classifyLogLines } from './smoke/log';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const HELPER = join(ROOT, 'scripts', 'smoke', 'windows.ps1');
@@ -149,23 +150,11 @@ async function run(scenario: Scenario, api: string, outDir: string): Promise<Res
     return result;
 }
 
-// A translation service that fails on the network logs "[<service>]happened error: ...".
-// Those depend on third-party servers, so they are reported but do not fail the run.
-const SERVICE_FAILURE = /\]happened error: /;
-
 function newLogErrors(fromByte: number): { appErrors: string[]; serviceErrors: string[] } {
     if (!existsSync(LOG_FILE)) return { appErrors: [], serviceErrors: [] };
     const log = readFileSync(LOG_FILE);
     const start = fromByte <= log.length ? fromByte : 0;
-    const errors = log
-        .subarray(start)
-        .toString('utf8')
-        .split(/\r?\n/)
-        .filter((line) => line.includes('[ERROR]') || line.includes('panicked'));
-    return {
-        appErrors: errors.filter((line) => !SERVICE_FAILURE.test(line)),
-        serviceErrors: errors.filter((line) => SERVICE_FAILURE.test(line)),
-    };
+    return classifyLogLines(log.subarray(start).toString('utf8').split(/\r?\n/));
 }
 
 function outputDir(): string {

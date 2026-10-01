@@ -45,6 +45,6 @@ export const httpMock = {
     reset(): void {
         queued.length = 0;
         calls.length = 0;
-        fetchMock.mockClear();
+        fetchMock.mockReset();
     },
 };

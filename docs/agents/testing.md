@@ -4,7 +4,7 @@
 
 | Command | What it does |
 | --- | --- |
-| `pnpm test` | Runs every `*.test.ts(x)` under `src/` once (Vitest, jsdom) |
+| `pnpm test` | Runs every `*.test.ts(x)` under `src/`, and every `*.test.ts` under `scripts/`, once (Vitest, jsdom) |
 | `pnpm test:watch` | The same, re-running on change |
 | `pnpm test src/services/translate/deepl` | Only the tests under one path (no `--`: with it, pnpm passes the path in a way Vitest ignores and the whole suite runs) |
 
@@ -75,7 +75,7 @@ expect(httpMock.calls).toMatchSnapshot();
 
 1. Stops at once, with exit code 1, if nothing answers on the app's HTTP port (`server_port`, default 60828) or the app is not this repository's dev build (`src-tauri\target\debug\pot.exe`).
 2. Closes any open app windows, then runs four scenarios through the HTTP API: `config` (`GET /config`, window shows "General Settings"), `translate` (`POST /translate` with `hello world`, which the window must show), `input` (`GET /input_translate`), and `ocr` (writes a "Hello World" image to the app's `pot_screenshot_cut.png`, then `GET /ocr_recognize?screenshot=false`). Each scenario waits up to 15 s for its window, reads its text through UI Automation where it checks text, saves a screenshot, and closes the window.
-3. Fails on any `[ERROR]` or `panicked` line the app logged during the run, except translation services failing on the network (`[<service>]happened error`), which it lists as warnings: several default services depend on servers that are gone (see [known-issues.md](known-issues.md)).
+3. Fails on any `[ERROR]` or `panicked` line the app logged during the run, except translation services failing on the network (`[<service>]happened error`), which it lists as warnings: several default services depend on servers that are gone (see [known-issues.md](known-issues.md)). A JavaScript error in such a line (`TypeError`, `ReferenceError`, `SyntaxError`, `RangeError`, `is not a function`, `is not defined`, `Cannot read propert…`) still fails the run: the Translate window logs every translate error through that same line, so a bug in the app's own code looks like a network failure otherwise. Some services already throw a `TypeError` on an unexpected server reply (see known-issues.md), so a live provider answering with an error body can fail the run without any refactor bug; check the log line before blaming the change. `scripts/smoke/log.ts` sorts the lines; `pnpm test` runs its tests.
 
 Results go to `test-results/smoke/<time>/` (gitignored): `report.json` and one PNG per scenario. `scripts/smoke/windows.ps1` holds the Windows helpers (find, capture and close windows; read UI Automation text; draw the OCR image).
 
