@@ -84,17 +84,19 @@ describe('Writing window', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Tones' }));
 
         await screen.findByText('f');
-        expect(httpMock.calls.slice(2).map((call) => new URL(call.url).host)).toEqual([
-            'api.llm7.io',
-            'api.example.com',
-            'api.llm7.io',
-            'api.example.com',
-        ]);
-        expect(messages().slice(2)).toEqual([
-            'Style: Casual.\n\nme and him goes',
-            'Style: Casual.\n\nme and him goes',
-            'Style: Concise.\n\nme and him goes',
-            'Style: Concise.\n\nme and him goes',
+        const boxes = screen.getAllByRole('button', { name: 'Click to replace' }).map((box) => box.textContent!);
+        expect(
+            boxes.slice(2).map((text) => `${/LLM7|OpenAI/.exec(text)![0]}/${/Casual|Concise/.exec(text)![0]}`)
+        ).toEqual(['LLM7/Casual', 'OpenAI/Casual', 'LLM7/Concise', 'OpenAI/Concise']);
+        // Each service was asked for each tone.
+        const asked = httpMock.calls
+            .slice(2)
+            .map((call, index) => `${new URL(call.url).host} ${messages()[index + 2]}`);
+        expect(asked.sort()).toEqual([
+            'api.example.com Style: Casual.\n\nme and him goes',
+            'api.example.com Style: Concise.\n\nme and him goes',
+            'api.llm7.io Style: Casual.\n\nme and him goes',
+            'api.llm7.io Style: Concise.\n\nme and him goes',
         ]);
     });
 
@@ -158,18 +160,18 @@ describe('Writing window', () => {
     });
 
     it('shows why a request failed, does not replace with it, and tries again', async () => {
-        httpMock.queue({ status: 429, data: { error: 'slow down' } });
+        httpMock.queue({ data: { error: 'busy' } });
         open();
 
-        expect(await screen.findByText('Http Status: 429')).toBeInTheDocument();
-        fireEvent.click(screen.getByText('Http Status: 429'));
+        expect(await screen.findByText('{"error":"busy"}')).toBeInTheDocument();
+        fireEvent.click(screen.getByText('{"error":"busy"}'));
         expect(fakeTauri.calls.some((call) => call.cmd === 'writing_replace')).toBe(false);
         httpMock.queue(answer('He and I go.'));
 
         fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
 
         expect(await screen.findByText('He and I go.')).toBeInTheDocument();
-        expect(screen.queryByText('Http Status: 429')).not.toBeInTheDocument();
+        expect(screen.queryByText('{"error":"busy"}')).not.toBeInTheDocument();
     });
 
     it('starts over for new text, and drops a late answer for the old one', async () => {
@@ -190,10 +192,11 @@ describe('Writing window', () => {
         httpMock.queue(answer('New text, improved.'));
 
         fakeTauri.emit('new_writing_text', 'new text');
+        // The free service takes one request at a time, so the new one waits for the old one's answer.
+        await new Promise((done) => setTimeout(done, 20));
+        late({ ok: true, status: 200, data: answer('Old text, improved.').data });
 
         expect(await screen.findByText('New text, improved.')).toBeInTheDocument();
-        late({ ok: true, status: 200, data: answer('Old text, improved.').data });
-        await new Promise((done) => setTimeout(done, 20));
         expect(screen.queryByText('Old text, improved.')).not.toBeInTheDocument();
         expect(messages()[1]).toBe('\nnew text');
     });

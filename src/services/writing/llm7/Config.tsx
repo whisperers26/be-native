@@ -9,8 +9,8 @@ export function Config(props: ServiceConfigProps) {
         <ChatConfig
             {...props}
             service='llm7'
-            fields={['model']}
-            defaults={{ model: DEFAULT_MODEL }}
+            fields={['apiKey', 'model']}
+            defaults={{ apiKey: '', model: DEFAULT_MODEL }}
             improve={improve}
         />
     );
