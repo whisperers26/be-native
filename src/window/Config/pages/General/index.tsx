@@ -21,24 +21,26 @@ import { LanguageFlag } from '../../../../utils/language';
 import { useToastStyle } from '../../../../hooks';
 import { osType } from '../../../../utils/env';
 
-let timer = null;
+let timer: ReturnType<typeof setTimeout> | null = null;
 
 export default function General() {
     const [autoStart, setAutoStart] = useState(false);
-    const [fontList, setFontList] = useState(null);
+    const [fontList, setFontList] = useState<string[] | null>(null);
     const [checkUpdate, setCheckUpdate] = useConfig('check_update', true);
     const [serverPort, setServerPort] = useConfig('server_port', 60828);
     const [appLanguage, setAppLanguage] = useConfig('app_language', 'en');
     const [appTheme, setAppTheme] = useConfig('app_theme', 'system');
     const [appFont, setAppFont] = useConfig('app_font', 'default');
     const [appFallbackFont, setAppFallbackFont] = useConfig('app_fallback_font', 'default');
-    const [appFontSize, setAppFontSize] = useConfig('app_font_size', 16);
+    // The default is a number, but the menu hands back its item key, a string, so a saved size is either.
+    const [appFontSize, setAppFontSize] = useConfig<number | string>('app_font_size', 16);
     const [transparent, setTransparent] = useConfig('transparent', true);
     const [devMode, setDevMode] = useConfig('dev_mode', false);
     const [trayClickEvent, setTrayClickEvent] = useConfig('tray_click_event', 'config');
     const [proxyEnable, setProxyEnable] = useConfig('proxy_enable', false);
     const [proxyHost, setProxyHost] = useConfig('proxy_host', '');
-    const [proxyPort, setProxyPort] = useConfig('proxy_port', '');
+    // The default is a string, but the input's handler saves a number once the user has typed one.
+    const [proxyPort, setProxyPort] = useConfig<string | number>('proxy_port', '');
     const [proxyUsername, setProxyUsername] = useConfig('proxy_username', '');
     const [proxyPassword, setProxyPassword] = useConfig('proxy_password', '');
     const [noProxy, setNoProxy] = useConfig('no_proxy', 'localhost,127.0.0.1');
@@ -46,7 +48,7 @@ export default function General() {
     const { setTheme } = useTheme();
     const toastStyle = useToastStyle();
 
-    const languageName = {
+    const languageName: Record<string, string> = {
         zh_cn: '简体中文',
         zh_tw: '繁體中文',
         en: 'English',
@@ -72,11 +74,12 @@ export default function General() {
         isEnabled().then((v) => {
             setAutoStart(v);
         });
-        invoke('font_list').then((v) => {
+        invoke<string[]>('font_list').then((v) => {
             setFontList(v);
         });
     }, []);
 
+    // NextUI's Input types its value as a string, but the two port inputs hold numbers, which they show as they are.
     return (
         <>
             <Toaster />
@@ -117,7 +120,7 @@ export default function General() {
                             <Input
                                 type='number'
                                 variant='bordered'
-                                value={serverPort}
+                                value={serverPort as unknown as string}
                                 labelPlacement='outside-left'
                                 onValueChange={(v) => {
                                     if (parseInt(v) !== serverPort) {
@@ -156,7 +159,7 @@ export default function General() {
                                 <DropdownTrigger>
                                     <Button
                                         variant='bordered'
-                                        startContent={<span className={`fi fi-${LanguageFlag[appLanguage]}`} />}
+                                        startContent={<span className={`fi fi-${LanguageFlag[appLanguage as keyof typeof LanguageFlag]}`} />}
                                     >
                                         {languageName[appLanguage]}
                                     </Button>
@@ -165,8 +168,8 @@ export default function General() {
                                     aria-label='app language'
                                     className='max-h-[40vh] overflow-y-auto'
                                     onAction={(key) => {
-                                        setAppLanguage(key);
-                                        i18n.changeLanguage(key);
+                                        setAppLanguage(key as string);
+                                        i18n.changeLanguage(key as string);
                                         invoke('update_tray', { language: key, copyMode: '' });
                                     }}
                                 >
@@ -298,9 +301,9 @@ export default function General() {
                                 <DropdownMenu
                                     aria-label='app theme'
                                     onAction={(key) => {
-                                        setAppTheme(key);
+                                        setAppTheme(key as string);
                                         if (key !== 'system') {
-                                            setTheme(key);
+                                            setTheme(key as string);
                                         } else {
                                             if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                                                 setTheme('dark');
@@ -347,7 +350,7 @@ export default function General() {
                                         document.documentElement.style.fontFamily = `"${
                                             key === 'default' ? 'sans-serif' : key
                                         }","${appFallbackFont === 'default' ? 'sans-serif' : appFallbackFont}"`;
-                                        setAppFont(key);
+                                        setAppFont(key as string);
                                     }}
                                 >
                                     <DropdownItem
@@ -356,6 +359,7 @@ export default function General() {
                                     >
                                         {t('config.general.default_font')}
                                     </DropdownItem>
+                                    {/* NextUI's collection children type does not accept a list after a fixed item */}
                                     {fontList.map((x) => {
                                         return (
                                             <DropdownItem
@@ -365,7 +369,7 @@ export default function General() {
                                                 {x}
                                             </DropdownItem>
                                         );
-                                    })}
+                                    }) as any}
                                 </DropdownMenu>
                             </Dropdown>
                         )}
@@ -393,7 +397,7 @@ export default function General() {
                                         document.documentElement.style.fontFamily = `"${
                                             appFont === 'default' ? 'sans-serif' : appFont
                                         }","${key === 'default' ? 'sans-serif' : key}"`;
-                                        setAppFallbackFont(key);
+                                        setAppFallbackFont(key as string);
                                     }}
                                 >
                                     <DropdownItem
@@ -402,6 +406,7 @@ export default function General() {
                                     >
                                         {t('config.general.default_font')}
                                     </DropdownItem>
+                                    {/* NextUI's collection children type does not accept a list after a fixed item */}
                                     {fontList.map((x) => {
                                         return (
                                             <DropdownItem
@@ -411,7 +416,7 @@ export default function General() {
                                                 {x}
                                             </DropdownItem>
                                         );
-                                    })}
+                                    }) as any}
                                 </DropdownMenu>
                             </Dropdown>
                         )}
@@ -452,7 +457,7 @@ export default function General() {
                                 <DropdownMenu
                                     aria-label='tray click event'
                                     onAction={(key) => {
-                                        setTrayClickEvent(key);
+                                        setTrayClickEvent(key as string);
                                     }}
                                 >
                                     <DropdownItem key='config'>{t('config.general.event.config')}</DropdownItem>
@@ -543,7 +548,7 @@ export default function General() {
                                 variant='bordered'
                                 isRequired
                                 label={t('config.general.proxy.port')}
-                                value={proxyPort}
+                                value={proxyPort as string}
                                 onValueChange={(v) => {
                                     if (parseInt(v) > 65535) {
                                         setProxyPort(65535);
