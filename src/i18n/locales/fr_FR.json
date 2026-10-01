@@ -300,7 +300,6 @@
                 "proxy_error": "Veuillez compléter l'hôte et le port",
                 "check_update": "Vérifier les mises à jour",
                 "app_language": "Langue d'affichage",
-                "transparent": "Effet de transparence",
                 "title": "Paramètres généraux",
                 "default_font": "Défaut",
                 "font_size": {

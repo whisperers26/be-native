@@ -70,7 +70,6 @@
                     "dark": "Dunkel",
                     "system": "System"
                 },
-                "transparent": "Transparenzeffekt",
                 "proxy": {
                     "title": "Netzwerkproxy",
                     "host": "Proxy-Adresse",
