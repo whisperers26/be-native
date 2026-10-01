@@ -7,11 +7,19 @@ import { useTranslation } from 'react-i18next';
 import { useToastStyle } from '../../../../../hooks';
 import * as webdav from '../utils/webdav';
 
-export default function WebDavModal(props) {
+interface WebDavModalProps {
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    url: string;
+    username: string;
+    password: string;
+}
+
+export default function WebDavModal(props: WebDavModalProps) {
     const { isOpen, onOpenChange, url, username, password } = props;
-    const [webdavList, setWebdavList] = useState([]);
+    const [webdavList, setWebdavList] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
-    const [downloading, setDownloading] = useState([]);
+    const [downloading, setDownloading] = useState<boolean[]>([]);
 
     const { t } = useTranslation();
     const toastStyle = useToastStyle();
@@ -37,7 +45,7 @@ export default function WebDavModal(props) {
         }
     }, [isOpen]);
 
-    const getBackup = async (name, onClose) => {
+    const getBackup = async (name: string, onClose: () => void) => {
         webdav.get(url, username, password, name).then(
             () => {
                 setDownloading(
