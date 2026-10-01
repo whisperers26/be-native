@@ -1,12 +1,25 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { appCacheDir, join } from '@tauri-apps/api/path';
-import { currentMonitor } from '@tauri-apps/api/window';
+import { currentMonitor, PhysicalPosition } from '@tauri-apps/api/window';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import { appWindow } from '@tauri-apps/api/window';
 import { emit } from '@tauri-apps/api/event';
 import { warn } from 'tauri-plugin-log-api';
 import { invoke } from '@tauri-apps/api';
 import type { MutableRefObject } from 'react';
+
+interface Point {
+    x: number;
+    y: number;
+}
+
+/** What the `cursor_position` command returns, in physical pixels. */
+interface CursorPosition extends Point {
+    /** The origin of the monitor under the cursor. */
+    monitor: Point;
+}
+
+const CURSOR_POLL_MS = 50;
 
 export default function Screenshot() {
     const [imgurl, setImgurl] = useState('');
@@ -16,22 +29,74 @@ export default function Screenshot() {
     const [mouseDownY, setMouseDownY] = useState(0);
     const [mouseMoveX, setMouseMoveX] = useState(0);
     const [mouseMoveY, setMouseMoveY] = useState(0);
+    // Where the crosshair lines meet, in CSS pixels; null while the pointer is not over the window.
+    const [cursor, setCursor] = useState<Point | null>(null);
+
+    // What the poll below reads; it outlives the render it was created in.
+    const origin = useRef<Point | null>(null);
+    const dragging = useRef(false);
+    const pointerSeen = useRef(false);
+    const captures = useRef(0);
 
     // The image is always rendered, so the ref is set before any handler runs.
     const imgRef = useRef<HTMLImageElement>() as MutableRefObject<HTMLImageElement>;
+
+    // Capture the monitor whose origin is `position` and show it. The number makes every capture a new URL, so
+    // the image loads again although the file name stays the same.
+    async function capture(position: Point) {
+        await invoke('screenshot', { x: position.x, y: position.y });
+        const filePath = await join(await appCacheDir(), 'pot_screenshot.png');
+        origin.current = { x: position.x, y: position.y };
+        captures.current += 1;
+        setImgurl(`${convertFileSrc(filePath)}?${captures.current}`);
+    }
+
+    // Take the window to another monitor. It stays hidden until the new capture has loaded.
+    async function moveTo(position: Point) {
+        await appWindow.hide();
+        setCursor(null);
+        pointerSeen.current = false;
+        // A full-screen window cannot be moved.
+        await appWindow.setFullscreen(false);
+        await appWindow.setPosition(new PhysicalPosition(position.x, position.y));
+        await appWindow.setFullscreen(true);
+        await capture(position);
+    }
 
     useEffect(() => {
         currentMonitor().then((monitor) => {
             // @ts-expect-error known bug (known-issues.md): currentMonitor() can return null
             const position = monitor.position;
-            invoke('screenshot', { x: position.x, y: position.y }).then(() => {
-                appCacheDir().then((appCacheDirPath) => {
-                    join(appCacheDirPath, 'pot_screenshot.png').then((filePath) => {
-                        setImgurl(convertFileSrc(filePath));
-                    });
-                });
-            });
+            void capture(position);
         });
+    }, []);
+
+    // The window gets no mouse events from another monitor, so ask Rust where the cursor is.
+    useEffect(() => {
+        let busy = false;
+        const timer = setInterval(async () => {
+            if (busy || origin.current === null) return;
+            busy = true;
+            try {
+                const position = await invoke<CursorPosition>('cursor_position');
+                const here = origin.current;
+                if (position.monitor.x !== here.x || position.monitor.y !== here.y) {
+                    // A region belongs to one monitor.
+                    if (!dragging.current) await moveTo(position.monitor);
+                } else if (!pointerSeen.current) {
+                    // Until the mouse moves, there is no mouse event to place the lines with.
+                    setCursor({
+                        x: (position.x - here.x) / window.devicePixelRatio,
+                        y: (position.y - here.y) / window.devicePixelRatio,
+                    });
+                }
+            } catch {
+                // No cursor position this time; the next poll asks again.
+            } finally {
+                busy = false;
+            }
+        }, CURSOR_POLL_MS);
+        return () => clearInterval(timer);
     }, []);
 
     return (
@@ -58,10 +123,25 @@ export default function Screenshot() {
                     right: screen.width - Math.max(mouseDownX, mouseMoveX),
                 }}
             />
+            {cursor && (
+                <>
+                    <div
+                        data-testid='crosshair-horizontal'
+                        className='fixed left-0 right-0 h-px bg-sky-500 pointer-events-none'
+                        style={{ top: cursor.y }}
+                    />
+                    <div
+                        data-testid='crosshair-vertical'
+                        className='fixed top-0 bottom-0 w-px bg-sky-500 pointer-events-none'
+                        style={{ left: cursor.x }}
+                    />
+                </>
+            )}
             <div
-                className='fixed top-0 left-0 bottom-0 right-0 cursor-crosshair select-none'
+                className='fixed top-0 left-0 bottom-0 right-0 cursor-none select-none'
                 onMouseDown={(e) => {
                     if (e.buttons === 1) {
+                        dragging.current = true;
                         setIsDown(true);
                         setMouseDownX(e.clientX);
                         setMouseDownY(e.clientY);
@@ -70,14 +150,20 @@ export default function Screenshot() {
                     }
                 }}
                 onMouseMove={(e) => {
+                    pointerSeen.current = true;
+                    setCursor({ x: e.clientX, y: e.clientY });
                     if (isDown) {
                         setIsMoved(true);
                         setMouseMoveX(e.clientX);
                         setMouseMoveY(e.clientY);
                     }
                 }}
+                onMouseLeave={() => {
+                    setCursor(null);
+                }}
                 onMouseUp={async (e) => {
                     appWindow.hide();
+                    dragging.current = false;
                     setIsDown(false);
                     setIsMoved(false);
                     const imgWidth = imgRef.current.naturalWidth;

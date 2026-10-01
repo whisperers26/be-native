@@ -52,7 +52,7 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 ## Other windows
 
 - **Recognize**: shows the cut screenshot (`invoke('get_base64')`, refreshed on `new_image`) and runs OCR with the chosen instance and language (defaults: the first in `recognize_service_list`, and `recognize_language`). Its Translate button posts the text to the app's own HTTP API (`/translate`).
-- **Screenshot**: shows a full-screen capture of the current monitor (`invoke('screenshot')`, which writes `pot_screenshot.png`). Dragging selects a region; on release it calls `invoke('cut_image')` and emits `success`. macOS uses the system `screencapture` tool instead of this window.
+- **Screenshot**: shows a full-screen capture of the current monitor (`invoke('screenshot')`, which writes `pot_screenshot.png`). Instead of a cursor it draws a horizontal and a vertical line through the pointer, across that one monitor. It polls `invoke('cursor_position')` every 50 ms: to place the lines before the mouse has moved, and to follow the cursor to another monitor (hide, leave full screen, move, enter full screen, capture again, show when the capture has loaded), unless a region is being dragged. Dragging selects a region; on release it calls `invoke('cut_image')` and emits `success`. macOS uses the system `screencapture` tool instead of this window.
 - **Updater**: runs Tauri's `checkUpdate()`, shows the release notes as markdown, downloads with a progress bar, installs, and relaunches.
 - **Config**: a sidebar plus react-router pages (`src/window/Config/routes/`); `/` redirects to `/general`.
 

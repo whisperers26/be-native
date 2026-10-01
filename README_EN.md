@@ -28,6 +28,7 @@
 > - The frontend is strict TypeScript; CI rejects JavaScript files under `src/`.
 > - Pushing a `v*` tag builds and publishes signed installers as a GitHub release; the in-app updater reads the latest release instead of upstream's feed.
 > - The app is named Be Native and has its own icon; a debug build (`pnpm tauri dev`) calls itself "Be Native (Debug)" and does not check for updates at launch.
+> - Selecting a screen region shows a horizontal and a vertical line through the pointer instead of a small crosshair; the lines stay on one monitor and follow the pointer to another.
 
 <!-- fork:end -->
 

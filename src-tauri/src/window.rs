@@ -34,11 +34,9 @@ fn get_daemon_window() -> Window {
     }
 }
 
-// Get monitor where the mouse is currently located
-fn get_current_monitor(x: i32, y: i32) -> Monitor {
-    info!("Mouse position: {}, {}", x, y);
-    let daemon_window = get_daemon_window();
-    let monitors = daemon_window.available_monitors().unwrap();
+// Find the monitor that contains a physical position
+fn monitor_at(x: i32, y: i32) -> Option<Monitor> {
+    let monitors = get_daemon_window().available_monitors().unwrap();
 
     for m in monitors {
         let size = m.size();
@@ -49,12 +47,39 @@ fn get_current_monitor(x: i32, y: i32) -> Monitor {
             && y >= position.y
             && y <= (position.y + size.height as i32)
         {
-            info!("Current Monitor: {:?}", m);
-            return m;
+            return Some(m);
         }
     }
-    warn!("Current Monitor not found, using primary monitor");
-    daemon_window.primary_monitor().unwrap().unwrap()
+    None
+}
+
+// Get monitor where the mouse is currently located
+fn get_current_monitor(x: i32, y: i32) -> Monitor {
+    info!("Mouse position: {}, {}", x, y);
+    match monitor_at(x, y) {
+        Some(m) => {
+            info!("Current Monitor: {:?}", m);
+            m
+        }
+        None => {
+            warn!("Current Monitor not found, using primary monitor");
+            get_daemon_window().primary_monitor().unwrap().unwrap()
+        }
+    }
+}
+
+// The cursor's physical position and the origin of the monitor under it. The screenshot window polls
+// this to follow the cursor to another monitor, which it cannot see through its own mouse events.
+#[tauri::command(async)]
+pub fn cursor_position() -> Result<serde_json::Value, String> {
+    use mouse_position::mouse_position::Mouse;
+
+    let Mouse::Position { x, y } = Mouse::get_mouse_position() else {
+        return Err("Mouse position not found".to_string());
+    };
+    let monitor = monitor_at(x, y).ok_or("Monitor not found")?;
+    let origin = monitor.position();
+    Ok(serde_json::json!({ "x": x, "y": y, "monitor": { "x": origin.x, "y": origin.y } }))
 }
 
 // Creating a window on the mouse monitor
