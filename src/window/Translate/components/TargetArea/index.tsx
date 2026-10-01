@@ -48,43 +48,59 @@ import {
     getServiceSouceType,
     whetherPluginService,
 } from '../../../../utils/service_instance';
+import type { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
+import type { MutableRefObject } from 'react';
+import type { PluginInfo, PluginList, ServiceConfigMap, TranslateResult } from '../../../../types/service';
 
-let translateID = [];
+let translateID: string[] = [];
 
-export default function TargetArea(props) {
+// The drag handle's props, which the Translate window spreads in, go to the card's header.
+interface TargetAreaProps extends Partial<DraggableProvidedDragHandleProps> {
+    index: number;
+    name: string;
+    translateServiceInstanceList: string[];
+    pluginList: PluginList;
+    serviceInstanceConfigMap: ServiceConfigMap;
+}
+
+export default function TargetArea(props: TargetAreaProps) {
     const { index, name, translateServiceInstanceList, pluginList, serviceInstanceConfigMap, ...drag } = props;
 
     const [currentTranslateServiceInstanceKey, setCurrentTranslateServiceInstanceKey] = useState(name);
-    function getInstanceName(instanceKey, serviceNameSupplier) {
+    function getInstanceName(instanceKey: string, serviceNameSupplier: () => string) {
         const instanceConfig = serviceInstanceConfigMap[instanceKey] ?? {};
         return getDisplayInstanceName(instanceConfig[INSTANCE_NAME_CONFIG_KEY], serviceNameSupplier);
     }
 
     const [appFontSize] = useConfig('app_font_size', 16);
-    const [collectionServiceList] = useConfig('collection_service_list', []);
+    const [collectionServiceList] = useConfig<string[]>('collection_service_list', []);
     const [ttsServiceList] = useConfig('tts_service_list', ['lingva_tts']);
     const [translateSecondLanguage] = useConfig('translate_second_language', 'en');
     const [historyDisable] = useConfig('history_disable', false);
     const [isLoading, setIsLoading] = useState(false);
     const [hide, setHide] = useState(true);
 
-    const [result, setResult] = useState('');
+    const [result, setResult] = useState<TranslateResult>('');
     const [error, setError] = useState('');
 
     const sourceText = useAtomValue(sourceTextAtom);
-    const sourceLanguage = useAtomValue(sourceLanguageAtom);
-    const targetLanguage = useAtomValue(targetLanguageAtom);
+    // Undefined until LanguageArea has copied the settings in; the translation effect below waits for both.
+    const sourceLanguage = useAtomValue(sourceLanguageAtom)!;
+    const targetLanguage = useAtomValue(targetLanguageAtom)!;
     const [autoCopy] = useConfig('translate_auto_copy', 'disable');
     const [hideWindow] = useConfig('translate_hide_window', false);
     const [clipboardMonitor] = useConfig('clipboard_monitor', false);
 
     const detectLanguage = useAtomValue(detectLanguageAtom);
-    const [ttsPluginInfo, setTtsPluginInfo] = useState();
+    const [ttsPluginInfo, setTtsPluginInfo] = useState<PluginInfo>();
     const { t } = useTranslation();
-    const textAreaRef = useRef();
+    // The textarea is not rendered while the result is a dictionary, and React then sets the ref to null.
+    const textAreaRef = useRef<HTMLTextAreaElement | null>() as MutableRefObject<HTMLTextAreaElement | null>;
     const toastStyle = useToastStyle();
     const speak = useVoice();
-    const theme = useTheme();
+    // known bug (known-issues.md): this is the object useTheme() returns, not the theme's name,
+    // so the spinner's colour test below is never true.
+    const theme: unknown = useTheme();
 
     useEffect(() => {
         if (error) {
@@ -124,7 +140,13 @@ export default function TargetArea(props) {
     ]);
 
     // todo: history panel use service instance key
-    const addToHistory = async (text, source, target, serviceInstanceKey, result) => {
+    const addToHistory = async (
+        text: string,
+        source: string,
+        target: string,
+        serviceInstanceKey: string,
+        result: TranslateResult
+    ) => {
         const db = await Database.load('sqlite:history.db');
 
         await db
@@ -147,10 +169,10 @@ export default function TargetArea(props) {
             );
     };
 
-    function invokeOnce(fn) {
+    function invokeOnce<A extends unknown[]>(fn: (...args: A) => void) {
         let isInvoke = false;
 
-        return (...args) => {
+        return (...args: A) => {
             if (isInvoke) {
                 return;
             } else {
@@ -429,7 +451,7 @@ export default function TargetArea(props) {
                             aria-label='app language'
                             className='max-h-[40vh] overflow-y-auto'
                             onAction={(key) => {
-                                setCurrentTranslateServiceInstanceKey(key);
+                                setCurrentTranslateServiceInstanceKey(key as string);
                             }}
                         >
                             {translateServiceInstanceList.map((instanceKey) => {
