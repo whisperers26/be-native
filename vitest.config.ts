@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
-// Unit and component tests. The app's own build config is vite.config.js.
+// Unit and component tests. The app's own build config is vite.config.ts.
 export default defineConfig({
     plugins: [react()],
     test: {
