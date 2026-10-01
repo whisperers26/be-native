@@ -87,7 +87,7 @@ The `ocr` screenshot's text pane shows either nothing or the loading skeleton, d
 
 ## Render tests
 
-Every window (`src/window/<Name>/index.test.tsx`), every settings page (`src/window/Config/pages/<Page>/index.test.tsx`) and `src/App.test.tsx` has a render test:
+Every window (`src/window/<Name>/index.test.tsx`; SilentRecognize's tests check what it copies, since it renders nothing), every settings page (`src/window/Config/pages/<Page>/index.test.tsx`) and `src/App.test.tsx` has a render test:
 
 - Set the window label in a `vi.hoisted` block before importing the component (see above).
 - Import `src/i18n` so labels are the English text from `en_US.json`; render inside `NextUIProvider`, plus `MemoryRouter` for the Config window and its pages.

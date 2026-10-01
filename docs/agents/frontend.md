@@ -14,6 +14,7 @@ Stack: React 18; Vite 5 (dev server on port 1420); NextUI 2.4 on Tailwind 3.4, w
 | --- | --- | --- |
 | `translate` | `src/window/Translate/` | Selection, input and image translation, the HTTP API, the clipboard monitor |
 | `recognize` | `src/window/Recognize/` | OCR after a screenshot, the HTTP API |
+| `silent_recognize` | `src/window/SilentRecognize/` | The silent OCR copy hotkey, the tray, the HTTP API |
 | `screenshot` | `src/window/Screenshot/` | The OCR and image translation hotkeys (not on macOS) |
 | `config` | `src/window/Config/` | The tray, first run, the HTTP API |
 | `updater` | `src/window/Updater/` | The update check, the About page |
@@ -52,6 +53,7 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 ## Other windows
 
 - **Recognize**: shows the cut screenshot (`invoke('get_base64')`, refreshed on `new_image`) and runs OCR with the chosen instance and language (defaults: the first in `recognize_service_list`, and `recognize_language`). Its Translate button posts the text to the app's own HTTP API (`/translate`).
+- **SilentRecognize**: renders nothing and is never shown. It reads the cut screenshot (`invoke('get_base64')`), runs the first instance in `recognize_service_list` with `recognize_language`, applies `recognize_delete_newline`, writes the text to the clipboard and closes. A `new_image` event while it is still working starts another run, and only the latest result is copied. A failure, an unsupported language or an empty result sends a system notification instead.
 - **Screenshot**: shows a full-screen capture of the current monitor (`invoke('screenshot')`, which writes `pot_screenshot.png`). Instead of a cursor it draws a horizontal and a vertical line through the pointer, across that one monitor. It polls `invoke('cursor_position')` every 50 ms: to place the lines before the mouse has moved, and to follow the cursor to another monitor (hide, leave full screen, move, enter full screen, capture again, show when the capture has loaded), unless a region is being dragged. Dragging selects a region; on release it calls `invoke('cut_image')` and emits `success`. macOS uses the system `screencapture` tool instead of this window.
 - **Updater**: runs Tauri's `checkUpdate()`, shows the release notes as markdown, downloads with a progress bar, installs, and relaunches.
 - **Config**: a sidebar plus react-router pages (`src/window/Config/routes/`); `/` redirects to `/general`.
@@ -61,7 +63,7 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 | General | Autostart, update check, HTTP port, UI language, theme, fonts, tray click (Windows), transparency, dev mode, proxy |
 | Translate | Default languages, detection engine, auto-copy, history, incremental and dynamic translation, window behaviour |
 | Recognize | Default OCR language and window behaviour |
-| Hotkey | The four global shortcuts |
+| Hotkey | The five global shortcuts |
 | Service | Instances per kind (translate, OCR, TTS, collection), their settings, external plugins |
 | History | Browse, edit and clear the translation history; send entries to collections |
 | Backup | Back up settings and history to WebDAV, Aliyun Drive or a local file, and restore them |

@@ -14,7 +14,7 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `dev_mode` | `false` | F12 opens devtools |
 | `check_update` | `true` | Check for updates at launch (release builds only; a debug build never does). Rust |
 | `server_port` | `60828` | Local HTTP API port; restart to apply. Rust |
-| `tray_click_event` | `config` | Windows tray left click: `config`, `translate`, `ocr_recognize`, `ocr_translate`, `disable`. Rust |
+| `tray_click_event` | `config` | Windows tray left click: `config`, `translate`, `ocr_recognize`, `ocr_translate`, `ocr_copy`, `disable`. Rust |
 | `proxy_enable` | `false` | Applied at launch only |
 | `proxy_host`, `proxy_port` | `''` | Rust builds `http://<host>:<port>`; the port must be a number |
 | `proxy_username`, `proxy_password` | `''` | Ignored (the inputs are disabled) |
@@ -59,7 +59,7 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 
 | Key | Default | Notes |
 | --- | --- | --- |
-| `hotkey_selection_translate`, `hotkey_input_translate`, `hotkey_ocr_recognize`, `hotkey_ocr_translate` | `''` | Accelerator strings set on the Hotkey page; empty means no shortcut. Rust |
+| `hotkey_selection_translate`, `hotkey_input_translate`, `hotkey_ocr_recognize`, `hotkey_ocr_translate`, `hotkey_ocr_copy` | `''` | Accelerator strings set on the Hotkey page; empty means no shortcut. Rust |
 
 ## Services
 
