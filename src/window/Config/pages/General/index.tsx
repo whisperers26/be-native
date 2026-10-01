@@ -35,6 +35,7 @@ export default function General() {
     // The default is a number, but the menu hands back its item key, a string, so a saved size is either.
     const [appFontSize, setAppFontSize] = useConfig<number | string>('app_font_size', 16);
     const [transparent, setTransparent] = useConfig('transparent', true);
+    const [windowAnimation, setWindowAnimation] = useConfig('window_animation', true);
     const [devMode, setDevMode] = useConfig('dev_mode', false);
     const [trayClickEvent, setTrayClickEvent] = useConfig('tray_click_event', 'config');
     const [proxyEnable, setProxyEnable] = useConfig('proxy_enable', false);
@@ -483,6 +484,17 @@ export default function General() {
                                 isSelected={transparent}
                                 onValueChange={(v) => {
                                     setTransparent(v);
+                                }}
+                            />
+                        )}
+                    </div>
+                    <div className='config-item'>
+                        <h3>{t('config.general.window_animation')}</h3>
+                        {windowAnimation !== null && (
+                            <Switch
+                                isSelected={windowAnimation}
+                                onValueChange={(v) => {
+                                    setWindowAnimation(v);
                                 }}
                             />
                         )}

@@ -9,7 +9,6 @@ import type { Tone } from '../../../../utils/writing_tones';
 
 export default function Writing() {
     const [tones, setTones] = useConfig<Tone[]>('writing_tones', DEFAULT_TONES);
-    const [windowAnimation, setWindowAnimation] = useConfig('writing_window_animation', true);
     const [closeOnBlur, setCloseOnBlur] = useConfig('writing_close_on_blur', true);
     const { t } = useTranslation();
 
@@ -81,17 +80,6 @@ export default function Writing() {
             </Card>
             <Card>
                 <CardBody>
-                    <div className='config-item'>
-                        <h3>{t('config.writing.window_animation')}</h3>
-                        {windowAnimation !== null && (
-                            <Switch
-                                isSelected={windowAnimation}
-                                onValueChange={(v) => {
-                                    setWindowAnimation(v);
-                                }}
-                            />
-                        )}
-                    </div>
                     <div className='config-item'>
                         <h3>{t('config.writing.close_on_blur')}</h3>
                         {closeOnBlur !== null && (

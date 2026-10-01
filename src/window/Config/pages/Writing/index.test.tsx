@@ -23,7 +23,7 @@ function open() {
 }
 
 describe('Writing settings page', () => {
-    it('shows the five default tones and the window settings', async () => {
+    it('shows the five default tones and the window setting', async () => {
         open();
 
         for (const tone of DEFAULT_TONES) {
@@ -31,7 +31,6 @@ describe('Writing settings page', () => {
             expect(screen.getByDisplayValue(tone.instruction)).toBeInTheDocument();
         }
         expect(DEFAULT_TONES).toHaveLength(5);
-        expect(screen.getByText('Window Animations')).toBeInTheDocument();
         expect(screen.getByText('Close window when focus lost')).toBeInTheDocument();
         expect(fakeTauri.unhandled).toEqual([]);
     });
@@ -66,20 +65,5 @@ describe('Writing settings page', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Reset to Defaults' }));
         expect(await screen.findByDisplayValue('Professional')).toBeInTheDocument();
         await vi.waitFor(() => expect(fakeTauri.store.get('writing_tones')).toEqual(DEFAULT_TONES));
-    });
-
-    it('turns the window animations off', async () => {
-        open();
-        const label = await screen.findByText('Window Animations');
-        const toggle = await vi.waitFor(() => {
-            const input = label.parentElement!.querySelector('input');
-            expect(input).not.toBeNull();
-            return input!;
-        });
-        expect(toggle).toBeChecked();
-
-        fireEvent.click(toggle);
-
-        await vi.waitFor(() => expect(fakeTauri.store.get('writing_window_animation')).toBe(false));
     });
 });

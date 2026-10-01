@@ -58,6 +58,7 @@
                     "system": "系統主題"
                 },
                 "transparent": "透明效果",
+                "window_animation": "視窗動畫",
                 "proxy": {
                     "title": "代理伺服器",
                     "host": "主機",
@@ -113,7 +114,6 @@
                 "mouse": "跟隨滑鼠",
                 "pre_state": "記住位置",
                 "remember_window_size": "記住視窗大小",
-                "window_animation": "視窗動畫",
                 "close_on_blur": "失去焦點時關閉視窗",
                 "always_on_top": "視窗始終置頂",
                 "hide_source": "隱藏原文",

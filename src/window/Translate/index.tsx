@@ -99,7 +99,7 @@ export default function Translate() {
     const [alwaysOnTop] = useConfig('translate_always_on_top', false);
     const [windowPosition] = useConfig('translate_window_position', 'smart');
     const [rememberWindowSize] = useConfig('translate_remember_window_size', false);
-    const [windowAnimation] = useConfig('translate_window_animation', true);
+    const [windowAnimation] = useConfig('window_animation', true);
     // The setting is read in the fit, which is set up before it may have changed.
     const animationRef = useRef(true);
     animationRef.current = windowAnimation !== false;
