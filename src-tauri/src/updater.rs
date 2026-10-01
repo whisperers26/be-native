@@ -3,6 +3,11 @@ use crate::window::updater_window;
 use log::{info, warn};
 
 pub fn check_update(app_handle: tauri::AppHandle) {
+    // A debug build is built from the working tree, so no release is newer than it.
+    if cfg!(debug_assertions) {
+        info!("Debug build, skipping the update check");
+        return;
+    }
     let enable = match get("check_update") {
         Some(v) => v.as_bool().unwrap(),
         None => {
