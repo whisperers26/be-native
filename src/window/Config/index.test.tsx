@@ -11,7 +11,7 @@ vi.hoisted(() => {
 
 import Config from './index';
 
-const PAGES = ['General', 'Translate', 'Recognize', 'Hotkey', 'Service', 'History', 'Backup', 'About'];
+const PAGES = ['General', 'Translate', 'Recognize', 'Hotkey', 'Service', 'History', 'About'];
 
 describe('Config window', () => {
     it('shows the sidebar and opens on the General page', async () => {
