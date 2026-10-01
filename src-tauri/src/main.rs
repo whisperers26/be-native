@@ -2,7 +2,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod agent_cli;
-mod backup;
 mod clipboard;
 mod cmd;
 mod config;
@@ -18,7 +17,6 @@ mod updater;
 mod window;
 
 use agent_cli::agent_cli_run;
-use backup::*;
 use clipboard::*;
 use cmd::*;
 use config::*;
@@ -170,11 +168,8 @@ fn main() {
             test_mode,
             lang_detect,
             agent_cli_run,
-            webdav,
-            local,
             install_plugin,
-            font_list,
-            aliyun
+            font_list
         ])
         .on_system_tray_event(tray_event_handler)
         .build(context)
