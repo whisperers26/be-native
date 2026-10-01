@@ -5,7 +5,7 @@
 | Tool | Version | Notes |
 | --- | --- | --- |
 | Node.js | `.node-version` (21); Node 22 also works | |
-| pnpm | 9 or newer | The lockfile is format 9.0 |
+| pnpm | 10.14.0 | Pinned by `packageManager` in `package.json` |
 | Rust | stable (1.98.1 known to work) | Windows: the MSVC toolchain |
 | Windows extras | Visual Studio 2022 or newer with "Desktop development with C++"; WebView2 runtime | WebView2 ships with Windows 10 and 11 |
 | Linux extras | `sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libayatana-appindicator3-dev librsvg2-dev patchelf libxdo-dev libxcb1 libxrandr2 libdbus-1-3` | |

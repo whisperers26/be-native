@@ -432,7 +432,7 @@ windowrulev2 = move cursor 0 0, class:(pot), title:(Translator|PopClip|Screensho
 
 Node.js >= 18.0.0
 
-pnpm >= 8.5.0
+pnpm 10.14.0 (package.json의 packageManager로 고정)
 
 Rust >= 1.80.0
 
