@@ -123,8 +123,9 @@ export default function Translate() {
         }
     }, [alwaysOnTop]);
     // 保存窗口位置
+    // Not in test mode: a test must leave the owner's saved position and size as they are.
     useEffect(() => {
-        if (windowPosition !== null && windowPosition === 'pre_state') {
+        if (testMode === false && windowPosition !== null && windowPosition === 'pre_state') {
             const unlistenMove = listen('tauri://move', async () => {
                 if (moveTimeout) {
                     clearTimeout(moveTimeout);
@@ -152,10 +153,10 @@ export default function Translate() {
                 });
             };
         }
-    }, [windowPosition]);
+    }, [windowPosition, testMode]);
     // 保存窗口大小
     useEffect(() => {
-        if (rememberWindowSize !== null && rememberWindowSize) {
+        if (testMode === false && rememberWindowSize !== null && rememberWindowSize) {
             const unlistenResize = listen('tauri://resize', async () => {
                 if (resizeTimeout) {
                     clearTimeout(resizeTimeout);
@@ -182,7 +183,7 @@ export default function Translate() {
                 });
             };
         }
-    }, [rememberWindowSize]);
+    }, [rememberWindowSize, testMode]);
 
     const loadPluginList = async () => {
         const serviceTypeList = ['translate', 'tts', 'recognize', 'collection'];

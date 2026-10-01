@@ -48,6 +48,27 @@ describe('Translate window', () => {
         expect(fakeTauri.unhandled).toEqual([]);
     });
 
+    it('does not save the window size or position in test mode', async () => {
+        fakeTauri.command('test_mode', () => true);
+        fakeTauri.store.set('translate_remember_window_size', true);
+        fakeTauri.store.set('translate_window_position', 'pre_state');
+        fakeTauri.store.set('translate_detect_engine', 'local');
+        render(
+            <NextUIProvider>
+                <Translate />
+            </NextUIProvider>
+        );
+        await screen.findByText('Google');
+
+        fakeTauri.emit('tauri://resize', null);
+        fakeTauri.emit('tauri://move', null);
+        // Both are saved 100 ms after the event.
+        await new Promise((done) => setTimeout(done, 300));
+
+        expect(fakeTauri.store.has('translate_window_width')).toBe(false);
+        expect(fakeTauri.store.has('translate_window_position_x')).toBe(false);
+    });
+
     it('shows text that arrives from Rust in the source box', async () => {
         fakeTauri.command('get_text', () => 'hello world');
         fakeTauri.command('lang_detect', () => 'en');
