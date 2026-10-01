@@ -76,12 +76,12 @@ describe('llm7 writing', () => {
         expect(payloads().map((payload) => payload.model)).toEqual(Array(3).fill('mistral-Nemo-Instruct-2407'));
     });
 
-    it('never waits longer than half a minute at a time, and gives up after four waits', async () => {
-        httpMock.queue(limited(600), limited(1), limited(1), limited(1), limited(1));
+    it('never waits much longer than a minute at a time, and gives up after two waits', async () => {
+        httpMock.queue(limited(600), limited(51), limited(1));
 
         await expect(improve('hello', { config: {} })).rejects.toContain('Http Status: 429');
-        expect(waits).toEqual([30, 1, 1, 1]);
-        expect(httpMock.calls).toHaveLength(5);
+        expect(waits).toEqual([65, 51]);
+        expect(httpMock.calls).toHaveLength(3);
     });
 
     it('asks the next free model when one is refused', async () => {

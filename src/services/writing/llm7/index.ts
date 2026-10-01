@@ -8,9 +8,10 @@ export const LLM7_URL = 'https://api.llm7.io/v1/chat/completions';
 export const DEFAULT_MODEL = 'mistral-Nemo-Instruct-2407';
 // What is asked when a model is refused: another model served without a token, then whichever LLM7 picks.
 const FALLBACK_MODELS = ['codestral-latest', 'default'];
-// How often a request waits out the rate limit before it gives up, and the longest it waits each time.
-const RATE_LIMIT_TRIES = 4;
-const LONGEST_WAIT = 30;
+// How often a request waits out the rate limit before it gives up, and the longest it waits each time, in seconds.
+// LLM7 counts requests by the minute, and a request made before the minute is over is refused again.
+const RATE_LIMIT_TRIES = 2;
+const LONGEST_WAIT = 65;
 
 /** How the service waits; a test replaces it. */
 export const pacing = {
