@@ -76,14 +76,31 @@ expect(httpMock.calls).toMatchSnapshot();
 `pnpm smoke` checks the real app on Windows. Start the app first with the "Tauri dev" run configuration in RustRover (or `pnpm tauri dev`), then run the "Smoke test" run configuration (or `pnpm smoke`). If you switched branches since starting the app, restart it first; otherwise every scenario can time out waiting for its window ([setup-and-run.md](setup-and-run.md#run)). It:
 
 1. Stops at once, with exit code 1, if nothing answers on the app's HTTP port (`server_port`, default 60828) or the app is not this repository's dev build (`src-tauri\target\debug\Be Native.exe`).
-2. Closes any open app windows, then runs four scenarios through the HTTP API: `config` (`GET /config`, window shows "General Settings"), `translate` (`POST /translate` with `hello world`, which the window must show), `input` (`GET /input_translate`), and `ocr` (writes a "Hello World" image to the app's `pot_screenshot_cut.png`, then `GET /ocr_recognize?screenshot=false`). Before each request it moves the mouse cursor to the centre of the secondary monitor (the primary one if it is the only monitor): the app opens its windows on the monitor under the cursor, sized by that monitor's scale, so this keeps them off the screen the owner works on, and the screenshots would otherwise change size with wherever the mouse was left. Each scenario waits up to 15 s for its window, reads its text through UI Automation where it checks text, saves a screenshot, and closes the window. The window draws the screenshot itself (`PrintWindow`), so other windows covering it, or showing through its translucent parts, do not appear in it.
+2. Turns on the app's test mode (below), closes any open app windows, then runs four scenarios through the HTTP API: `config` (`GET /config`, window shows "General Settings"), `translate` (`POST /translate` with `hello world`, which the window must show), `input` (`GET /input_translate`), and `ocr` (writes a "Hello World" image to the app's `pot_screenshot_cut.png`, then `GET /ocr_recognize?screenshot=false`). Each scenario waits up to 15 s for its window, reads its text through UI Automation where it checks text, saves a screenshot, and closes the window. The window draws the screenshot itself (`PrintWindow`), so other windows covering it, or showing through its translucent parts, do not appear in it. It turns test mode off again at the end.
 3. Fails on any `[ERROR]` or `panicked` line the app logged during the run, except translation services failing on the network (`[<service>]happened error`), which it lists as warnings: several default services depend on servers that are gone (see [known-issues.md](known-issues.md)). A JavaScript error in such a line (`TypeError`, `ReferenceError`, `SyntaxError`, `RangeError`, `is not a function`, `is not defined`, `Cannot read propert…`) still fails the run: the Translate window logs every translate error through that same line, so a bug in the app's own code looks like a network failure otherwise. Some services already throw a `TypeError` on an unexpected server reply (see known-issues.md), so a live provider answering with an error body can fail the run without any refactor bug; check the log line before blaming the change. The report keeps only the first line of each error; the HTTP status and reply follow it in the app's `pot.log` ([setup-and-run.md](setup-and-run.md#data-on-disk)). A service can also start failing for outside reasons: Google answers `Http Status: 429` with a "Sorry..." page when it rate-limits the app. `scripts/smoke/log.ts` sorts the lines; `pnpm test` runs its tests.
 
-Results go to `test-results/smoke/<time>/` (gitignored): `report.json` and one PNG per scenario. `scripts/smoke/windows.ps1` holds the Windows helpers (find, capture and close windows; read UI Automation text; draw the OCR image; park the cursor). To open a window by hand on the secondary monitor, park first: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/smoke/windows.ps1 -Action park`, then send the HTTP request.
+Results go to `test-results/smoke/<time>/` (gitignored): `report.json` and one PNG per scenario. `scripts/smoke/windows.ps1` holds the Windows helpers (find, capture and close windows; read UI Automation text; draw the OCR image).
 
 The baseline from the JavaScript code is kept at `test-results/smoke/baseline-js/` on the owner's machine. Its `config.png` was captured again on 2026-10-01, while the Config window was still JavaScript, because the first one showed another app covering the window. After a refactor, run the smoke test again and compare the screenshots with it: layout, labels and the shown image must match; live translation results may differ.
 
-Leave the computer alone while the smoke test runs. The Translate window closes itself when it loses focus (`translate_close_on_blur`, on by default), so a click elsewhere can fail the `translate` or `input` scenario with "window … has no area"; the app's log then shows `Blur` and `Confirm Blur`. Run it again.
+The smoke test does not touch the mouse, the keyboard or the focus, so the owner can keep working while it runs. If it says the app has no test mode, the running app was built before test mode existed: restart it.
+
+### Test mode
+
+A debug build has a test mode for testing in the background. `GET /test_mode?on=true` on the app's HTTP API turns it on and `?on=false` turns it off; it is off at launch, and release builds do not have it. While it is on:
+
+- New windows open at the centre of the secondary monitor (the first monitor that is not the primary one; the primary one if it is alone) instead of on the monitor under the mouse cursor, sized by that monitor's scale. The cursor is not read or moved.
+- On Windows, windows are shown without being activated and are never focused, so the window the owner is typing in keeps the focus. A window that never had the focus cannot lose it, so the Translate window does not close itself (`translate_close_on_blur`). On Linux and macOS a shown window still takes the focus.
+
+To open a window by hand without disturbing the owner, turn test mode on, send the HTTP request, and turn it off when done:
+
+```bash
+curl "http://127.0.0.1:60828/test_mode?on=true"
+curl "http://127.0.0.1:60828/config"
+curl "http://127.0.0.1:60828/test_mode?on=false"
+```
+
+Test mode cannot cover what needs real input: global hotkeys, selection translation (it reads the selection of the foreground app) and dragging a region in the Screenshot window, which also covers its monitor and takes the focus.
 
 The `ocr` screenshot's text pane shows either nothing or the loading skeleton, depending on when the screenshot is taken: the window never finishes loading ([known-issues.md](known-issues.md)). Both match the baseline.
 

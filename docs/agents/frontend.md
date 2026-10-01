@@ -34,7 +34,7 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 | `src/components/WindowControl/` | Minimise, maximise and close buttons for frameless windows (hidden on macOS) |
 | `src/components/AgentCliConfig/` | The settings form shared by the Claude Code and Codex translate services |
 | `src/hooks/` | `useConfig`, `useGetState`, `useSyncAtom`, `useToastStyle`, `useVoice` |
-| `src/utils/` | Store and env setup, `debounce`, language detection, language tables, service instance keys, the plugin loader, the Claude Code and Codex session helper (`agent_cli`) |
+| `src/utils/` | Store and env setup, `debounce`, language detection, language tables, service instance keys, the plugin loader, the Claude Code and Codex session helper (`agent_cli`), `showWindow` and `focusWindow` (`window`): a window shows and focuses itself through these, never `appWindow.show()` or `appWindow.setFocus()`, so that [test mode](testing.md#test-mode) can keep it in the background |
 | `src/i18n/` | i18next setup and `locales/*.json` |
 | `src/types/` | Shared TypeScript types; so far the service types (`service.ts`) |
 | `src/services/` | Built-in services: [services.md](services.md) |
