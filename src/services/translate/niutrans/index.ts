@@ -1,13 +1,23 @@
 import { fetch, Body } from '@tauri-apps/api/http';
+import type { TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+interface NiutransResponse {
+    tgt_text?: string;
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     const { config } = options;
 
     const { https, apikey } = config;
 
     const url = `${https ? 'https' : 'http'}://api.niutrans.com/NiuTransServer/translation`;
 
-    let res = await fetch(url, {
+    let res = await fetch<NiutransResponse>(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
