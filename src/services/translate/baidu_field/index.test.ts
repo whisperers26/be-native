@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { httpMock } from '../../../test/http';
 import { info, Language, translate } from './index';
 
-// 'it' is the default the settings form (Config.jsx) writes; translate itself applies no default.
+// 'it' is the default the settings form (Config.tsx) writes; translate itself applies no default.
 const config = { appid: 'test-appid', secret: 'test-secret', field: 'it' };
 
 describe('baidu_field translate', () => {

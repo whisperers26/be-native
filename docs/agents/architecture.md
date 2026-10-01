@@ -5,7 +5,7 @@ Be Native is a fork of Pot, a Tauri 1 desktop app. One Rust process owns the win
 | Piece | Where | Read |
 | --- | --- | --- |
 | Rust core | `src-tauri/` | [backend.md](backend.md) |
-| React UI, one bundle for every window | `src/` | [frontend.md](frontend.md) |
+| React UI in TypeScript, one bundle for every window | `src/` | [frontend.md](frontend.md) |
 | Translation, OCR, TTS and collection services, plugins | `src/services/` | [services.md](services.md) |
 | Settings, one JSON file read by both sides | `config.json` | [config-keys.md](config-keys.md) |
 | Tools, running, files on disk | | [setup-and-run.md](setup-and-run.md) |

@@ -6,7 +6,7 @@
 
 ![License](https://img.shields.io/github/license/pot-app/pot-desktop.svg)
 ![Tauri](https://img.shields.io/badge/Tauri-1.6.8-blue?logo=tauri)
-![JavaScript](https://img.shields.io/badge/-JavaScript-yellow?logo=javascript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/-TypeScript-blue?logo=typescript&logoColor=white)
 ![Rust](https://img.shields.io/badge/-Rust-orange?logo=rust&logoColor=white)
 ![Windows](https://img.shields.io/badge/-Windows-blue?logo=windows&logoColor=white)
 ![MacOS](https://img.shields.io/badge/-macOS-black?&logo=apple&logoColor=white)
@@ -21,9 +21,10 @@
 >
 > - 기본 브랜치는 `main`이며, 모든 변경은 풀 리퀘스트로 병합됩니다.
 > - AI 에이전트는 [AGENTS.md](./AGENTS.md)와 [docs/agents](./docs/agents/)의 위키를 따라 작업합니다.
-> - 모든 풀 리퀘스트는 CI에서 검사됩니다(문서 검사 및 프런트엔드 빌드).
+> - 모든 풀 리퀘스트는 CI에서 검사됩니다(문서, 타입, 테스트 및 프런트엔드 빌드).
 > - 자동화 테스트(Vitest)가 프런트엔드 동작을 고정합니다: `pnpm test`.
 > - 실제 앱 스모크 테스트(`pnpm smoke`, Windows)가 로컬 HTTP API로 앱의 창을 검사합니다.
+> - 프런트엔드는 strict 모드의 TypeScript이며, CI는 `src/` 아래의 JavaScript 파일을 거부합니다.
 
 <!-- fork:end -->
 

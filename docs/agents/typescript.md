@@ -45,11 +45,9 @@ Every migration PR shows three things:
 2. `pnpm test` passes with the test files changed at most in their types and the snapshots untouched.
 3. For windows and services, the real-app smoke test matches the JavaScript baseline ([testing.md](testing.md)).
 
-## Converting a file
+## New code
 
-1. Rename it in its own commit with `git mv`: `.jsx` with JSX to `.tsx`, `.jsx` without JSX and `.js` to `.ts`. Import paths stay extension-less, so nothing else changes.
-2. Add types in follow-up commits, one module or a small group per commit.
-3. Run `pnpm typecheck`, `pnpm test`, `pnpm check:transpile`, `pnpm build`.
+All of `src/` is TypeScript. Write a new file as `.ts`, or `.tsx` when it holds JSX, and follow the type policy above; CI fails on a `.js` or `.jsx` file in `src/`. When a change should touch types only, such as tightening a type, `pnpm check:transpile` still proves it.
 
 ## Migration status
 
