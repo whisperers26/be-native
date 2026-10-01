@@ -42,10 +42,11 @@ Closing a window never quits the app; only Quit or Restart in the tray does. A s
 
 ## How the two sides talk
 
-- Frontend → Rust: `invoke('<command>', args)`, 21 commands.
-- Rust → frontend: the events `new_text` and `new_image` to one window, and `translate_auto_copy_changed` to every window.
+- Frontend → Rust: `invoke('<command>', args)`, 22 commands.
+- Rust → frontend: the events `new_text`, `new_image` and `agent_cli_stream` to one window, and `translate_auto_copy_changed` to every window.
 - Frontend → Rust: the event `success` from the screenshot window.
 - Requests to outside services go through Tauri's HTTP client, which runs in Rust, so CORS does not apply.
+- The Claude Code and Codex translate services have no HTTP requests of their own: Rust runs the installed command-line tools as child processes ([services.md](services.md)).
 
 ## Inherited risks
 

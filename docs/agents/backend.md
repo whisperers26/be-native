@@ -16,6 +16,7 @@
 | `screenshot` | Captures one monitor to `pot_screenshot.png` |
 | `system_ocr` | OS OCR: Windows.Media.Ocr, a bundled macOS helper, or Linux `tesseract` |
 | `lang_detect` | Offline language detection (lingua) |
+| `agent_cli` | Claude Code and Codex sessions for the translate services of the same names ([services.md](services.md)) |
 | `backup` | WebDAV, local file and Aliyun Drive backup and restore |
 | `cmd` | Other commands: text state, store reload, image cut, base64 and copy, proxy, plugin install and run, fonts, devtools |
 | `updater` | Update check at launch |
@@ -26,14 +27,14 @@
 1. macOS: accessory activation policy and the accessibility permission prompt.
 2. Load the settings and prune unknown services from the four service lists.
 3. First run (settings empty): open the Config window.
-4. Build the tray menu, start the HTTP server, register the global shortcuts (a failure shows a notification), apply the proxy if enabled, check for updates, warm up offline language detection if it is the selected engine, start the clipboard monitor if enabled.
+4. Build the tray menu, start the HTTP server, register the global shortcuts (a failure shows a notification), apply the proxy if enabled, check for updates, warm up offline language detection if it is the selected engine, start the clipboard monitor if enabled, start the waiting Claude Code and Codex sessions.
 
 ## Commands
 
 | Command | Arguments | Returns | Does |
 | --- | --- | --- | --- |
 | `get_text` | — | string | The text waiting for the translate window |
-| `reload_store` | — | — | Reloads `config.json` into Rust's cache |
+| `reload_store` | — | — | Reloads `config.json` into Rust's cache, then matches the waiting Claude Code and Codex sessions to it |
 | `screenshot` | `x`, `y` | — | Captures the monitor at that position to `pot_screenshot.png` |
 | `cursor_position` | — | `{ x, y, monitor: { x, y } }` | The cursor's physical position and the origin of the monitor under it; an error if either is unknown |
 | `cut_image` | `left`, `top`, `width`, `height` | — | Crops it to `pot_screenshot_cut.png` |
@@ -41,6 +42,7 @@
 | `copy_img` | `width`, `height` | — | Copies the cut image to the clipboard |
 | `system_ocr` | `lang` | string | OS OCR of `pot_screenshot_cut.png` |
 | `lang_detect` | `text` | string | Offline language detection; an app language code, `en` if unsure |
+| `agent_cli_run` | `id`, `spec`, `prompt` | string | Runs one prompt in a Claude Code or Codex session of its own and returns the answer; emits `agent_cli_stream` meanwhile |
 | `set_proxy`, `unset_proxy` | — | bool | Set or clear the proxy environment variables. The frontend never calls them; the proxy is applied at launch |
 | `install_plugin` | `pathList` | number | Installs `.potext` files |
 | `run_binary` | `pluginType`, `pluginName`, `cmdName`, `args` | `{ stdout, stderr, status }` | Runs a program with the plugin's directory as working directory |
@@ -70,6 +72,7 @@ On Windows the Screenshot window is subclassed (`suppress_title_bar`) so that th
 | `new_text` | Rust → translate window | The text, `[INPUT_TRANSLATE]` or `[IMAGE_TRANSLATE]` |
 | `new_image` | Rust → recognize or silent_recognize window | `""`; the window re-reads the image |
 | `translate_auto_copy_changed` | Rust → all windows | The auto-copy mode, when changed from the tray |
+| `agent_cli_stream` | Rust → the window that called `agent_cli_run` | `{ id, text }`: the answer so far |
 | `success` | Screenshot window → Rust | None; the region is saved, continue with OCR or image translation |
 
 ## Hotkeys

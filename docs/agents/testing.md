@@ -10,6 +10,8 @@
 
 CI runs `pnpm test` on every PR.
 
+Rust has unit tests only for `agent_cli` (the arguments it starts the tools with, and how it reads their output). Run them from `src-tauri/` with `cargo test agent_cli`; CI does not. `cargo test agent_cli -- --ignored --nocapture` also runs two tests against the real Claude Code with the signed-in account, each a one-line translation.
+
 ## Layout
 
 Tests sit next to the code they test (`src/utils/index.test.ts` tests `src/utils/index`). Snapshots live in `__snapshots__/` beside the test. Test helpers live in `src/test/`:
