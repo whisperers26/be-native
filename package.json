@@ -13,7 +13,8 @@
         "updater:fixRuntime": "node updater/updater-for-fix-runtime.mjs",
         "check:docs": "tsx scripts/check-docs.ts",
         "test": "vitest run",
-        "test:watch": "vitest"
+        "test:watch": "vitest",
+        "smoke": "tsx scripts/smoke.ts"
     },
     "dependencies": {
         "@nextui-org/react": "^2.4.8",
