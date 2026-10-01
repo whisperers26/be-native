@@ -1,0 +1,55 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`tencent OCR > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ara",
+    "auto": "auto",
+    "de": "ger",
+    "en": "auto",
+    "es": "spa",
+    "fr": "fre",
+    "hi": "hi",
+    "it": "ita",
+    "ja": "jap",
+    "ko": "kor",
+    "ms": "may",
+    "pt_br": "por",
+    "pt_pt": "por",
+    "ru": "rus",
+    "th": "tha",
+    "vi": "vie",
+    "yue": "zh_rare",
+    "zh_cn": "zh",
+    "zh_tw": "zh_rare",
+  },
+  "info": {
+    "icon": "logo/tencent_cloud.png",
+    "name": "tencent_ocr",
+  },
+}
+`;
+
+exports[`tencent OCR > posts a TC3-HMAC-SHA256 signed JSON body and joins the detected lines 1`] = `
+[
+  {
+    "options": {
+      "body": {
+        "payload": "{"ImageBase64":"aW1hZ2U=","LanguageType":"zh"}",
+        "type": "Text",
+      },
+      "headers": {
+        "Authorization": "TC3-HMAC-SHA256 Credential=test-secret-id/2026-01-02/ocr/tc3_request, SignedHeaders=content-type;host, Signature=d8b76ec925b44a47447d7aa72f2052e659e30fdb17498bda3088e002b641dd98",
+        "Host": "ocr.tencentcloudapi.com",
+        "X-TC-Action": "GeneralBasicOCR",
+        "X-TC-Region": "ap-beijing",
+        "X-TC-Timestamp": "1767323046",
+        "X-TC-Version": "2018-11-19",
+        "content-type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://ocr.tencentcloudapi.com",
+  },
+]
+`;
