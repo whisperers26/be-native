@@ -9,7 +9,7 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `app_language` | `en` | UI language; also the tray menu language. Rust |
 | `app_theme` | `system` | `system`, `light`, `dark` |
 | `app_font`, `app_fallback_font` | `default` | Font family names |
-| `app_font_size` | `16` | Pixels |
+| `app_font_size` | `16` | Pixels. A number by default, but the General page saves a picked size as a string (`'18'`) |
 | `transparent` | `true` | Transparent window background (not macOS) |
 | `dev_mode` | `false` | F12 opens devtools |
 | `check_update` | `true` | Check for updates at launch. Rust |
