@@ -129,6 +129,8 @@ async function run(scenario: Scenario, api: string, outDir: string): Promise<Res
     const result: Result = { name: scenario.name, ok: false, title: scenario.title };
     try {
         scenario.prepare?.();
+        // Windows open on the monitor under the cursor; keep them on the same one every run.
+        helper('-Action', 'park');
         await scenario.request(api);
         const window = await waitFor(`a visible "${scenario.title}" window`, () =>
             visibleAppWindows().find((candidate) => candidate.title === scenario.title)
