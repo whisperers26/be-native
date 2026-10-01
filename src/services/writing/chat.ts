@@ -24,14 +24,21 @@ export function chatUrl(requestPath: string): string {
     return url.href;
 }
 
-/** Ask once, without streaming, and return the answer's text. */
-export async function chat(request: ChatRequest): Promise<string> {
+/** The reply to a chat request, as Tauri's HTTP client gives it. */
+export interface ChatReply {
+    ok: boolean;
+    status: number;
+    data: ChatResponse & { error?: { retry_after?: number } };
+}
+
+/** Ask once, without streaming. */
+export async function send(request: ChatRequest): Promise<ChatReply> {
     const { url, apiKey, model, systemPrompt, message } = request;
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (apiKey) {
         headers['Authorization'] = `Bearer ${apiKey}`;
     }
-    const res = await fetch<ChatResponse>(url, {
+    return fetch<ChatReply['data']>(url, {
         method: 'POST',
         headers,
         body: Body.json({
@@ -43,12 +50,21 @@ export async function chat(request: ChatRequest): Promise<string> {
             ],
         }),
     });
-    if (!res.ok) {
-        throw `Http Request Error\nHttp Status: ${res.status}\n${JSON.stringify(res.data)}`;
+}
+
+/** The text of a reply; a failed request or a reply without text is thrown, as the services throw errors. */
+export function answer(reply: ChatReply): string {
+    if (!reply.ok) {
+        throw `Http Request Error\nHttp Status: ${reply.status}\n${JSON.stringify(reply.data)}`;
     }
-    const text = res.data?.choices?.[0]?.message?.content?.trim();
+    const text = reply.data?.choices?.[0]?.message?.content?.trim();
     if (!text) {
-        throw JSON.stringify(res.data);
+        throw JSON.stringify(reply.data);
     }
     return text;
+}
+
+/** Ask once, without streaming, and return the answer's text. */
+export async function chat(request: ChatRequest): Promise<string> {
+    return answer(await send(request));
 }
