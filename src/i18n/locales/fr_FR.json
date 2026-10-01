@@ -426,8 +426,6 @@
                 "feedback": "Commentaires",
                 "label": "À propos",
                 "view_config": "Voir la configuration",
-                "issue": "Bug",
-                "email": "E-mail",
                 "github": "GitHub",
                 "view_log": "Voir les journaux"
             },

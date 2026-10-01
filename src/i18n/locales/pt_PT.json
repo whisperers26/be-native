@@ -426,8 +426,6 @@
                 "feedback": "Realimentação",
                 "label": "Sobre",
                 "view_config": "Exibir Configuração",
-                "issue": "Problemas",
-                "email": "Email",
                 "github": "GitHub",
                 "view_log": "Exibir Registro"
             },

@@ -249,8 +249,6 @@
                 "website": "웹사이트",
                 "github": "GitHub",
                 "feedback": "피드백",
-                "issue": "오류 제보",
-                "email": "이메일",
                 "check_update": "업데이트 확인",
                 "view_log": "로그 확인",
                 "view_config": "설정 확인"

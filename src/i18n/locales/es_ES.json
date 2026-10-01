@@ -186,9 +186,7 @@
                 "title": "Acerca de la aplicación",
                 "website": "Sitio web",
                 "feedback": "Comentarios",
-                "check_update": "Comprobar actualizaciones",
-                "issue": "Incidencia",
-                "email": "Correo electrónico"
+                "check_update": "Comprobar actualizaciones"
             }
         },
         "updater": {

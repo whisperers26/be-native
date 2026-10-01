@@ -179,7 +179,6 @@
                 "login_success": "כניסה הושלמה"
             },
             "about": {
-                "email": "דוא\"ל",
                 "title": "אודות התוכנה",
                 "check_update": "חפש עדכונים",
                 "view_log": "הצג יומן רישום",
@@ -187,8 +186,7 @@
                 "github": "GitHub",
                 "label": "אודות",
                 "website": "אתר האינטרנט",
-                "feedback": "משוב",
-                "issue": "גיליון"
+                "feedback": "משוב"
             },
             "recognize": {
                 "label": "זהה",
