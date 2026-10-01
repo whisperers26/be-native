@@ -28,7 +28,7 @@ Bugs in code inherited from upstream, not fixed yet. Each one was confirmed by r
 - **System OCR has no Portuguese.** The `system` OCR `Language` maps `pt_pt`, but its per-OS language tables use the key `pt`, so Portuguese becomes `undefined`.
 - **Some error paths throw `TypeError`s.** caiyun and lingva (translate) call `.trim()` on the response object while building their error message; volcengine OCR (both variants) calls `.trim()` on `undefined` when the response has no `data`; iflytek_latex reads `result.data['region']` without checking `data`; tencent_img reads `Response.ImageRecord.Value` without checking `ImageRecord`. The user sees a `TypeError` instead of the provider's error.
 - **The DeepL API check uses a comma operator.** `(result.translations, result.translations[0])` only tests its second operand.
-- **Lingva TTS fails silently.** On an HTTP error it returns `undefined` instead of throwing.
+- **Lingva TTS fails silently.** On an HTTP error it returns `undefined` instead of throwing, and the Translate window's speak buttons then pass that `undefined` to `speak`.
 - **Anki errors are ignored.** The `error` field of AnkiConnect's replies is never checked.
 - **A failed audio download leaves a URL as the voice.** cambridge_dict replaces each pronunciation's audio URL with the downloaded bytes only when the request succeeds, so after a failure `voice` is still the URL (its test pins this). The Anki collection spreads `voice` into `String.fromCharCode`, so it sends one NUL character per character of the URL as the note's audio.
 - **QR code OCR can hang.** The image loader has no `onerror`, so an unreadable image never settles; an image with zero width or height never settles either.
