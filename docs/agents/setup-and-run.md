@@ -53,7 +53,7 @@ What to expect:
 | What | Windows | Linux | macOS |
 | --- | --- | --- | --- |
 | Settings `config.json`, history `history.db`, plugins `plugins/` | `%APPDATA%\com.pot-app.desktop\` | `~/.config/com.pot-app.desktop/` | `~/Library/Application Support/com.pot-app.desktop/` |
-| Log `pot.log` (deleted at launch once over 40 KB) | `%APPDATA%\com.pot-app.desktop\logs\` | `~/.config/com.pot-app.desktop/logs/` | `~/Library/Logs/com.pot-app.desktop/` |
+| Log `Be Native.log`, or `Be Native (Debug).log` from a debug build (deleted at launch once over 40 KB) | `%APPDATA%\com.pot-app.desktop\logs\` | `~/.config/com.pot-app.desktop/logs/` | `~/Library/Logs/com.pot-app.desktop/` |
 | Screenshots `pot_screenshot.png`, `pot_screenshot_cut.png` | `%LOCALAPPDATA%\com.pot-app.desktop\` | `~/.cache/com.pot-app.desktop/` | `~/Library/Caches/com.pot-app.desktop/` |
 
 To start as on first run, quit the app and move `config.json` away.

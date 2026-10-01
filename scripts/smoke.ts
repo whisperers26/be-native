@@ -20,7 +20,8 @@ const DEV_BINARY = join('src-tauri', 'target', 'debug', 'Be Native.exe');
 const APP_TITLES = ['Config', 'Translate', 'Recognize', 'Screenshot', 'Updater'];
 const APP_DIR = 'com.pot-app.desktop';
 const CONFIG_FILE = join(process.env.APPDATA ?? '', APP_DIR, 'config.json');
-const LOG_FILE = join(process.env.APPDATA ?? '', APP_DIR, 'logs', 'pot.log');
+// The log is named after the app, and a debug build's name ends in " (Debug)".
+const LOG_FILE = join(process.env.APPDATA ?? '', APP_DIR, 'logs', 'Be Native (Debug).log');
 const CUT_FILE = join(process.env.LOCALAPPDATA ?? '', APP_DIR, 'pot_screenshot_cut.png');
 
 interface AppWindow {
