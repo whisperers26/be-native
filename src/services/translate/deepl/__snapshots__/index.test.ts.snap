@@ -1,0 +1,110 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`deepl translate > api: uses api-free.deepl.com for :fx keys and sends the auth header 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "target_lang": "DE",
+          "text": [
+            "hello",
+          ],
+        },
+        "type": "Json",
+      },
+      "headers": {
+        "Authorization": "DeepL-Auth-Key k:fx",
+        "Content-Type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://api-free.deepl.com/v2/translate",
+  },
+]
+`;
+
+exports[`deepl translate > deeplx: posts to the custom URL and returns data 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "source_lang": "EN",
+          "target_lang": "DE",
+          "text": "hello",
+        },
+        "type": "Json",
+      },
+      "method": "POST",
+    },
+    "url": "http://localhost:1188/translate",
+  },
+]
+`;
+
+exports[`deepl translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "auto": "auto",
+    "de": "DE",
+    "en": "EN",
+    "es": "ES",
+    "fr": "FR",
+    "id": "ID",
+    "it": "IT",
+    "ja": "JA",
+    "ko": "KO",
+    "nl": "NL",
+    "pl": "PL",
+    "pt_br": "PT-BR",
+    "pt_pt": "PT-PT",
+    "ru": "RU",
+    "sv": "SV",
+    "tr": "TR",
+    "uk": "UK",
+    "zh_cn": "ZH",
+    "zh_tw": "ZH",
+  },
+  "info": {
+    "icon": "logo/deepl.svg",
+    "name": "deepl",
+  },
+}
+`;
+
+exports[`deepl translate > free: cuts language codes to two letters and shifts the timestamp by the number of i in the text 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": "{"jsonrpc":"2.0","method": "LMT_handle_texts","params":{"splitting":"newlines","lang":{"source_lang_user_selected":"PT","target_lang":"PT"},"texts":[{"text":"hi","requestAlternatives":3}],"timestamp":1767323045680},"id":112345000}",
+        "type": "Text",
+      },
+      "headers": {
+        "Content-Type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://www2.deepl.com/jsonrpc",
+  },
+]
+`;
+
+exports[`deepl translate > free: posts JSON-RPC to www2.deepl.com and returns the trimmed text 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": "{"jsonrpc":"2.0","method": "LMT_handle_texts","params":{"splitting":"newlines","lang":{"source_lang_user_selected":"EN","target_lang":"DE"},"texts":[{"text":"hello","requestAlternatives":3}],"timestamp":1767323045678},"id":112345000}",
+        "type": "Text",
+      },
+      "headers": {
+        "Content-Type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://www2.deepl.com/jsonrpc",
+  },
+]
+`;
