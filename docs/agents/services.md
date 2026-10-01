@@ -105,3 +105,5 @@ Services with no settings (bing, yandex, bing_dict, cambridge_dict, ecdict and l
 ## Language detection
 
 `src/utils/lang_detect` detects the source language with the engine in `translate_detect_engine` (default `baidu`): the web endpoints of baidu, google, tencent, niutrans, yandex or bing, or `local` (Rust, offline). An unknown engine name falls back to `local`; a failed detection returns `en`.
+
+Text that mixes Chinese, Japanese or Korean with another script is detected by its larger part. The engines answer Chinese for mostly English text with a little Chinese in it (Google does from about one Chinese character per three English words), and the Translate window then translates into `translate_second_language`, which leaves the English as it was. So when the words in the other script outnumber the Chinese, Japanese and Korean characters counted two to a word, those characters are left out of the text the engine sees. The services still translate the whole text.
