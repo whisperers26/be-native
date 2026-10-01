@@ -58,7 +58,7 @@ Every migration PR shows three things:
 | L0 | Toolchain, `check:transpile` | Done |
 | L1 | `src/utils`, `src/hooks`, `src/i18n`, `src/types` | Done |
 | L2 | `src/services` | Done |
-| L3 | `src/components`, `src/window` | Pending |
+| L3 | `src/components`, `src/window` | Done |
 | L4 | `src/main`, `src/App`, `index.html`, Vite and Tailwind configs; `allowJs` off | Pending |
 
 Staying JavaScript on purpose: `postcss.config.js`, `updater/*.mjs` (upstream's release tooling), `public/*.js` (bundled Tesseract files), external `.potext` plugins.
