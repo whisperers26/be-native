@@ -442,11 +442,18 @@ export default function TargetArea(props: TargetAreaProps) {
     };
 
     const [boundRef, bounds] = useMeasure({ scroll: true });
+    // A window that is not showing yet is measured for its size, and must not be measured half open: until the
+    // window has opened, and for a moment after, the card has the height of what is in it, without the animation.
+    const [opensAnimated, setAnimated] = useState(stage === 'shown');
+    useEffect(() => {
+        if (stage !== 'shown') return;
+        const timer = setTimeout(() => setAnimated(true), 300);
+        return () => clearTimeout(timer);
+    }, [stage]);
     const springs = useSpring({
         from: { height: 0 },
         to: { height: hide ? 0 : bounds.height },
-        // A window that is not showing yet is measured for its size, and must not be measured half open.
-        immediate: stage !== 'shown',
+        immediate: !opensAnimated,
     });
 
     return (
@@ -573,7 +580,7 @@ export default function TargetArea(props: TargetAreaProps) {
                     </Button>
                 </div>
             </CardHeader>
-            <animated.div style={{ ...springs }}>
+            <animated.div style={stage === 'shown' ? { ...springs } : { height: hide ? 0 : 'auto' }}>
                 <div ref={boundRef}>
                     {/* result content */}
                     <CardBody className={`p-[12px] pb-0 ${hide && 'h-0 p-0'}`}>
