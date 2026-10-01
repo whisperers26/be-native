@@ -1,7 +1,16 @@
 import { fetch } from '@tauri-apps/api/http';
 import CryptoJS from 'crypto-js';
+import type { RecognizeOptions } from '../../../types/service';
 
-export async function recognize(base64, language, options = {}) {
+interface IflytekResponse {
+    payload?: { result: { text: string } };
+}
+
+export async function recognize(
+    base64: string,
+    language: string,
+    options: RecognizeOptions = {} as RecognizeOptions
+): Promise<string> {
     const { config } = options;
 
     const { appid, apisecret, apikey } = config;
@@ -44,7 +53,7 @@ export async function recognize(base64, language, options = {}) {
         },
     };
 
-    let res = await fetch(request_url, {
+    let res = await fetch<IflytekResponse>(request_url, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: { type: 'Text', payload: JSON.stringify(request_body) },
@@ -92,7 +101,7 @@ export async function recognize(base64, language, options = {}) {
     return return_content.trim();
 }
 
-export function iflytek_auth(api_key, api_secret, host, date, request_line) {
+export function iflytek_auth(api_key: string, api_secret: string, host: string, date: string, request_line: string) {
     const signature_origin = 'host: ' + host + '\n' + 'date: ' + date + '\n' + request_line;
     let signature_sha = CryptoJS.HmacSHA256(signature_origin, api_secret);
     let signature = CryptoJS.enc.Base64.stringify(signature_sha);
