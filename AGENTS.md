@@ -16,6 +16,7 @@ frontend in `src/`.
 1. Never commit to `main`. Work on one branch per feature or fix, open a PR to
    the fork, and merge it yourself with a merge commit once the checks pass.
    Procedure: [git-workflow.md](docs/agents/git-workflow.md).
+| [setup-and-run.md](docs/agents/setup-and-run.md) | Installing tools, running or building the app, finding its files |
 2. If the owner explicitly asks to review a PR, open it and stop. Do not merge.
 3. Never push to, open PRs against, or add a remote for upstream
    `pot-app/pot-desktop`. Every `gh pr` command takes
@@ -44,3 +45,4 @@ Before opening a PR, run `pnpm check:docs` and `pnpm build`.
 | Read | When you are |
 | --- | --- |
 | [git-workflow.md](docs/agents/git-workflow.md) | Branching, committing, opening or merging a PR |
+| [setup-and-run.md](docs/agents/setup-and-run.md) | Installing tools, running or building the app, finding its files |
