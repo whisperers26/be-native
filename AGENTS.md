@@ -47,6 +47,7 @@ Before opening a PR, run `pnpm check:docs` and `pnpm build`.
 | --- | --- |
 | [git-workflow.md](docs/agents/git-workflow.md) | Branching, committing, opening or merging a PR |
 | [setup-and-run.md](docs/agents/setup-and-run.md) | Installing tools, running or building the app, finding its files |
+| [frontend.md](docs/agents/frontend.md) | Changing windows, pages, hooks, state, i18n or styling |
 | [backend.md](docs/agents/backend.md) | Changing Rust: commands, windows, tray, hotkeys, HTTP API, OCR, backup |
 | [services.md](docs/agents/services.md) | Adding or changing a translate, OCR, TTS or collection service, or plugins |
 | [config-keys.md](docs/agents/config-keys.md) | Reading, adding or changing a setting |
