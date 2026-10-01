@@ -310,7 +310,25 @@ async function local_detect(text: string) {
     return await invoke<string>('lang_detect', { text: text });
 }
 
+const CJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu;
+// A run of letters of any other script: a word
+const OTHER_WORD = /[^\P{L}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]+/gu;
+// About how many Chinese, Japanese or Korean characters make a word
+const CJK_PER_WORD = 2;
+
+// The part of the text to detect the language of. The engines call a text Chinese (or Japanese, or Korean) even
+// when it is mostly in another script with a little Chinese in it, so such a text is detected without that part.
+function textToDetect(text: string) {
+    const cjkWords = (text.match(CJK)?.length ?? 0) / CJK_PER_WORD;
+    const otherWords = text.match(OTHER_WORD)?.length ?? 0;
+    if (cjkWords > 0 && otherWords > cjkWords) {
+        return text.replace(CJK, '');
+    }
+    return text;
+}
+
 export default async function detect(text: string) {
+    text = textToDetect(text);
     let langDetectEngine = (await store.get('translate_detect_engine')) ?? 'baidu';
 
     switch (langDetectEngine) {

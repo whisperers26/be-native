@@ -87,6 +87,27 @@ describe('language detection', () => {
         await expect(detect('hallo')).resolves.toBe('de');
     });
 
+    it('asks about the other script alone when it outweighs the Chinese, Japanese or Korean in the text', async () => {
+        useEngine('google');
+        httpMock.queue({ data: [null, null, 'en'] });
+
+        await expect(detect('这个 function returns the user object. 如果 request 失败 it throws an error.')).resolves.toBe(
+            'en'
+        );
+        expect(httpMock.calls[0].options).toMatchObject({
+            query: { q: ' function returns the user object.  request  it throws an error.' },
+        });
+    });
+
+    it('asks about the whole text when the Chinese, Japanese or Korean in it weighs as much or more', async () => {
+        useEngine('google');
+        httpMock.queue({ data: [null, null, 'zh-CN'] });
+        const text = 'pnpm tauri dev # 以开发模式运行应用';
+
+        await expect(detect(text)).resolves.toBe('zh_cn');
+        expect(httpMock.calls[0].options).toMatchObject({ query: { q: text } });
+    });
+
     it('returns en when the request fails', async () => {
         useEngine('baidu');
         httpMock.queue({ status: 500, data: {} });
