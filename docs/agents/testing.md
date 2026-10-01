@@ -71,7 +71,7 @@ expect(httpMock.calls).toMatchSnapshot();
 
 ## Real-app smoke test
 
-`pnpm smoke` checks the real app on Windows. Start the app first with the "Tauri dev" run configuration in RustRover (or `pnpm tauri dev`), then run the "Smoke test" run configuration (or `pnpm smoke`). It:
+`pnpm smoke` checks the real app on Windows. Start the app first with the "Tauri dev" run configuration in RustRover (or `pnpm tauri dev`), then run the "Smoke test" run configuration (or `pnpm smoke`). If you switched branches since starting the app, restart it first; otherwise every scenario can time out waiting for its window ([setup-and-run.md](setup-and-run.md#run)). It:
 
 1. Stops at once, with exit code 1, if nothing answers on the app's HTTP port (`server_port`, default 60828) or the app is not this repository's dev build (`src-tauri\target\debug\pot.exe`).
 2. Closes any open app windows, then runs four scenarios through the HTTP API: `config` (`GET /config`, window shows "General Settings"), `translate` (`POST /translate` with `hello world`, which the window must show), `input` (`GET /input_translate`), and `ocr` (writes a "Hello World" image to the app's `pot_screenshot_cut.png`, then `GET /ocr_recognize?screenshot=false`). Before each request it moves the mouse cursor to the centre of the primary monitor: the app opens its windows on the monitor under the cursor, sized by that monitor's scale, so the screenshots would otherwise change size with wherever the mouse was left. Each scenario waits up to 15 s for its window, reads its text through UI Automation where it checks text, saves a screenshot, and closes the window.
