@@ -393,6 +393,9 @@
                 "tesseract": {
                     "title": "Tesseract.js"
                 },
+                "rapidocr": {
+                    "title": "RapidOCR"
+                },
                 "baidu_ocr": {
                     "title": "Baidu OCR",
                     "client_id": "API Key",
