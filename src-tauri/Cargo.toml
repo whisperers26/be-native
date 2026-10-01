@@ -56,3 +56,9 @@ window-shadows = "0.2"
 # this feature is used for production builds or when `devPath` points to the filesystem
 # DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
+
+# tauri-plugin-single-instance (v1) dereferences a null pointer in its window procedure.
+# Debug builds made with newer Rust check for that and abort at launch, so `pnpm tauri dev`
+# crashes on Windows. Release builds have debug assertions off already; this matches them.
+[profile.dev.package.tauri-plugin-single-instance]
+debug-assertions = false
