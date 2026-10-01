@@ -29,6 +29,7 @@ const DEFAULT_COMMANDS: Record<string, Handler> = {
     cursor_position: () => ({ x: 0, y: 0, monitor: { x: 0, y: 0 } }),
     show_window: () => null,
     focus_window: () => null,
+    test_mode: () => false,
     cut_image: () => null,
     copy_img: () => null,
     system_ocr: () => '',
