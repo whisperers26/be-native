@@ -33,13 +33,14 @@ export default function Recognize() {
                                 aria-label='recognize language'
                                 className='max-h-[50vh] overflow-y-auto'
                                 onAction={(key) => {
-                                    setRecognizeLanguage(key);
+                                    setRecognizeLanguage(key as string);
                                 }}
                             >
                                 <DropdownItem key='auto'>{t('languages.auto')}</DropdownItem>
+                                {/* NextUI's collection children type does not accept a list after a fixed item */}
                                 {languageList.map((item) => {
                                     return <DropdownItem key={item}>{t(`languages.${item}`)}</DropdownItem>;
-                                })}
+                                }) as any}
                             </DropdownMenu>
                         </Dropdown>
                     )}
