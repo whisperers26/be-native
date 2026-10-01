@@ -43,7 +43,7 @@ What to expect:
   ```
 
 - With `dev_mode` on (Config → General), F12 opens the devtools of the focused window.
-- The updater still checks upstream's release feed; upstream's latest release is 3.0.7, the version in this repository, so it finds nothing.
+- The updater still checks upstream's feed, which now announces a "4.0.0" that is a notice about upstream's successor app (Manggo), not a Pot release. So every launch with `check_update` on opens the Updater window. Close it, and never click Update: it would download upstream's installer. Turn off "check for updates" in Config → General to stop it.
 
 ## Data on disk
 
