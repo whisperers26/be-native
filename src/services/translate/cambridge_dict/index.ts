@@ -1,6 +1,6 @@
 import { fetch } from '@tauri-apps/api/http';
 import { Language } from './info';
-import type { DictionaryResult, TranslateResult } from '../../../types/service';
+import type { TranslateResult } from '../../../types/service';
 
 // `declare` fields are type-only: a plain field declaration would be emitted as a class field.
 class Pronunciation {
@@ -108,9 +108,7 @@ export async function translate(text: string, from: string, to: string): Promise
             i.voice = res.data;
         }
     }
-    // The result has no associations or sentence, which DictionaryResult requires;
-    // the Translate window checks each field before it uses it.
-    return resultMap.result as DictionaryResult;
+    return resultMap.result;
 }
 
 export * from './Config';

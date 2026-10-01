@@ -50,7 +50,7 @@ export async function translate(text: string, from: string, to: string): Promise
                 return acc;
             }, {})
         );
-        let target: DictionaryResult = { pronunciations: [], explanations: [], associations: [], sentence: [] };
+        let target: Required<DictionaryResult> = { pronunciations: [], explanations: [], associations: [], sentence: [] };
         for (const pronunciation of formatGroups['发音']) {
             target.pronunciations.push({
                 region: pronunciation.partsOfSpeech[0].name,

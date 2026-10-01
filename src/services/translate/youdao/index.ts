@@ -52,7 +52,7 @@ export async function translate(
     if (res.ok) {
         let result = res.data;
         if (result['isWord']) {
-            let target: DictionaryResult = { pronunciations: [], explanations: [], associations: [], sentence: [] };
+            let target: Required<DictionaryResult> = { pronunciations: [], explanations: [], associations: [], sentence: [] };
             let basic = result['basic'];
 
             if (basic['uk-phonetic']) {
