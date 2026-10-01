@@ -37,6 +37,7 @@ use tray::*;
 use updater::check_update;
 use window::config_window;
 use window::cursor_position;
+use window::fit_translate_window;
 use window::focus_window;
 use window::show_window;
 use window::test_mode;
@@ -159,6 +160,7 @@ fn main() {
             cursor_position,
             show_window,
             focus_window,
+            fit_translate_window,
             test_mode,
             lang_detect,
             agent_cli_run,
