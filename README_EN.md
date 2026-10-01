@@ -33,6 +33,7 @@
 > - Claude Code and Codex are translation services: they use the `claude` or `codex` command-line tool already installed and signed in on your computer, so translations run on your subscription with no API key. Each translation gets a fresh session, and one is kept ready in the background so answers come about as fast as from an API; model and reasoning level are set in the service settings.
 > - RapidOCR is a built-in OCR service: the PP-OCRv5 models run on your computer, fully offline, and read small text and tight selections that the system OCR misses (Simplified and Traditional Chinese, English and Japanese).
 > - The translation window sizes itself to its text: it shows everything without scrolling where it can, gets wider rather than tall and narrow for longer text, and never fills the screen. Turn on "Remember Window Size" to keep the size you give it instead, which it now reopens with exactly.
+> - Text that mixes languages is detected by its larger part, so mostly English text with some Chinese in it is translated instead of being taken for Chinese.
 
 <!-- fork:end -->
 
