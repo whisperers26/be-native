@@ -1,0 +1,99 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`youdao translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "spa",
+    "fa": "fa",
+    "fr": "fra",
+    "he": "he",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "jp",
+    "km": "km",
+    "ko": "kor",
+    "mn_mo": "mn",
+    "ms": "may",
+    "nb_no": "no",
+    "nl": "nl",
+    "nn_no": "no",
+    "pl": "pl",
+    "pt_br": "pt",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "sv": "sv",
+    "th": "th",
+    "tr": "tr",
+    "uk": "uk",
+    "vi": "vie",
+    "yue": "yue",
+    "zh_cn": "zh-CHS",
+    "zh_tw": "zh-CHT",
+  },
+  "info": {
+    "icon": "logo/youdao.svg",
+    "name": "youdao",
+  },
+}
+`;
+
+exports[`youdao translate > sentence: trims the text, signs a truncated form of a long one, and joins the translations 1`] = `
+[
+  {
+    "options": {
+      "method": "GET",
+      "query": {
+        "appKey": "test-appkey",
+        "curtime": "1767323046",
+        "from": "en",
+        "q": "The quick brown fox jumps over the lazy dog",
+        "salt": "nanoid-fixed-id",
+        "sign": "73445e7880d0a7d20de4116783efb2a528c95b8ce1458b96cf96154d7167bb2c",
+        "signType": "v3",
+        "to": "zh-CHS",
+      },
+    },
+    "url": "https://openapi.youdao.com/api",
+  },
+]
+`;
+
+exports[`youdao translate > word: fetches both speech files and returns pronunciations, explanations and associations 1`] = `
+[
+  {
+    "options": {
+      "method": "GET",
+      "query": {
+        "appKey": "test-appkey",
+        "curtime": "1767323046",
+        "from": "en",
+        "q": "hello",
+        "salt": "nanoid-fixed-id",
+        "sign": "58f080fe0d72949ed5354ebc5e09ee19a799badef4805c7dc9e80e6adc4a0642",
+        "signType": "v3",
+        "to": "zh-CHS",
+      },
+    },
+    "url": "https://openapi.youdao.com/api",
+  },
+  {
+    "options": {
+      "method": "GET",
+      "responseType": 3,
+    },
+    "url": "https://dict.youdao.com/dictvoice?audio=hello&type=1",
+  },
+  {
+    "options": {
+      "method": "GET",
+      "responseType": 3,
+    },
+    "url": "https://dict.youdao.com/dictvoice?audio=hello&type=2",
+  },
+]
+`;
