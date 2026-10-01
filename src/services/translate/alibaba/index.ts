@@ -1,8 +1,19 @@
 import { fetch } from '@tauri-apps/api/http';
 import HmacSHA1 from 'crypto-js/hmac-sha1';
 import base64 from 'crypto-js/enc-base64';
+import type { TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+interface AlibabaResponse {
+    Code: string;
+    Data: { Translated: string };
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     const { config } = options;
 
     const { accesskey_id, accesskey_secret } = config;
@@ -40,7 +51,7 @@ export async function translate(text, from, to, options = {}) {
 
     CanonicalizedQueryString = CanonicalizedQueryString + '&Signature=' + encodeURIComponent(signature);
 
-    let res = await fetch(CanonicalizedQueryString, {
+    let res = await fetch<AlibabaResponse>(CanonicalizedQueryString, {
         method: 'GET',
     });
 
