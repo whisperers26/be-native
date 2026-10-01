@@ -33,6 +33,7 @@ What to expect:
 
 - On first run (no settings file yet) the Config window opens. Otherwise the app starts with only a tray icon.
 - Closing a window does not quit. Quit or restart from the tray menu.
+- Restart `pnpm tauri dev` after switching branches. Vite keeps serving the modules it transformed before the switch, and those can still import files the new branch renamed or deleted (such as a `.jsx` that became `.tsx`). New windows then fail to load and stay hidden.
 - Only one instance runs at a time. The app identifier, `com.pot-app.desktop`, is the same as upstream Pot's, so an installed Pot and the dev build share settings, and whichever starts second exits with an "already running" notification. Quit the other one first.
 - Global shortcuts are empty until set in Config → Hotkey. Without them, trigger windows through the local HTTP API (port setting `server_port`, default 60828):
 
