@@ -294,7 +294,7 @@ class FakeTauri {
             case 'plugin:sql|execute':
                 return [1, 1];
             case 'plugin:sql|select':
-                return this.sqlRows;
+                return /COUNT\(\*\)/.test(String(args.query)) ? [{ 'COUNT(*)': this.sqlRows.length }] : this.sqlRows;
             case 'plugin:sql|close':
                 return true;
             case 'plugin:fs-watch|watch':

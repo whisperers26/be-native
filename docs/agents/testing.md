@@ -79,3 +79,15 @@ expect(httpMock.calls).toMatchSnapshot();
 Results go to `test-results/smoke/<time>/` (gitignored): `report.json` and one PNG per scenario. `scripts/smoke/windows.ps1` holds the Windows helpers (find, capture and close windows; read UI Automation text; draw the OCR image).
 
 The baseline from the JavaScript code is kept at `test-results/smoke/baseline-js/` on the owner's machine. After a refactor, run the smoke test again and compare the screenshots with it: layout, labels and the shown image must match; live translation results may differ.
+
+## Render tests
+
+Every window (`src/window/<Name>/index.test.tsx`), every settings page (`src/window/Config/pages/<Page>/index.test.tsx`) and `src/App.test.tsx` has a render test:
+
+- Set the window label in a `vi.hoisted` block before importing the component (see above).
+- Import `src/i18n` so labels are the English text from `en_US.json`; render inside `NextUIProvider`, plus `MemoryRouter` for the Config window and its pages.
+- Assert the labels the user sees, and end with `expect(fakeTauri.unhandled).toEqual([])`.
+- Keep the network out: a window that detects a language when it opens (Translate) needs `fakeTauri.store.set('translate_detect_engine', 'local')`; an unqueued HTTP request fails the run as an unhandled rejection.
+- Wait for whatever happens after the settings load (`findBy…`, `vi.waitFor`), never for a fixed time.
+
+React prints development warnings from the app's own code during these tests (`defaultProps` in react-beautiful-dnd, a `className={false}` in the Translate window's source area). They are not failures.

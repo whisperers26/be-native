@@ -68,6 +68,18 @@ describe('test harness', () => {
         await expect(store.get('missing')).resolves.toBeNull();
     });
 
+    it('answers SQL selects with the seeded rows, and COUNT(*) with their number', async () => {
+        fakeTauri.sqlRows = [{ id: 1 }, { id: 2 }];
+
+        await expect(invoke('plugin:sql|select', { db: 'x', query: 'SELECT COUNT(*) FROM history', values: [] })).resolves.toEqual([
+            { 'COUNT(*)': 2 },
+        ]);
+        await expect(invoke('plugin:sql|select', { db: 'x', query: 'SELECT * FROM history', values: [] })).resolves.toEqual([
+            { id: 1 },
+            { id: 2 },
+        ]);
+    });
+
     it('delivers emitted events to listeners and records them', async () => {
         const received: unknown[] = [];
         await listen('demo', (event) => received.push(event.payload));
