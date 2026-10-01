@@ -21,6 +21,7 @@
 >
 > - 主分支为 `main`，所有改动都通过 Pull Request 合并。
 > - AI 代理按照 [AGENTS.md](./AGENTS.md) 及 [docs/agents](./docs/agents/) 中的 wiki 工作。
+> - 每个 Pull Request 都会经过 CI 检查（文档检查和前端构建）。
 
 <!-- fork:end -->
 
@@ -433,7 +434,7 @@ windowrulev2 = move cursor 0 0, class:(pot), title:(Translator|PopClip|Screensho
 
 Node.js >= 18.0.0
 
-pnpm >= 8.5.0
+pnpm 10.14.0（由 package.json 中的 packageManager 字段固定）
 
 Rust >= 1.80.0
 

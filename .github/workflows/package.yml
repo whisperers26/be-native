@@ -1,8 +1,8 @@
 name: Package
+# Upstream's signed release pipeline. Manual-only in this fork: it needs
+# pot-app's signing and Apple secrets, and its push trigger also fired on tags.
 on:
-    push:
-        branches: [master]
-        tags-ignore: [updater]
+    workflow_dispatch:
 permissions: write-all
 
 jobs:

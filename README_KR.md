@@ -21,6 +21,7 @@
 >
 > - 기본 브랜치는 `main`이며, 모든 변경은 풀 리퀘스트로 병합됩니다.
 > - AI 에이전트는 [AGENTS.md](./AGENTS.md)와 [docs/agents](./docs/agents/)의 위키를 따라 작업합니다.
+> - 모든 풀 리퀘스트는 CI에서 검사됩니다(문서 검사 및 프런트엔드 빌드).
 
 <!-- fork:end -->
 
@@ -431,7 +432,7 @@ windowrulev2 = move cursor 0 0, class:(pot), title:(Translator|PopClip|Screensho
 
 Node.js >= 18.0.0
 
-pnpm >= 8.5.0
+pnpm 10.14.0 (package.json의 packageManager로 고정)
 
 Rust >= 1.80.0
 

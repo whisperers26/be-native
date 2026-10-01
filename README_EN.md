@@ -21,6 +21,7 @@
 >
 > - The main branch is `main`; every change lands through a pull request.
 > - AI agents work from [AGENTS.md](./AGENTS.md) and the wiki in [docs/agents](./docs/agents/).
+> - CI checks every pull request (docs check and frontend build).
 
 <!-- fork:end -->
 
@@ -431,7 +432,7 @@ windowrulev2 = move cursor 0 0, class:(pot), title:(Translator|PopClip|Screensho
 
 Node.js >= 18.0.0
 
-pnpm >= 8.5.0
+pnpm 10.14.0 (pinned by packageManager in package.json)
 
 Rust >= 1.80.0
 
