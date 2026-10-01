@@ -9,6 +9,8 @@ interface ProgressProps {
     origin: { x: number; y: number };
     /** Whether the window is opening: it comes out of the indicator, which fades into it. */
     leaving: boolean;
+    /** Whether the indicator comes, goes and changes its icon with an animation. The ring turns either way. */
+    animated: boolean;
     onPress: () => void;
 }
 
@@ -16,10 +18,19 @@ const TURN = 1400;
 const DISC = DISC_SIZE;
 const RING = 29;
 const ROUND = 2 * Math.PI * RING;
+const ring = {
+    width: DISC,
+    height: DISC,
+    viewBox: `0 0 ${DISC} ${DISC}`,
+    fill: 'none',
+    strokeWidth: 3,
+    strokeLinecap: 'round',
+} as const;
+const circle = { cx: DISC / 2, cy: DISC / 2, r: RING };
 
 /** A round progress indicator with the icon of the service at work in it: all there is of the window while it waits. */
 export default function Progress(props: ProgressProps) {
-    const { icons, origin, leaving, onPress } = props;
+    const { icons, origin, leaving, animated, onPress } = props;
     const [turn, setTurn] = useState(0);
     useEffect(() => {
         if (icons.length < 2) return;
@@ -36,49 +47,49 @@ export default function Progress(props: ProgressProps) {
                 top: origin.y,
                 width: WAITING_SIZE,
                 height: WAITING_SIZE,
-                transition: 'transform 200ms ease-out, opacity 160ms ease-out',
+                transition: animated ? 'transform 200ms ease-out, opacity 160ms ease-out' : undefined,
                 transform: leaving ? 'scale(0.82)' : 'scale(1)',
                 opacity: leaving ? 0 : 1,
                 pointerEvents: leaving ? 'none' : 'auto',
             }}
             onClick={onPress}
         >
-            <div className='translate-progress-appear'>
+            <div className={animated ? 'translate-progress-appear' : undefined}>
                 <div
-                    className='relative rounded-full bg-content1 shadow-md translate-progress-breathe'
+                    className={`relative rounded-full bg-content1 shadow-md ${animated && 'translate-progress-breathe'}`}
                     style={{ width: DISC, height: DISC }}
                 >
+                    {/* Each arc is a layer of its own that turns as a whole. The compositor turns a layer without
+                        the page's thread, which is busy laying out the window while the indicator shows; an arc
+                        animated inside one picture stood still for as long as that took. */}
                     <svg
-                        className='absolute inset-0'
-                        width={DISC}
-                        height={DISC}
-                        viewBox={`0 0 ${DISC} ${DISC}`}
-                        fill='none'
-                        strokeWidth={3}
-                        strokeLinecap='round'
+                        className='absolute inset-0 text-default-200'
+                        {...ring}
                     >
                         <circle
-                            className='text-default-200'
-                            cx={DISC / 2}
-                            cy={DISC / 2}
-                            r={RING}
+                            {...circle}
                             stroke='currentColor'
                         />
+                    </svg>
+                    <svg
+                        className='absolute inset-0 text-secondary translate-progress-back'
+                        {...ring}
+                    >
                         <circle
-                            className='text-secondary translate-progress-back'
-                            cx={DISC / 2}
-                            cy={DISC / 2}
-                            r={RING}
+                            {...circle}
                             stroke='currentColor'
                             strokeOpacity={0.45}
                             strokeDasharray={`${ROUND * 0.16} ${ROUND * 0.84}`}
                         />
+                    </svg>
+                    <svg
+                        className='absolute inset-0 text-primary translate-progress-arc'
+                        {...ring}
+                    >
                         <circle
-                            className='text-primary translate-progress-arc'
-                            cx={DISC / 2}
-                            cy={DISC / 2}
-                            r={RING}
+                            {...circle}
                             stroke='currentColor'
+                            strokeDasharray={`${ROUND * 0.3} ${ROUND * 0.7}`}
                         />
                     </svg>
                     {icon !== undefined && (
@@ -87,7 +98,7 @@ export default function Progress(props: ProgressProps) {
                             key={icon}
                             src={icon}
                             draggable={false}
-                            className='absolute inset-0 m-auto h-[30px] w-[30px] object-contain translate-progress-icon'
+                            className={`absolute inset-0 m-auto h-[30px] w-[30px] object-contain ${animated && 'translate-progress-icon'}`}
                         />
                     )}
                 </div>
