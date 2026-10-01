@@ -281,6 +281,10 @@ pub fn config_window() {
 // The gap between a window and what it is placed beside, in logical pixels
 const PLACEMENT_GAP: f64 = 8.0;
 
+// The size the Translate window opens at when its size is not remembered, in logical pixels. The
+// window then fits itself to what it shows, through `fit_translate_window`.
+const TRANSLATE_AUTO_SIZE: (i64, i64) = (420, 240);
+
 // What the `smart` position put the Translate window beside, and where it put it
 static TRANSLATE_PLACED: std::sync::Mutex<Option<(Rect, (i32, i32))>> =
     std::sync::Mutex::new(None);
@@ -297,19 +301,28 @@ fn translate_window(region: Option<Rect>) -> Window {
     window.set_skip_taskbar(true).unwrap();
     *TRANSLATE_PLACED.lock().unwrap() = None;
     // Get Translate Window Size
-    let width = match get("translate_window_width") {
-        Some(v) => v.as_i64().unwrap(),
-        None => {
-            set("translate_window_width", 350);
-            350
-        }
+    let remember_size = match get("translate_remember_window_size") {
+        Some(v) => v.as_bool().unwrap_or(false),
+        None => false,
     };
-    let height = match get("translate_window_height") {
-        Some(v) => v.as_i64().unwrap(),
-        None => {
-            set("translate_window_height", 420);
-            420
-        }
+    let (width, height) = if remember_size {
+        let width = match get("translate_window_width") {
+            Some(v) => v.as_i64().unwrap(),
+            None => {
+                set("translate_window_width", 350);
+                350
+            }
+        };
+        let height = match get("translate_window_height") {
+            Some(v) => v.as_i64().unwrap(),
+            None => {
+                set("translate_window_height", 420);
+                420
+            }
+        };
+        (width, height)
+    } else {
+        TRANSLATE_AUTO_SIZE
     };
 
     let monitor = window.current_monitor().unwrap().unwrap();
