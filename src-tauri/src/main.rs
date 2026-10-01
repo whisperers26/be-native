@@ -44,7 +44,7 @@ use window::translate_window_opened;
 use window::translate_window_origin;
 use window::translate_window_waiting;
 use window::updater_window;
-use writing::{get_writing_text, WritingText};
+use writing::{fit_writing_window, get_writing_text, WritingText};
 
 // Global AppHandle
 pub static APP: OnceCell<tauri::AppHandle> = OnceCell::new();
@@ -172,6 +172,7 @@ fn main() {
             lang_detect,
             agent_cli_run,
             get_writing_text,
+            fit_writing_window,
             install_plugin,
             font_list
         ])
