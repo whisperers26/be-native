@@ -8,6 +8,11 @@ import { warn } from 'tauri-plugin-log-api';
 import { invoke } from '@tauri-apps/api';
 import type { MutableRefObject } from 'react';
 
+interface Point {
+    x: number;
+    y: number;
+}
+
 export default function Screenshot() {
     const [imgurl, setImgurl] = useState('');
     const [isMoved, setIsMoved] = useState(false);
@@ -16,6 +21,8 @@ export default function Screenshot() {
     const [mouseDownY, setMouseDownY] = useState(0);
     const [mouseMoveX, setMouseMoveX] = useState(0);
     const [mouseMoveY, setMouseMoveY] = useState(0);
+    // Where the crosshair lines meet, in CSS pixels; null while the pointer is not over the window.
+    const [cursor, setCursor] = useState<Point | null>(null);
 
     // The image is always rendered, so the ref is set before any handler runs.
     const imgRef = useRef<HTMLImageElement>() as MutableRefObject<HTMLImageElement>;
@@ -58,8 +65,22 @@ export default function Screenshot() {
                     right: screen.width - Math.max(mouseDownX, mouseMoveX),
                 }}
             />
+            {cursor && (
+                <>
+                    <div
+                        data-testid='crosshair-horizontal'
+                        className='fixed left-0 right-0 h-px bg-sky-500 pointer-events-none'
+                        style={{ top: cursor.y }}
+                    />
+                    <div
+                        data-testid='crosshair-vertical'
+                        className='fixed top-0 bottom-0 w-px bg-sky-500 pointer-events-none'
+                        style={{ left: cursor.x }}
+                    />
+                </>
+            )}
             <div
-                className='fixed top-0 left-0 bottom-0 right-0 cursor-crosshair select-none'
+                className='fixed top-0 left-0 bottom-0 right-0 cursor-none select-none'
                 onMouseDown={(e) => {
                     if (e.buttons === 1) {
                         setIsDown(true);
@@ -70,11 +91,15 @@ export default function Screenshot() {
                     }
                 }}
                 onMouseMove={(e) => {
+                    setCursor({ x: e.clientX, y: e.clientY });
                     if (isDown) {
                         setIsMoved(true);
                         setMouseMoveX(e.clientX);
                         setMouseMoveY(e.clientY);
                     }
+                }}
+                onMouseLeave={() => {
+                    setCursor(null);
                 }}
                 onMouseUp={async (e) => {
                     appWindow.hide();
