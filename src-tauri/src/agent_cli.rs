@@ -384,21 +384,22 @@ fn converse(
     Err(warning.unwrap_or_else(|| session.failure()))
 }
 
-// The sessions waiting for a translation
+// The sessions waiting for a translation or a rewrite
 static POOL: Lazy<Mutex<HashMap<Spec, Session>>> = Lazy::new(|| Mutex::new(HashMap::new()));
 
-// One spec per enabled Claude Code or Codex instance in the translate service list
-fn configured_specs() -> Vec<Spec> {
-    let Some(list) = get("translate_service_list") else {
-        return vec![];
-    };
+// The lists of service instances that can hold a Claude Code or Codex instance
+const SERVICE_LISTS: [&str; 2] = ["translate_service_list", "writing_service_list"];
+
+// One spec per enabled Claude Code or Codex instance in a service list. `config_of` gives the
+// stored settings of an instance.
+fn specs_in(list: &Value, config_of: impl Fn(&str) -> Option<Value>) -> Vec<Spec> {
     let mut specs = vec![];
     for key in list.as_array().into_iter().flatten().filter_map(Value::as_str) {
         let provider = key.split('@').next().unwrap_or_default();
         if provider != CLAUDE_CODE && provider != CODEX {
             continue;
         }
-        let Some(config) = get(key) else {
+        let Some(config) = config_of(key) else {
             continue;
         };
         if !config["enable"].as_bool().unwrap_or(true) {
@@ -410,6 +411,19 @@ fn configured_specs() -> Vec<Spec> {
             continue;
         }
         specs.push(spec);
+    }
+    specs
+}
+
+// One spec per enabled Claude Code or Codex instance in the settings, for translation or writing
+fn configured_specs() -> Vec<Spec> {
+    let mut specs: Vec<Spec> = vec![];
+    for list in SERVICE_LISTS.iter().filter_map(|name| get(name)) {
+        for spec in specs_in(&list, get) {
+            if !specs.contains(&spec) {
+                specs.push(spec);
+            }
+        }
     }
     specs
 }
@@ -507,6 +521,34 @@ mod tests {
             effort: effort.to_string(),
             system_prompt: "Translate.".to_string(),
         }
+    }
+
+    #[test]
+    fn specs_come_from_the_enabled_saved_instances_of_a_list() {
+        let list = json!(["google", "claude_code@a", "codex@b", "claude_code@off", "claude_code@new", "claude_code@same"]);
+        let config_of = |key: &str| match key {
+            "claude_code@a" | "claude_code@same" => {
+                Some(json!({ "model": "haiku", "effort": "off", "systemPrompt": "Rewrite." }))
+            }
+            "codex@b" => Some(json!({ "effort": "low", "systemPrompt": "Rewrite." })),
+            "claude_code@off" => Some(json!({ "enable": false, "systemPrompt": "Rewrite." })),
+            // Added but never saved by its settings form
+            "claude_code@new" => Some(json!({})),
+            _ => None,
+        };
+
+        let specs = specs_in(&list, config_of);
+
+        let providers: Vec<&str> = specs.iter().map(|spec| spec.provider.as_str()).collect();
+        assert_eq!(providers, [CLAUDE_CODE, CODEX]);
+        assert_eq!(specs[0].model, "haiku");
+        assert_eq!(specs[0].system_prompt, "Rewrite.");
+        assert_eq!(specs[1].effort, "low");
+    }
+
+    #[test]
+    fn a_list_that_is_not_a_list_has_no_specs() {
+        assert!(specs_in(&json!("claude_code"), |_| Some(json!({}))).is_empty());
     }
 
     #[test]
