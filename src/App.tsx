@@ -16,7 +16,8 @@ import { useConfig } from './hooks';
 import './style.css';
 import './i18n';
 
-const windowMap = {
+// Keyed by window label, which Tauri gives as a plain string.
+const windowMap: Record<string, React.JSX.Element> = {
     translate: <Translate />,
     screenshot: <Screenshot />,
     recognize: <Recognize />,
