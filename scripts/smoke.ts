@@ -126,10 +126,10 @@ const scenarios: Scenario[] = [
         request: (api) => fetch(`${api}/input_translate`),
     },
     {
-        // The buttons are there before any service has answered, so this does not depend on the free service.
+        // The box of the free service is there before it has answered, so this does not depend on its answer.
         name: 'writing',
         title: 'Writing',
-        expectText: 'Tones',
+        expectText: 'LLM7',
         request: (api) => fetch(`${api}/writing`, { method: 'POST', body: 'me and him goes to the store yesterday' }),
     },
     {
