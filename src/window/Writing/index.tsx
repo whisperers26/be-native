@@ -93,6 +93,8 @@ export default function Writing() {
         const cancel = () => {
             if (timeout) clearTimeout(timeout);
             timeout = null;
+    // When the window last asked for its height, which can move it.
+    const lastFit = useRef(0);
         };
         // Dragging the window loses the focus and gets it back at once (Windows), so the close waits a moment.
         const listeners = [
@@ -101,7 +103,10 @@ export default function Writing() {
                 timeout = setTimeout(() => void appWindow.close(), 100);
             }),
             listen('tauri://focus', cancel),
-            listen('tauri://move', cancel),
+            // A move by the user, who is dragging the window; not one the window's own fit made.
+            listen('tauri://move', () => {
+                if (performance.now() - lastFit.current > 300) cancel();
+            }),
         ];
         return () => {
             cancel();
@@ -179,6 +184,7 @@ export default function Writing() {
                 }
             }
             if (!shown) {
+                lastFit.current = performance.now();
                 // Not before it has its height: a window seen at the size Rust opened it with would jump.
                 shown = true;
                 void showWindow().then(focusWindow);
