@@ -1,0 +1,66 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`baidu OCR > exports its info and language table 1`] = `
+{
+  "Language": {
+    "auto": "CHN_ENG",
+    "de": "GER",
+    "en": "ENG",
+    "es": "SPA",
+    "fr": "FRE",
+    "it": "ITA",
+    "ja": "JAP",
+    "ko": "KOR",
+    "pt_br": "POR",
+    "pt_pt": "POR",
+    "ru": "RUS",
+    "yue": "CHN_ENG",
+    "zh_cn": "CHN_ENG",
+    "zh_tw": "CHN_ENG",
+  },
+  "info": {
+    "icon": "logo/baidu.svg",
+    "name": "baidu_ocr",
+  },
+}
+`;
+
+exports[`baidu OCR > fetches an access token, posts the image as a form with it and joins the lines 1`] = `
+[
+  {
+    "options": {
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      "method": "POST",
+      "query": {
+        "client_id": "test-client-id",
+        "client_secret": "test-client-secret",
+        "grant_type": "client_credentials",
+      },
+    },
+    "url": "https://aip.baidubce.com/oauth/2.0/token",
+  },
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "detect_direction": "false",
+          "image": "aW1hZ2U=",
+          "language_type": "ENG",
+        },
+        "type": "Form",
+      },
+      "headers": {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      "method": "POST",
+      "query": {
+        "access_token": "TOKEN",
+      },
+    },
+    "url": "https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic",
+  },
+]
+`;

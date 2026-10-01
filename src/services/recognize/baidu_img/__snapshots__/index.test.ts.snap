@@ -1,0 +1,70 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`baidu_img OCR > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "spa",
+    "fr": "fra",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "jp",
+    "ko": "kor",
+    "ms": "may",
+    "pt_br": "pot",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "th": "th",
+    "tr": "tr",
+    "vi": "vie",
+    "yue": "yue",
+    "zh_cn": "zh",
+    "zh_tw": "cht",
+  },
+  "info": {
+    "icon": "logo/baidu.svg",
+    "name": "baidu_img_ocr",
+  },
+}
+`;
+
+exports[`baidu_img OCR > posts the cut screenshot as a multipart form signed with md5 and returns sumDst 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": {
+          "appid": "test-appid",
+          "cuid": "APICUID",
+          "from": "auto",
+          "image": {
+            "file": Uint8Array [
+              137,
+              80,
+              78,
+              71,
+            ],
+            "fileName": "pot_screenshot_cut.png",
+            "mime": "image/png",
+          },
+          "mac": "mac",
+          "salt": "nanoid-fixed-id",
+          "sign": "e2b7dfb574d4a2ad58cd333269cdc7db",
+          "to": "en",
+          "version": "3",
+        },
+        "type": "Form",
+      },
+      "headers": {
+        "Content-Type": "multipart/form-data",
+      },
+      "method": "POST",
+    },
+    "url": "https://fanyi-api.baidu.com/api/trans/sdk/picture",
+  },
+]
+`;

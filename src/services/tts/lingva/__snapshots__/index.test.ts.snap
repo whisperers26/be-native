@@ -1,0 +1,51 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`lingva TTS > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fa": "fa",
+    "fr": "fr",
+    "he": "he",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "ja",
+    "km": "km",
+    "ko": "ko",
+    "mn_cy": "mn",
+    "ms": "ms",
+    "nb_no": "no",
+    "nl": "nl",
+    "nn_no": "no",
+    "pl": "pl",
+    "pt_br": "pt",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "sv": "sv",
+    "th": "th",
+    "tr": "tr",
+    "uk": "uk",
+    "vi": "vi",
+    "zh_cn": "zh",
+    "zh_tw": "zh_HANT",
+  },
+  "info": {
+    "icon": "logo/lingva.svg",
+    "name": "lingva_tts",
+  },
+}
+`;
+
+exports[`lingva TTS > requests the audio from the default instance and returns the audio bytes 1`] = `
+[
+  {
+    "options": undefined,
+    "url": "https://lingva.pot-app.com/api/v1/audio/en/hello",
+  },
+]
+`;

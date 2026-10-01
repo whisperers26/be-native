@@ -1,0 +1,53 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`tencent_img OCR > exports its info and language table 1`] = `
+{
+  "Language": {
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fr": "fr",
+    "it": "it",
+    "ja": "ja",
+    "ko": "ko",
+    "ms": "ms",
+    "pt_br": "pt",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "th": "th",
+    "vi": "vi",
+    "yue": "zh-TW",
+    "zh_cn": "zh",
+    "zh_tw": "zh-TW",
+  },
+  "info": {
+    "icon": "logo/tencent_cloud.png",
+    "name": "tencent_img_ocr",
+  },
+}
+`;
+
+exports[`tencent_img OCR > posts a TC3-HMAC-SHA256 signed ImageTranslate request to tmt and returns the TargetText lines 1`] = `
+[
+  {
+    "options": {
+      "body": {
+        "payload": "{"SessionUuid":"nanoid-fixed-id","Scene":"doc","Data":"aW1hZ2U=","Source":"auto","Target":"zh","ProjectId":0}",
+        "type": "Text",
+      },
+      "headers": {
+        "Authorization": "TC3-HMAC-SHA256 Credential=test-secret-id/2026-01-02/tmt/tc3_request, SignedHeaders=content-type;host, Signature=47e59f7a50e54bc80ae76d480d1319d6763c8588a818505b17b3547f18ef1dbf",
+        "Host": "tmt.tencentcloudapi.com",
+        "X-TC-Action": "ImageTranslate",
+        "X-TC-Region": "ap-beijing",
+        "X-TC-Timestamp": "1767323046",
+        "X-TC-Version": "2018-03-21",
+        "content-type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://tmt.tencentcloudapi.com",
+  },
+]
+`;

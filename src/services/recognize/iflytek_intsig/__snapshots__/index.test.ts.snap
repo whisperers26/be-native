@@ -1,0 +1,50 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`iflytek_intsig OCR > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fr": "fr",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "ja",
+    "ko": "ko",
+    "ms": "ms",
+    "pt_br": "pt_br",
+    "pt_pt": "pt_pt",
+    "ru": "ru",
+    "th": "th",
+    "tr": "tr",
+    "vi": "vi",
+    "zh_cn": "zh_cn",
+    "zh_tw": "zh_tw",
+  },
+  "info": {
+    "icon": "logo/iflytek.png",
+    "name": "iflytek_intsig_ocr",
+  },
+}
+`;
+
+exports[`iflytek_intsig OCR > posts the image as JSON to a signed URL and returns the trimmed whole_text 1`] = `
+[
+  {
+    "options": {
+      "body": {
+        "payload": "{"header":{"app_id":"test-appid","status":3},"parameter":{"hh_ocr_recognize_doc":{"recognizeDocumentRes":{"encoding":"utf8","compress":"raw","format":"json"}}},"payload":{"image":{"image":"aW1hZ2U="}}}",
+        "type": "Text",
+      },
+      "headers": {
+        "content-type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://api.xf-yun.com/v1/private/hh_ocr_recognize_doc?authorization=YXBpX2tleT0idGVzdC1hcGlrZXkiLCBhbGdvcml0aG09ImhtYWMtc2hhMjU2IiwgaGVhZGVycz0iaG9zdCBkYXRlIHJlcXVlc3QtbGluZSIsIHNpZ25hdHVyZT0iZEVsTWFXME5HMXJONEhYWDBpZVp6dFEwN1pzSDUwQW5KT3Mxc2dtMDJFMD0i&host=api.xf-yun.com&date=Fri%2C%2002%20Jan%202026%2003%3A04%3A05%20GMT",
+  },
+]
+`;

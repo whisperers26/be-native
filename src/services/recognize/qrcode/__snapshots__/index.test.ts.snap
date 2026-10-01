@@ -1,0 +1,32 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`qrcode OCR > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "",
+    "auto": "",
+    "de": "",
+    "en": "",
+    "es": "",
+    "fr": "",
+    "hi": "",
+    "id": "",
+    "it": "",
+    "ja": "",
+    "ko": "",
+    "ms": "",
+    "pt_br": "",
+    "pt_pt": "",
+    "ru": "",
+    "th": "",
+    "tr": "",
+    "vi": "",
+    "zh_cn": "",
+    "zh_tw": "",
+  },
+  "info": {
+    "icon": "logo/qrcode.svg",
+    "name": "qrcode",
+  },
+}
+`;

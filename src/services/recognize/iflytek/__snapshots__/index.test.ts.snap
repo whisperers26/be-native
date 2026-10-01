@@ -1,0 +1,34 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`iflytek OCR > exports its info and language table 1`] = `
+{
+  "Language": {
+    "auto": "zh_cn",
+    "en": "en",
+    "zh_cn": "zh_cn",
+    "zh_tw": "zh_tw",
+  },
+  "info": {
+    "icon": "logo/iflytek.png",
+    "name": "iflytek_ocr",
+  },
+}
+`;
+
+exports[`iflytek OCR > posts the image as JSON to a signed URL and returns the decoded words, lines joined 1`] = `
+[
+  {
+    "options": {
+      "body": {
+        "payload": "{"header":{"app_id":"test-appid","status":3},"parameter":{"sf8e6aca1":{"category":"ch_en_public_cloud","result":{"encoding":"utf8","compress":"raw","format":"json"}}},"payload":{"sf8e6aca1_data_1":{"image":"aW1hZ2U="}}}",
+        "type": "Text",
+      },
+      "headers": {
+        "content-type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://api.xf-yun.com/v1/private/sf8e6aca1?authorization=YXBpX2tleT0idGVzdC1hcGlrZXkiLCBhbGdvcml0aG09ImhtYWMtc2hhMjU2IiwgaGVhZGVycz0iaG9zdCBkYXRlIHJlcXVlc3QtbGluZSIsIHNpZ25hdHVyZT0iMTFwc1F4bEVyVjFieUM0RkdPREZOQ3hVd3kwVnV0S0k3UU5uVXJtZ2p1QT0i&host=api.xf-yun.com&date=Fri%2C%2002%20Jan%202026%2003%3A04%3A05%20GMT",
+  },
+]
+`;

@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`tencent_accurate OCR > exports its info and language table 1`] = `
+{
+  "Language": {
+    "auto": "auto",
+    "en": "auto",
+    "yue": "zh_rare",
+    "zh_cn": "zh",
+    "zh_tw": "zh_rare",
+  },
+  "info": {
+    "icon": "logo/tencent_cloud.png",
+    "name": "tencent_accurate_ocr",
+  },
+}
+`;
+
+exports[`tencent_accurate OCR > posts a TC3-HMAC-SHA256 signed JSON body and joins the detected lines 1`] = `
+[
+  {
+    "options": {
+      "body": {
+        "payload": "{"ImageBase64":"aW1hZ2U="}",
+        "type": "Text",
+      },
+      "headers": {
+        "Authorization": "TC3-HMAC-SHA256 Credential=test-secret-id/2026-01-02/ocr/tc3_request, SignedHeaders=content-type;host, Signature=43c30ee65163d6501e30d90799c68f059483740229850eb83a0d53c1d6a4b9ee",
+        "Host": "ocr.tencentcloudapi.com",
+        "X-TC-Action": "GeneralAccurateOCR",
+        "X-TC-Region": "ap-beijing",
+        "X-TC-Timestamp": "1767323046",
+        "X-TC-Version": "2018-11-19",
+        "content-type": "application/json",
+      },
+      "method": "POST",
+    },
+    "url": "https://ocr.tencentcloudapi.com",
+  },
+]
+`;
