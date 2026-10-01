@@ -36,6 +36,8 @@ use tray::*;
 use updater::check_update;
 use window::config_window;
 use window::cursor_position;
+use window::focus_window;
+use window::show_window;
 use window::updater_window;
 
 // Global AppHandle
@@ -153,6 +155,8 @@ fn main() {
             updater_window,
             screenshot,
             cursor_position,
+            show_window,
+            focus_window,
             lang_detect,
             agent_cli_run,
             webdav,

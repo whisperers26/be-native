@@ -106,6 +106,45 @@ fn secondary_monitor_centre() -> Position {
     }
 }
 
+// Show a window without making it the active one
+#[cfg(target_os = "windows")]
+fn show_inactive(window: &Window) {
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::UI::WindowsAndMessaging::{ShowWindow, SW_SHOWNOACTIVATE};
+
+    let Ok(hwnd) = window.hwnd() else {
+        warn!("Window handle not found: {}", window.label());
+        return;
+    };
+    unsafe {
+        let _ = ShowWindow(HWND(hwnd.0 as _), SW_SHOWNOACTIVATE);
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn show_inactive(window: &Window) {
+    window.show().unwrap_or_default();
+}
+
+// The frontend shows and focuses its window through these two, so that test mode can keep the
+// window from taking the focus. A window that never had the focus cannot lose it either, so the
+// ones that close on blur stay open.
+#[tauri::command]
+pub fn show_window(window: Window) {
+    if TEST_MODE.load(Ordering::Relaxed) {
+        show_inactive(&window);
+    } else {
+        window.show().unwrap_or_default();
+    }
+}
+
+#[tauri::command]
+pub fn focus_window(window: Window) {
+    if !TEST_MODE.load(Ordering::Relaxed) {
+        window.set_focus().unwrap_or_default();
+    }
+}
+
 // The physical position that decides where a new window goes: the mouse, or in test mode the
 // centre of the secondary monitor, which keeps the windows off the screen the owner works on
 fn placement_point() -> Position {
