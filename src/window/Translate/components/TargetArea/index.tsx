@@ -26,7 +26,7 @@ import { useTranslation } from 'react-i18next';
 import Database from 'tauri-plugin-sql-api';
 import { GiCycle } from 'react-icons/gi';
 import { useTheme } from 'next-themes';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { nanoid } from 'nanoid';
 import { useSpring, animated } from '@react-spring/web';
 import useMeasure from 'react-use-measure';
@@ -35,6 +35,7 @@ import * as builtinCollectionServices from '../../../../services/collection';
 import { sourceLanguageAtom, targetLanguageAtom } from '../LanguageArea';
 import { useConfig, useToastStyle, useVoice } from '../../../../hooks';
 import { sourceTextAtom, detectLanguageAtom } from '../SourceArea';
+import { cardProgressAtom, stageAtom } from '../../progress';
 import { invoke_plugin } from '../../../../utils/invoke_plugin';
 import * as builtinServices from '../../../../services/translate';
 import * as builtinTtsServices from '../../../../services/tts';
@@ -117,6 +118,22 @@ export default function TargetArea(props: TargetAreaProps) {
     // known bug (known-issues.md): this is the object useTheme() returns, not the theme's name,
     // so the spinner's colour test below is never true.
     const theme: unknown = useTheme();
+
+    // The window waits for every card before it opens, so each card says how far it is. A card has finished once
+    // it has been loading and no longer is, or has an error: a translation can be empty.
+    const stage = useAtomValue(stageAtom);
+    const setCardProgress = useSetAtom(cardProgressAtom);
+    const [started, setStarted] = useState(false);
+    useEffect(() => {
+        if (isLoading || error !== '') {
+            setStarted(true);
+        }
+        const state = isLoading ? 'loading' : started || error !== '' ? 'done' : 'idle';
+        setCardProgress((cards) => ({ ...cards, [name]: { service: currentTranslateServiceInstanceKey, state } }));
+    }, [isLoading, error, started, currentTranslateServiceInstanceKey]);
+    useEffect(() => {
+        return () => setCardProgress(({ [name]: _gone, ...cards }) => cards);
+    }, []);
 
     useEffect(() => {
         if (error) {
@@ -419,6 +436,8 @@ export default function TargetArea(props: TargetAreaProps) {
     const springs = useSpring({
         from: { height: 0 },
         to: { height: hide ? 0 : bounds.height },
+        // A window that is not showing yet is measured for its size, and must not be measured half open.
+        immediate: stage !== 'shown',
     });
 
     return (
