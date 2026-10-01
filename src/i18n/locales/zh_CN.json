@@ -175,7 +175,8 @@
                 "install_plugin": "安装外部插件",
                 "view_plugin_list": "查看插件列表",
                 "uninstall_success": "插件卸载成功",
-                "homepage": "插件主页"
+                "homepage": "插件主页",
+                "writing": "写作"
             },
             "history": {
                 "label": "历史记录",
