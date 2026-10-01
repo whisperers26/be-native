@@ -58,8 +58,7 @@
                 ]
             },
             "dialog": {
-                "open": true,
-                "save": true
+                "open": true
             }
         },
         "bundle": {
