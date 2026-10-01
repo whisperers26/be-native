@@ -116,6 +116,6 @@ A backup is an uncompressed zip of `config.json`, `history.db` if present, and e
 
 ## Tauri plugins
 
-`single-instance` (a second launch shows a notification and exits), `log` (`pot.log` and stdout), `autostart`, `sql` (the SQLite history), `store` (settings), `fs-watch` (the frontend watches `config.json`).
+`single-instance` (a second launch shows a notification and exits), `log` (a file named after the app, `Be Native.log` or `Be Native (Debug).log` from a debug build, and stdout), `autostart`, `sql` (the SQLite history), `store` (settings), `fs-watch` (the frontend watches `config.json`).
 
 Rust bugs found so far: [known-issues.md](known-issues.md).
