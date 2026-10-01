@@ -76,6 +76,14 @@ describe('llm7 writing', () => {
         expect(payloads().map((payload) => payload.model)).toEqual(Array(3).fill('mistral-Nemo-Instruct-2407'));
     });
 
+    it('waits a second when the reply says how long in no number', async () => {
+        httpMock.queue({ status: 429, data: { error: { retry_after: 'soon' } } }, answer);
+
+        await improve('hello', { config: {} });
+
+        expect(waits).toEqual([1]);
+    });
+
     it('never waits much longer than a minute at a time, and gives up after two waits', async () => {
         httpMock.queue(limited(600), limited(51), limited(1));
 

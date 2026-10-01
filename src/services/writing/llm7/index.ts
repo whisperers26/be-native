@@ -48,9 +48,10 @@ export async function improve(text: string, options: WritingOptions): Promise<st
         let model = 0;
         while (!reply.ok) {
             if (reply.status === 429 && waits < RATE_LIMIT_TRIES) {
-                // The reply says how long to wait.
                 waits++;
-                await pacing.wait(Math.min(Math.max(reply.data?.error?.retry_after ?? 1, 1), LONGEST_WAIT));
+                // A second when it does not say, or says it in a way that is no number.
+                const seconds = Number(reply.data?.error?.retry_after) || 1;
+                await pacing.wait(Math.min(Math.max(seconds, 1), LONGEST_WAIT));
             } else if (reply.status !== 429 && model < models.length - 1) {
                 model++;
             } else {
