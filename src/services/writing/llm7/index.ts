@@ -9,7 +9,8 @@ export const DEFAULT_MODEL = 'mistral-Nemo-Instruct-2407';
 // What is asked when a model is refused: another model served without a token, then whichever LLM7 picks.
 const FALLBACK_MODELS = ['codestral-latest', 'default'];
 // How often a request waits out the rate limit before it gives up, and the longest it waits each time, in seconds.
-// LLM7 counts requests by the minute, and a request made before the minute is over is refused again.
+// LLM7 counts requests by the minute, and a request made before the minute is over is refused again. It also
+// counts them by the hour, and then says to wait far longer than is worth waiting.
 const RATE_LIMIT_TRIES = 2;
 const LONGEST_WAIT = 65;
 
@@ -47,11 +48,13 @@ export async function improve(text: string, options: WritingOptions): Promise<st
         let waits = 0;
         let model = 0;
         while (!reply.ok) {
-            if (reply.status === 429 && waits < RATE_LIMIT_TRIES) {
+            // A second when it does not say, or says it in a way that is no number.
+            const seconds = Math.max(Number(reply.data?.error?.retry_after) || 1, 1);
+            // Once the hour's requests are used up it says to wait for many minutes: that is not waited for, and
+            // its message, which says how long, is shown.
+            if (reply.status === 429 && waits < RATE_LIMIT_TRIES && seconds <= LONGEST_WAIT) {
                 waits++;
-                // A second when it does not say, or says it in a way that is no number.
-                const seconds = Number(reply.data?.error?.retry_after) || 1;
-                await pacing.wait(Math.min(Math.max(seconds, 1), LONGEST_WAIT));
+                await pacing.wait(seconds);
             } else if (reply.status !== 429 && model < models.length - 1) {
                 model++;
             } else {

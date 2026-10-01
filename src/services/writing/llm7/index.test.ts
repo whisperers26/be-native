@@ -84,12 +84,20 @@ describe('llm7 writing', () => {
         expect(waits).toEqual([1]);
     });
 
-    it('never waits much longer than a minute at a time, and gives up after two waits', async () => {
-        httpMock.queue(limited(600), limited(51), limited(1));
+    it('gives up after two waits', async () => {
+        httpMock.queue(limited(65), limited(51), limited(1));
 
         await expect(improve('hello', { config: {} })).rejects.toContain('Http Status: 429');
         expect(waits).toEqual([65, 51]);
         expect(httpMock.calls).toHaveLength(3);
+    });
+
+    it('does not wait when it is told to wait for many minutes, and shows what it was told', async () => {
+        httpMock.queue(limited(1336));
+
+        await expect(improve('hello', { config: {} })).rejects.toContain('"retry_after":1336');
+        expect(waits).toEqual([]);
+        expect(httpMock.calls).toHaveLength(1);
     });
 
     it('asks the next free model when one is refused', async () => {
