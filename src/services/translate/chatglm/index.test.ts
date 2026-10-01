@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { sseEvent, streamBody, stubFetch } from '../../../test/stream';
 import { info, Language, translate } from './index';
 
 const config = {
@@ -16,31 +17,6 @@ const config = {
 beforeEach(() => {
     vi.stubGlobal('Uint8Array', new TextEncoder().encode('').constructor);
 });
-
-// One server-sent event the way the API streams it: a JSON delta after "data:", then a blank line.
-function event(delta: object): string {
-    return `data: ${JSON.stringify({ choices: [{ index: 0, delta }] })}\n\n`;
-}
-
-// A streamed response body that delivers `text` in reads of `readSize` bytes.
-function streamBody(text: string, readSize = Infinity): ReadableStream<Uint8Array> {
-    const bytes = new TextEncoder().encode(text);
-    return new ReadableStream({
-        start(controller) {
-            for (let start = 0; start < bytes.length; start += readSize) {
-                controller.enqueue(bytes.slice(start, start + readSize));
-            }
-            controller.close();
-        },
-    });
-}
-
-// Replaces the global fetch (the service does not use Tauri's); returns what it was called with.
-function stubFetch(response: Response) {
-    const fetchMock = vi.fn(async (_url: string, _options?: RequestInit) => response);
-    vi.stubGlobal('fetch', fetchMock);
-    return () => fetchMock.mock.calls.map(([url, options]) => ({ url, options }));
-}
 
 describe('chatglm translate', () => {
     it('exports its info and language table', () => {
@@ -69,9 +45,9 @@ describe('chatglm translate', () => {
         const requests = stubFetch(
             new Response(
                 streamBody(
-                    event({ role: 'assistant', content: '你' }) +
-                        event({ role: 'assistant', content: '好' }) +
-                        event({ role: 'assistant', content: '' }) +
+                    sseEvent({ role: 'assistant', content: '你' }) +
+                        sseEvent({ role: 'assistant', content: '好' }) +
+                        sseEvent({ role: 'assistant', content: '' }) +
                         'data: [DONE]\n\n'
                 )
             )
@@ -87,7 +63,9 @@ describe('chatglm translate', () => {
 
     it('works without setResult and returns the text without the underscore', async () => {
         stubFetch(
-            new Response(streamBody(event({ content: 'Hallo' }) + event({ content: ' Welt' }) + 'data: [DONE]\n\n'))
+            new Response(
+                streamBody(sseEvent({ content: 'Hallo' }) + sseEvent({ content: ' Welt' }) + 'data: [DONE]\n\n')
+            )
         );
 
         await expect(translate('hello', 'Auto', 'German', { config })).resolves.toBe('Hallo Welt');
@@ -97,9 +75,9 @@ describe('chatglm translate', () => {
         stubFetch(
             new Response(
                 streamBody(
-                    event({ content: '你好' }) +
-                        event({ content: '，世界' }) +
-                        event({ content: '！' }) +
+                    sseEvent({ content: '你好' }) +
+                        sseEvent({ content: '，世界' }) +
+                        sseEvent({ content: '！' }) +
                         'data: [DONE]\n\n',
                     7
                 )
@@ -114,7 +92,7 @@ describe('chatglm translate', () => {
     });
 
     it('substitutes $text, $from, $to and $detect in every prompt', async () => {
-        const requests = stubFetch(new Response(streamBody(event({ content: 'x' }))));
+        const requests = stubFetch(new Response(streamBody(sseEvent({ content: 'x' }))));
 
         await translate('hello', 'Auto', 'Simplified Chinese', { config, detect: 'en' });
         const body = JSON.parse(requests()[0].options!.body as string);
@@ -125,7 +103,7 @@ describe('chatglm translate', () => {
     });
 
     it('substitutes "undefined" for $detect when no language was detected', async () => {
-        const requests = stubFetch(new Response(streamBody(event({ content: 'x' }))));
+        const requests = stubFetch(new Response(streamBody(sseEvent({ content: 'x' }))));
 
         await translate('hello', 'Auto', 'German', { config });
         const body = JSON.parse(requests()[0].options!.body as string);
@@ -133,7 +111,7 @@ describe('chatglm translate', () => {
     });
 
     it('lets String.replaceAll interpret $ patterns in the text', async () => {
-        const requests = stubFetch(new Response(streamBody(event({ content: 'x' }))));
+        const requests = stubFetch(new Response(streamBody(sseEvent({ content: 'x' }))));
 
         await translate('costs $$5 and $&', 'Auto', 'German', { config });
         const body = JSON.parse(requests()[0].options!.body as string);
@@ -141,7 +119,7 @@ describe('chatglm translate', () => {
     });
 
     it('appends "undefined" for a chunk without content', async () => {
-        stubFetch(new Response(streamBody(event({ role: 'assistant' }) + event({ content: 'Hi' }))));
+        stubFetch(new Response(streamBody(sseEvent({ role: 'assistant' }) + sseEvent({ content: 'Hi' }))));
 
         await expect(translate('hello', 'Auto', 'German', { config })).resolves.toBe('undefinedHi');
     });
@@ -150,7 +128,7 @@ describe('chatglm translate', () => {
         stubFetch(
             new Response(
                 streamBody(
-                    event({ content: 'Hi' }) +
+                    sseEvent({ content: 'Hi' }) +
                         `data: ${JSON.stringify({ choices: [{ delta: { content: ' there' } }] })}`
                 )
             )

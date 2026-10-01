@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { httpMock } from '../../../test/http';
+import { sseEvent, streamBody, stubFetch } from '../../../test/stream';
 import { info, Language, translate } from './index';
 
 const promptList = [
@@ -24,28 +25,6 @@ const streamConfig = { ...config, stream: true };
 
 function reply(content: string) {
     return { data: { choices: [{ message: { role: 'assistant', content } }] } };
-}
-
-// One server-sent event: a chat.completion.chunk after "data:", then a blank line.
-function event(delta: object): string {
-    return `data: ${JSON.stringify({ choices: [{ index: 0, delta }] })}\n\n`;
-}
-
-// A streamed response body that delivers each string as one read.
-function streamBody(...reads: string[]): ReadableStream<Uint8Array> {
-    return new ReadableStream({
-        start(controller) {
-            for (const read of reads) controller.enqueue(new TextEncoder().encode(read));
-            controller.close();
-        },
-    });
-}
-
-// Replaces the global fetch (window.fetch, which the streaming branch uses); returns what it was called with.
-function stubFetch(response: Response) {
-    const fetchMock = vi.fn(async (_url: string, _options?: RequestInit) => response);
-    vi.stubGlobal('fetch', fetchMock);
-    return () => fetchMock.mock.calls.map(([url, options]) => ({ url, options }));
 }
 
 describe('openai translate', () => {
@@ -223,10 +202,10 @@ describe('openai translate', () => {
             const requests = stubFetch(
                 new Response(
                     streamBody(
-                        event({ role: 'assistant', content: '' }) +
-                            event({ content: 'Hallo' }) +
-                            event({ content: ' Welt' }) +
-                            event({}) +
+                        sseEvent({ role: 'assistant', content: '' }) +
+                            sseEvent({ content: 'Hallo' }) +
+                            sseEvent({ content: ' Welt' }) +
+                            sseEvent({}) +
                             'data: [DONE]\n\n'
                     )
                 )
@@ -242,13 +221,13 @@ describe('openai translate', () => {
         });
 
         it('returns "[STREAM]" at the first piece of content when there is no setResult', async () => {
-            stubFetch(new Response(streamBody(event({ content: 'Hallo' }) + event({ content: ' Welt' }))));
+            stubFetch(new Response(streamBody(sseEvent({ content: 'Hallo' }) + sseEvent({ content: ' Welt' }))));
 
             await expect(translate('hello', 'Auto', 'German', { config: streamConfig })).resolves.toBe('[STREAM]');
         });
 
         it('joins an event that arrives in two reads', async () => {
-            const whole = event({ content: 'Hallo' });
+            const whole = sseEvent({ content: 'Hallo' });
             const cut = whole.indexOf('Hal') + 3;
             stubFetch(new Response(streamBody(whole.slice(0, cut), whole.slice(cut) + 'data: [DONE]\n\n')));
             const setResult = vi.fn();
@@ -260,7 +239,7 @@ describe('openai translate', () => {
         });
 
         it('uses the api-key header and omits the model when streaming through azure', async () => {
-            const requests = stubFetch(new Response(streamBody(event({ content: 'Hallo' }))));
+            const requests = stubFetch(new Response(streamBody(sseEvent({ content: 'Hallo' }))));
 
             await translate('hello', 'Auto', 'German', {
                 config: { ...azureConfig, stream: true },
@@ -279,8 +258,8 @@ describe('openai translate', () => {
                 new Response(
                     streamBody(
                         'data: {"choices":[],"prompt_filter_results":[]}\n\n',
-                        event({ content: 'Hallo' }),
-                        event({ content: ' Welt' }),
+                        sseEvent({ content: 'Hallo' }),
+                        sseEvent({ content: ' Welt' }),
                         'data: [DONE]\n\n'
                     )
                 )

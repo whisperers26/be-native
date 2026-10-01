@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { httpMock } from '../../../test/http';
+import { streamBody, stubFetch } from '../../../test/stream';
 import { info, Language, translate } from './index';
 
 const promptList = [
@@ -17,23 +18,6 @@ function reply(text: string) {
 // One response object the way streamGenerateContent prints it: pretty-printed JSON.
 function candidate(text: string): string {
     return JSON.stringify({ candidates: [{ content: { parts: [{ text }], role: 'model' }, index: 0 }] }, null, 2);
-}
-
-// A streamed response body that delivers each string as one read.
-function streamBody(...reads: string[]): ReadableStream<Uint8Array> {
-    return new ReadableStream({
-        start(controller) {
-            for (const read of reads) controller.enqueue(new TextEncoder().encode(read));
-            controller.close();
-        },
-    });
-}
-
-// Replaces the global fetch (window.fetch, which the streaming branch uses); returns what it was called with.
-function stubFetch(response: Response) {
-    const fetchMock = vi.fn(async (_url: string, _options?: RequestInit) => response);
-    vi.stubGlobal('fetch', fetchMock);
-    return () => fetchMock.mock.calls.map(([url, options]) => ({ url, options }));
 }
 
 describe('geminipro translate', () => {

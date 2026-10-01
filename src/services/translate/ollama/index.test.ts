@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { type FetchCall, streamBody, stubFetch } from '../../../test/stream';
 import { info, Language, translate } from './index';
 
 const promptList = [
@@ -20,38 +21,22 @@ function chunk(content: string, done = false): string {
     );
 }
 
-// A streamed response body that delivers each string as one read.
-function streamBody(...reads: string[]): ReadableStream<Uint8Array> {
-    return new ReadableStream({
-        start(controller) {
-            for (const read of reads) controller.enqueue(new TextEncoder().encode(read));
-            controller.close();
-        },
+// ollama-js puts the platform in the User-Agent and an AbortSignal prints its internals, so a snapshot of
+// the requests shows a placeholder for each. The User-Agent is still checked to be ollama-js's.
+function describeRequests(calls: FetchCall[]) {
+    return calls.map(({ url, options }) => {
+        const { signal, headers, ...rest } = options ?? {};
+        const { 'User-Agent': userAgent, ...otherHeaders } = (headers ?? {}) as Record<string, string>;
+        expect(userAgent).toMatch(/^ollama-js\/\d+\.\d+\.\d+ \(/);
+        return {
+            url,
+            options: {
+                ...rest,
+                headers: { ...otherHeaders, 'User-Agent': '<ollama-js user agent>' },
+                signal: signal ? '<AbortSignal>' : undefined,
+            },
+        };
     });
-}
-
-// ollama/browser calls the global fetch, so replace that. `respond` makes one Response per request.
-function stubFetch(respond: () => Response) {
-    const fetchMock = vi.fn(async (_url: string, _options?: RequestInit) => respond());
-    vi.stubGlobal('fetch', fetchMock);
-    return {
-        // The User-Agent carries the platform and an AbortSignal prints its internals, so both are replaced.
-        requests: () =>
-            fetchMock.mock.calls.map(([url, options]) => {
-                const { signal, headers, ...rest } = options ?? {};
-                const { 'User-Agent': userAgent, ...otherHeaders } = (headers ?? {}) as Record<string, string>;
-                expect(userAgent).toMatch(/^ollama-js\/\d+\.\d+\.\d+ \(/);
-                return {
-                    url,
-                    options: {
-                        ...rest,
-                        headers: { ...otherHeaders, 'User-Agent': '<ollama-js user agent>' },
-                        signal: signal ? '<AbortSignal>' : undefined,
-                    },
-                };
-            }),
-        signal: () => fetchMock.mock.calls[0][1]?.signal as AbortSignal,
-    };
 }
 
 function jsonResponse(body: unknown, status = 200) {
@@ -65,25 +50,21 @@ describe('ollama translate', () => {
 
     describe('with streaming', () => {
         it('posts the prompts to /api/chat and passes the growing text to setResult', async () => {
-            const { requests } = stubFetch(
-                () => new Response(streamBody(chunk('Hallo'), chunk(' Welt'), chunk('', true)))
-            );
+            const requests = stubFetch(() => new Response(streamBody(chunk('Hallo'), chunk(' Welt'), chunk('', true))));
             const setResult = vi.fn();
 
             await expect(translate('hello', 'Auto', 'German', { config, setResult, detect: 'en' })).resolves.toBe(
                 'Hallo Welt'
             );
             expect(setResult.mock.calls).toEqual([['Hallo_'], ['Hallo Welt_'], ['Hallo Welt_'], ['Hallo Welt']]);
-            expect(requests()).toMatchSnapshot();
+            expect(describeRequests(requests())).toMatchSnapshot();
         });
 
         it('returns "[STREAM]" at the first part and aborts the request when there is no setResult', async () => {
-            const { signal } = stubFetch(
-                () => new Response(streamBody(chunk('Hallo'), chunk(' Welt'), chunk('', true)))
-            );
+            const requests = stubFetch(() => new Response(streamBody(chunk('Hallo'), chunk(' Welt'), chunk('', true))));
 
             await expect(translate('hello', 'Auto', 'German', { config })).resolves.toBe('[STREAM]');
-            expect(signal().aborted).toBe(true);
+            expect(requests()[0].options?.signal?.aborted).toBe(true);
         });
 
         it('rejects when the stream ends without a done message', async () => {
@@ -104,46 +85,46 @@ describe('ollama translate', () => {
     });
 
     it('without streaming: sends stream false and returns the reply content without trimming it', async () => {
-        const { requests } = stubFetch(() =>
+        const requests = stubFetch(() =>
             jsonResponse({ message: { role: 'assistant', content: ' Hallo ' }, done: true })
         );
 
         await expect(translate('hello', 'Auto', 'German', { config: plainConfig, detect: 'en' })).resolves.toBe(
             ' Hallo '
         );
-        expect(requests()).toMatchSnapshot();
+        expect(describeRequests(requests())).toMatchSnapshot();
     });
 
     it('substitutes $text, $from, $to and $detect in every prompt', async () => {
-        const { requests } = stubFetch(() => jsonResponse({ message: { content: 'x' }, done: true }));
+        const requests = stubFetch(() => jsonResponse({ message: { content: 'x' }, done: true }));
 
         await translate('hello', 'Auto', 'German', { config: plainConfig, detect: 'en' });
-        expect(JSON.parse(requests()[0].options.body as string).messages).toEqual([
+        expect(JSON.parse(requests()[0].options!.body as string).messages).toEqual([
             { role: 'system', content: 'Translate from Auto to German (detected: English).' },
             { role: 'user', content: 'Translate into German:\n"""\nhello\n"""' },
         ]);
     });
 
     it('substitutes "undefined" for $detect when no language was detected', async () => {
-        const { requests } = stubFetch(() => jsonResponse({ message: { content: 'x' }, done: true }));
+        const requests = stubFetch(() => jsonResponse({ message: { content: 'x' }, done: true }));
 
         await translate('hello', 'Auto', 'German', { config: plainConfig });
-        expect(JSON.parse(requests()[0].options.body as string).messages[0].content).toBe(
+        expect(JSON.parse(requests()[0].options!.body as string).messages[0].content).toBe(
             'Translate from Auto to German (detected: undefined).'
         );
     });
 
     it('lets String.replaceAll interpret $ patterns in the text', async () => {
-        const { requests } = stubFetch(() => jsonResponse({ message: { content: 'x' }, done: true }));
+        const requests = stubFetch(() => jsonResponse({ message: { content: 'x' }, done: true }));
 
         await translate('costs $$5 and $&', 'Auto', 'German', { config: plainConfig });
-        expect(JSON.parse(requests()[0].options.body as string).messages[1].content).toBe(
+        expect(JSON.parse(requests()[0].options!.body as string).messages[1].content).toBe(
             'Translate into German:\n"""\ncosts $5 and $text\n"""'
         );
     });
 
     it('normalises requestPath: https:// added, trailing slash dropped, default port added by ollama-js', async () => {
-        const { requests } = stubFetch(() => jsonResponse({ message: { content: 'x' }, done: true }));
+        const requests = stubFetch(() => jsonResponse({ message: { content: 'x' }, done: true }));
 
         await translate('hello', 'Auto', 'German', { config: { ...plainConfig, requestPath: 'localhost:11434' } });
         await translate('hello', 'Auto', 'German', {
