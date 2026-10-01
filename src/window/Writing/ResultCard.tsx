@@ -98,9 +98,10 @@ export default function ResultCard(props: ResultCardProps) {
 
     return (
         <div
-            role='button'
+            // A group and not a button: a button's text is read as its name only, which would hide the rewrite from
+            // a screen reader, and from the smoke test.
+            role='group'
             tabIndex={ready ? 0 : -1}
-            aria-disabled={!ready}
             aria-label={t('writing.replace')}
             className={`group rounded-[10px] border-1 bg-content1 outline-none transition-[border-color,box-shadow,transform] duration-200 ${
                 ready

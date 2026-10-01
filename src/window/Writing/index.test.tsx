@@ -84,7 +84,7 @@ describe('Writing window', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Tones' }));
 
         await screen.findByText('f');
-        const boxes = screen.getAllByRole('button', { name: 'Click to replace' }).map((box) => box.textContent!);
+        const boxes = screen.getAllByRole('group', { name: 'Click to replace' }).map((box) => box.textContent!);
         expect(
             boxes.slice(2).map((text) => `${/LLM7|OpenAI/.exec(text)![0]}/${/Casual|Concise/.exec(text)![0]}`)
         ).toEqual(['LLM7/Casual', 'OpenAI/Casual', 'LLM7/Concise', 'OpenAI/Concise']);
