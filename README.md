@@ -15,7 +15,7 @@
 <!-- fork:start -->
 
 > [!NOTE]
-> **Be Native** 是 Pot 的个人分支（fork）。上游仓库 [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) 已归档，开发在 [whisperers26/be-native](https://github.com/whisperers26/be-native) 继续进行。本分支不发布安装包，下文的安装说明安装的是上游的 Pot。
+> **Be Native** 是 Pot 的个人分支（fork）。上游仓库 [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) 已归档，开发在 [whisperers26/be-native](https://github.com/whisperers26/be-native) 继续进行。安装包发布在本分支的 [Releases](https://github.com/whisperers26/be-native/releases) 页面，应用内更新也读取这里；下文的安装说明针对的是上游的 Pot。
 >
 > 本分支的改动：
 >
@@ -25,6 +25,7 @@
 > - 前端行为由自动化测试（Vitest）固定，命令为 `pnpm test`。
 > - 真实应用冒烟测试（`pnpm smoke`，Windows）通过本地 HTTP 接口检查应用的各个窗口。
 > - 前端代码是严格模式（strict）的 TypeScript，CI 会拒绝 `src/` 下的 JavaScript 文件。
+> - 推送 `v*` 标签会构建并在 GitHub 发布带签名的安装包，应用内更新读取最新的发布，不再读取上游的更新源。
 
 <!-- fork:end -->
 

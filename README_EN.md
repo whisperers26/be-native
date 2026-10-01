@@ -15,7 +15,7 @@
 <!-- fork:start -->
 
 > [!NOTE]
-> **Be Native** is a personal fork of Pot. Upstream [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) has been archived; development continues in [whisperers26/be-native](https://github.com/whisperers26/be-native). This fork publishes no releases, so the install instructions below install upstream Pot.
+> **Be Native** is a personal fork of Pot. Upstream [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) has been archived; development continues in [whisperers26/be-native](https://github.com/whisperers26/be-native). Installers are published on this fork's [Releases](https://github.com/whisperers26/be-native/releases) page and the in-app updater reads them; the install instructions below are for upstream Pot.
 >
 > Changes in this fork:
 >
@@ -25,6 +25,7 @@
 > - Automated tests (Vitest) pin the frontend's behaviour: `pnpm test`.
 > - A real-app smoke test (`pnpm smoke`, Windows) checks the app's windows through its local HTTP API.
 > - The frontend is strict TypeScript; CI rejects JavaScript files under `src/`.
+> - Pushing a `v*` tag builds and publishes signed installers as a GitHub release; the in-app updater reads the latest release instead of upstream's feed.
 
 <!-- fork:end -->
 

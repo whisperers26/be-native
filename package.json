@@ -1,7 +1,7 @@
 {
     "name": "pot",
     "private": true,
-    "version": "3.0.7",
+    "version": "1.0.0",
     "type": "module",
     "packageManager": "pnpm@10.14.0",
     "scripts": {
@@ -9,8 +9,6 @@
         "build": "vite build",
         "preview": "vite preview",
         "tauri": "tauri",
-        "updater": "node updater/updater.mjs",
-        "updater:fixRuntime": "node updater/updater-for-fix-runtime.mjs",
         "check:docs": "tsx scripts/check-docs.ts",
         "test": "vitest run",
         "test:watch": "vitest",
