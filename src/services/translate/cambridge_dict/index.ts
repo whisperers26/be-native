@@ -1,8 +1,13 @@
 import { fetch } from '@tauri-apps/api/http';
 import { Language } from './info';
+import type { DictionaryResult, TranslateResult } from '../../../types/service';
 
+// `declare` fields are type-only: a plain field declaration would be emitted as a class field.
 class Pronunciation {
-    constructor(region, symbol, voice) {
+    declare region: string;
+    declare symbol: string;
+    declare voice: string | number[];
+    constructor(region: string, symbol: string, voice: string) {
         this.region = region;
         this.symbol = symbol;
         this.voice = voice;
@@ -10,20 +15,24 @@ class Pronunciation {
 }
 
 class Explanation {
-    constructor(trait, explains) {
+    declare trait: string;
+    declare explains: string[];
+    constructor(trait: string, explains: string[]) {
         this.trait = trait;
         this.explains = explains;
     }
 }
 
 class WordTranslateResult {
-    constructor(pronunciations, explanations) {
+    declare pronunciations: Pronunciation[];
+    declare explanations: Explanation[];
+    constructor(pronunciations: Pronunciation[], explanations: Explanation[]) {
         this.pronunciations = pronunciations;
         this.explanations = explanations;
     }
 }
 
-function tryDetectLanguage(text) {
+function tryDetectLanguage(text: string): Language | null {
     if (/^[A-Za-z]/.test(text)) {
         return Language.en;
     }
@@ -31,7 +40,7 @@ function tryDetectLanguage(text) {
 }
 
 // 翻译服务商：https://dictionary.cambridge.org/
-export async function translate(text, from, to) {
+export async function translate(text: string, from: string, to: string): Promise<TranslateResult> {
     if (Language.auto === from) {
         from = tryDetectLanguage(text) ?? from;
     }
@@ -41,7 +50,7 @@ export async function translate(text, from, to) {
     }
 
     const url = `https://dictionary.cambridge.org/search/direct/?datasetsearch=${from}-${to}&q=${text}`;
-    let res = await fetch(url, {
+    let res = await fetch<string>(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'text/html;charset=UTF-8',
@@ -58,15 +67,15 @@ export async function translate(text, from, to) {
         throw new Error(`Words not yet included: ${text}`);
     }
 
-    const resultMap = [...entryNodes].reduce((dict, entryNode) => {
+    const resultMap = [...entryNodes].reduce<Record<string, WordTranslateResult>>((dict, entryNode) => {
         const wordTranslateResult = dict['result'] || new WordTranslateResult([], []);
 
         if (wordTranslateResult.pronunciations.length === 0) {
             const pronunciationNodes = entryNode.querySelectorAll('.dpron-i');
             const pronunciations = [...pronunciationNodes].map((pronunciationNode) => {
-                const region = pronunciationNode.querySelector('.region').innerText;
-                const symbol = pronunciationNode.querySelector('.pron').innerText;
-                let voice = pronunciationNode.querySelector('.daud source').src;
+                const region = pronunciationNode.querySelector<HTMLElement>('.region')!.innerText;
+                const symbol = pronunciationNode.querySelector<HTMLElement>('.pron')!.innerText;
+                let voice = pronunciationNode.querySelector<HTMLSourceElement>('.daud source')!.src;
                 voice = voice.replace(/^https?:\/\/[^/]+/, 'https://dictionary.cambridge.org');
                 voice = voice.replace(/^tauri:\/\/[^/]+/, 'https://dictionary.cambridge.org');
                 return new Pronunciation(region, symbol, voice);
@@ -74,12 +83,17 @@ export async function translate(text, from, to) {
             wordTranslateResult.pronunciations.push(...pronunciations);
         }
 
-        const wordPos = entryNode.querySelector('.posgram')?.innerText;
+        const wordPos = entryNode.querySelector<HTMLElement>('.posgram')?.innerText;
         const defBlockNodes = entryNode.querySelectorAll('.sense-body.dsense_b .def-block.ddef_block');
         const explanations = [...defBlockNodes].map((defBlockNode) => {
             const trait =
-                wordPos ?? defBlockNode.querySelector('.ddef_h .def.ddef_d.db').innerText.replace(/\s+/g, ' ').trim();
-            const explains = defBlockNode.querySelector('.def-body.ddef_b .trans.dtrans.dtrans-se.break-cj').innerText;
+                wordPos ??
+                defBlockNode
+                    .querySelector<HTMLElement>('.ddef_h .def.ddef_d.db')!
+                    .innerText.replace(/\s+/g, ' ')
+                    .trim();
+            const explains =
+                defBlockNode.querySelector<HTMLElement>('.def-body.ddef_b .trans.dtrans.dtrans-se.break-cj')!.innerText;
             return new Explanation(trait, explains.split(';'));
         });
         wordTranslateResult.explanations.push(...explanations);
@@ -88,12 +102,15 @@ export async function translate(text, from, to) {
         return dict;
     }, {});
     for (let i of resultMap.result.pronunciations) {
-        const res = await fetch(i.voice, { responseType: 3 });
+        // @ts-expect-error Tauri's FetchOptions requires a method, but fetch defaults to GET without one
+        const res = await fetch<number[]>(i.voice as string, { responseType: 3 });
         if (res.ok) {
             i.voice = res.data;
         }
     }
-    return resultMap.result;
+    // The result has no associations or sentence, which DictionaryResult requires;
+    // the Translate window checks each field before it uses it.
+    return resultMap.result as DictionaryResult;
 }
 
 export * from './Config';
