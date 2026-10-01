@@ -1,0 +1,39 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`volcengine OCR > exports its info and language table 1`] = `
+{
+  "Language": {
+    "auto": "auto",
+    "en": "en",
+    "yue": "yue",
+    "zh_cn": "zh_cn",
+    "zh_tw": "zh_tw",
+  },
+  "info": {
+    "icon": "logo/volcengine.svg",
+    "name": "volcengine_ocr",
+  },
+}
+`;
+
+exports[`volcengine OCR > posts a signed form body as text and joins line_texts 1`] = `
+[
+  {
+    "options": {
+      "body": Body {
+        "payload": "image_base64=aW1hZ2U%3D&approximate_pixel=0&mode=default&filter_thresh=80",
+        "type": "Text",
+      },
+      "headers": {
+        "Authorization": "HMAC-SHA256 Credential=test-access-key/20260102/cn-north-1/cv/request, SignedHeaders=content-type;host;x-content-sha256;x-date, Signature=5d2cbd5252d34da47ad4720a48913834759a8576bf9172f7cfdca83444d1708c",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Host": "visual.volcengineapi.com",
+        "X-Content-Sha256": "ecd186ce72cd98ebe5e7a8581b5ad9046faf15d5c1c3cbcddac4b61ead4a019b",
+        "X-Date": "20260102T030405Z",
+      },
+      "method": "POST",
+    },
+    "url": "https://visual.volcengineapi.com/?Action=OCRNormal&Version=2020-08-26",
+  },
+]
+`;
