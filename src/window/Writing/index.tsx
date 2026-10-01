@@ -55,7 +55,14 @@ export default function Writing() {
             setConfigs(map);
         })();
     }, [serviceList]);
-    const services = serviceList !== null && configs !== null ? enabledServices(serviceList, configs) : null;
+    // Only the instances whose settings have been read: after a change of the list, a new one's are on their way.
+    const services =
+        serviceList !== null && configs !== null
+            ? enabledServices(
+                  serviceList.filter((key) => key in configs),
+                  configs
+              )
+            : null;
 
     // The text to improve. Each new one starts the window over: `version` makes its boxes new ones.
     const [text, setText] = useState('');
@@ -86,6 +93,8 @@ export default function Writing() {
         };
     }, []);
 
+    // When the window last asked for its height, which can move it.
+    const lastFit = useRef(0);
     // The window closes when it loses the focus, unless that is switched off or the window is pinned.
     useEffect(() => {
         if (closeOnBlur !== true || pinned) return;
@@ -93,8 +102,6 @@ export default function Writing() {
         const cancel = () => {
             if (timeout) clearTimeout(timeout);
             timeout = null;
-    // When the window last asked for its height, which can move it.
-    const lastFit = useRef(0);
         };
         // Dragging the window loses the focus and gets it back at once (Windows), so the close waits a moment.
         const listeners = [
@@ -117,6 +124,8 @@ export default function Writing() {
     const onBusy = useCallback((id: string, value: boolean) => {
         setBusy((all) => (Boolean(all[id]) === value ? all : { ...all, [id]: value }));
     }, []);
+    // One result is picked: a second click before the window has closed picks nothing.
+    const replacing = useRef(false);
     const onReplace = useCallback((result: string) => {
         if (replacing.current) return;
         replacing.current = true;
@@ -135,8 +144,6 @@ export default function Writing() {
         setMoreSpecs((specs) => [...specs, ...toneResults(tones, services)]);
     };
     const askCustom = () => {
-    // One result is picked: a second click before the window has closed picks nothing.
-    const replacing = useRef(false);
         const request = customRequest.trim();
         if (services === null || request === '') return;
         const round = customRound.current++;
@@ -177,6 +184,7 @@ export default function Writing() {
             if (height !== asked) {
                 asking = true;
                 asked = height;
+                lastFit.current = performance.now();
                 try {
                     await invoke('fit_writing_window', { height });
                 } finally {
@@ -184,7 +192,6 @@ export default function Writing() {
                 }
             }
             if (!shown) {
-                lastFit.current = performance.now();
                 // Not before it has its height: a window seen at the size Rust opened it with would jump.
                 shown = true;
                 void showWindow().then(focusWindow);
