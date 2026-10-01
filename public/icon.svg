@@ -1,23 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
     <defs>
-        <linearGradient id="bg" x1="102" y1="922" x2="922" y2="102" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="#4338ca"/>
-            <stop offset="0.55" stop-color="#3b82f6"/>
-            <stop offset="1" stop-color="#22d3ee"/>
-        </linearGradient>
-        <linearGradient id="ink" x1="372" y1="640" x2="592" y2="400" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="#4338ca"/>
-            <stop offset="1" stop-color="#2563eb"/>
+        <linearGradient id="line" x1="230" y1="800" x2="794" y2="250" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#22d3ee"/>
+            <stop offset="1" stop-color="#a3e635"/>
         </linearGradient>
     </defs>
     <!-- Tile -->
-    <rect fill="url(#bg)" x="102" y="102" width="820" height="820" rx="177.15" ry="177.15"/>
+    <rect fill="#0f172a" x="102" y="102" width="820" height="820" rx="177.15" ry="177.15"/>
     <!-- Speech bubble: what you say, in any language -->
-    <path fill="#ffffff" d="M322,330h320a100,100 0 0 1 100,100v180a100,100 0 0 1 -100,100h-212l-128,112v-112a100,100 0 0 1 -80,-98v-182a100,100 0 0 1 100,-100z"/>
-    <!-- N for Native, written in one stroke -->
-    <path fill="none" stroke="url(#ink)" stroke-width="62" stroke-linecap="round" stroke-linejoin="round" d="M382,630v-220l200,220v-220"/>
-    <!-- Sparkle: the polish that makes it read as native -->
-    <path fill="#fbbf24" d="M768,170Q768,290 888,290Q768,290 768,410Q768,290 648,290Q768,290 768,170z"/>
-    <path fill="#fde68a" d="M866,420Q866,470 916,470Q866,470 866,520Q866,470 816,470Q866,470 866,420z"/>
+    <path fill="none" stroke="url(#line)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round" d="M560,250H330a100,100 0 0 0 -100,100v230a100,100 0 0 0 94,96v124l140,-120h230a100,100 0 0 0 100,-100V490"/>
+    <!-- Spark breaking through the corner: the moment it reads as native -->
+    <path fill="#ffffff" d="M700,150Q700,340 890,340Q700,340 700,530Q700,340 510,340Q700,340 700,150z"/>
+    <path fill="#a3e635" d="M480,460Q480,520 540,520Q480,520 480,580Q480,520 420,520Q480,520 480,460z"/>
 </svg>
