@@ -1,8 +1,19 @@
 import { Language } from './info';
 import * as jose from 'jose';
 import { info } from 'tauri-plugin-log-api';
+import type { TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+interface Prompt {
+    role: string;
+    content: string;
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     const { config, setResult, detect } = options;
 
     let { model, apiKey, promptList } = config;
@@ -11,14 +22,14 @@ export async function translate(text, from, to, options = {}) {
     if (id === undefined || secret === undefined) {
         return Promise.reject('invalid apikey');
     }
-    promptList = promptList.map((item) => {
+    promptList = promptList.map((item: Prompt) => {
         return {
             ...item,
             content: item.content
                 .replaceAll('$text', text)
                 .replaceAll('$from', from)
                 .replaceAll('$to', to)
-                .replaceAll('$detect', Language[detect]),
+                .replaceAll('$detect', Language[detect as keyof typeof Language]),
         };
     });
 
@@ -60,7 +71,7 @@ export async function translate(text, from, to, options = {}) {
 
         let buffer = '';
         // Function to process the stream data
-        const processChatStream = async (reader, decoder) => {
+        const processChatStream = async (reader: ReadableStreamDefaultReader<Uint8Array>, decoder: TextDecoder) => {
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
@@ -90,7 +101,7 @@ export async function translate(text, from, to, options = {}) {
             }
         };
 
-        await processChatStream(response.body.getReader(), new TextDecoder());
+        await processChatStream(response.body!.getReader(), new TextDecoder());
     } catch (error) {
         return Promise.reject(error);
     }
