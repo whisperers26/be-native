@@ -45,6 +45,14 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `hide_source`, `hide_language` | `false` | Hide the source box or the language bar |
 | `clipboard_monitor` | `false` | Toggled from the tray only. Rust |
 
+## Writing
+
+| Key | Default | Notes |
+| --- | --- | --- |
+| `writing_tones` | Professional, Casual, Friendly, Confident, Concise | A list of `{ name, instruction }` (`DEFAULT_TONES` in `src/utils/writing_tones`): what the Tones button asks for |
+| `writing_window_animation` | `true` | Off: boxes and the window take their size at once |
+| `writing_close_on_blur` | `true` | |
+
 ## Recognize (OCR)
 
 | Key | Default | Notes |
@@ -60,17 +68,18 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 
 | Key | Default | Notes |
 | --- | --- | --- |
-| `hotkey_selection_translate`, `hotkey_input_translate`, `hotkey_ocr_recognize`, `hotkey_ocr_translate`, `hotkey_ocr_copy` | `''` | Accelerator strings set on the Hotkey page; empty means no shortcut. Rust |
+| `hotkey_selection_translate`, `hotkey_input_translate`, `hotkey_ocr_recognize`, `hotkey_ocr_translate`, `hotkey_ocr_copy`, `hotkey_selection_writing` | `''` | Accelerator strings set on the Hotkey page; empty means no shortcut. Rust |
 
 ## Services
 
 | Key | Default | Notes |
 | --- | --- | --- |
 | `translate_service_list` | `['deepl', 'bing', 'lingva', 'yandex', 'google', 'ecdict']` | Instance keys in display order. Rust prunes unknown entries at launch |
+| `writing_service_list` | `['llm7']` | Same; no plugins |
 | `recognize_service_list` | `['system', 'tesseract']` | Same |
 | `tts_service_list` | `['lingva_tts']` | Same; only the first entry is used |
 | `collection_service_list` | `[]` | Same |
-| `<instance key>` | `{}` | That instance's settings: `instanceName`, the service's own fields, and for translate `enable`. Rust reads `command`, `model`, `effort`, `systemPrompt` and `enable` of `claude_code` and `codex` instances |
+| `<instance key>` | `{}` | That instance's settings: `instanceName`, the service's own fields, and for translate `enable`. Rust reads `command`, `model`, `effort`, `systemPrompt` and `enable` of `claude_code` and `codex` instances, of both the translate and the writing list |
 
 ## Adding a setting
 

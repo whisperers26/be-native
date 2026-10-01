@@ -6,7 +6,7 @@ Be Native is a fork of Pot, a Tauri 1 desktop app. One Rust process owns the win
 | --- | --- | --- |
 | Rust core | `src-tauri/` | [backend.md](backend.md) |
 | React UI in TypeScript, one bundle for every window | `src/` | [frontend.md](frontend.md) |
-| Translation, OCR, TTS and collection services, plugins | `src/services/` | [services.md](services.md) |
+| Translation, writing, OCR, TTS and collection services, plugins | `src/services/` | [services.md](services.md) |
 | Settings, one JSON file read by both sides | `config.json` | [config-keys.md](config-keys.md) |
 | Tools, running, files on disk | | [setup-and-run.md](setup-and-run.md) |
 
@@ -18,6 +18,7 @@ Rust creates windows on demand (`src-tauri/src/window.rs`), hidden; each shows i
 | --- | --- |
 | `daemon` | Hidden static page created at launch; Rust uses it to find monitors |
 | `translate` | Results from every enabled translate service |
+| `writing` | Rewrites of the selected text from every enabled writing service |
 | `recognize` | OCR of a screenshot region |
 | `silent_recognize` | Never shown: copies the text of a screenshot region and closes |
 | `screenshot` | Full-screen region picker (not on macOS, which uses `screencapture`) |
@@ -29,6 +30,7 @@ Closing a window never quits the app; only Quit or Restart in the tray does. A s
 ## Main flows
 
 - **Selection translation.** Hotkey → Rust reads the selected text (UI Automation or a simulated copy on Windows) → stores it and opens or focuses the `translate` window → a new window fetches it with `get_text`, an open one receives `new_text` → the window detects the language and calls every enabled translate service.
+- **Writing improvement.** Hotkey → Rust reads the selected text, remembers the window it was in, and opens or focuses the `writing` window beside the cursor → the window fetches the text with `get_writing_text` (an open one receives `new_writing_text`) and asks every enabled writing service for a rewrite → the user may ask for tones or add a request of their own → a click on a result calls `writing_replace`, and Rust gives the focus back and pastes the text over the selection.
 - **Input translation.** The same, with the text `[INPUT_TRANSLATE]`, which opens an empty input box.
 - **OCR.** Hotkey → Rust opens the `screenshot` window → it captures the monitor (`pot_screenshot.png`), the user drags a region, `cut_image` writes `pot_screenshot_cut.png`, and the window emits `success` → Rust opens `recognize` → it reads the image with `get_base64` and runs the chosen OCR service.
 - **Image translation.** The same capture, then `[IMAGE_TRANSLATE]` goes to the `translate` window, which runs OCR with the first OCR service and translates the text.
@@ -42,11 +44,11 @@ Closing a window never quits the app; only Quit or Restart in the tray does. A s
 
 ## How the two sides talk
 
-- Frontend → Rust: `invoke('<command>', args)`, 22 commands.
-- Rust → frontend: the events `new_text`, `new_image` and `agent_cli_stream` to one window, and `translate_auto_copy_changed` to every window.
+- Frontend → Rust: `invoke('<command>', args)`, 25 commands.
+- Rust → frontend: the events `new_text`, `new_writing_text`, `new_image` and `agent_cli_stream` to one window, and `translate_auto_copy_changed` to every window.
 - Frontend → Rust: the event `success` from the screenshot window.
 - Requests to outside services go through Tauri's HTTP client, which runs in Rust, so CORS does not apply.
-- The Claude Code and Codex translate services have no HTTP requests of their own: Rust runs the installed command-line tools as child processes ([services.md](services.md)).
+- The Claude Code and Codex translate and writing services have no HTTP requests of their own: Rust runs the installed command-line tools as child processes ([services.md](services.md)).
 
 ## Inherited risks
 
