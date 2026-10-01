@@ -2,7 +2,7 @@ use std::fs;
 
 use crate::config::get;
 use crate::config::set;
-use crate::placement::{beside, between, inside, Rect};
+use crate::placement::{beside, between, inset, inside, Rect};
 use crate::StringWrapper;
 use crate::APP;
 use dirs::cache_dir;
@@ -280,6 +280,16 @@ pub fn config_window() {
 
 // The gap between a window and what it is placed beside, in logical pixels
 const PLACEMENT_GAP: f64 = 8.0;
+// The room the Translate window leaves between itself and the edges of the monitor's usable area
+const EDGE_MARGIN: f64 = 12.0;
+
+// Where the Translate window may be on a monitor
+fn translate_area(monitor: &Monitor) -> Rect {
+    inset(
+        usable_area(monitor),
+        (EDGE_MARGIN * monitor.scale_factor()) as i32,
+    )
+}
 
 // The size the Translate window opens at when its size is not remembered, in logical pixels. The
 // window then fits itself to what it shows, through `fit_translate_window`.
@@ -346,7 +356,7 @@ fn translate_window(region: Option<Rect>) -> Window {
                 anchor,
                 (width as f64 * dpi) as i32,
                 (height as f64 * dpi) as i32,
-                usable_area(&monitor),
+                translate_area(&monitor),
                 (PLACEMENT_GAP * dpi) as i32,
             );
             window
@@ -473,7 +483,7 @@ pub fn fit_translate_window(window: Window, width: f64, height: f64) {
     // Rounded up, so that a fraction of a pixel cut off does not leave something to scroll
     let width = (width * scale).ceil() as i32;
     let height = (height * scale).ceil() as i32;
-    let area = usable_area(&monitor);
+    let area = translate_area(&monitor);
 
     let fit = FIT_COUNT.fetch_add(1, Ordering::SeqCst) + 1;
     // On its way to where it was placed, the window is not there yet, but it has not been moved

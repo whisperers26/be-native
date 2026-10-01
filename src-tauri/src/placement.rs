@@ -33,6 +33,16 @@ fn overlap(a: Rect, b: Rect) -> i64 {
     width as i64 * height as i64
 }
 
+// `rect` with `margin` taken off each side
+pub fn inset(rect: Rect, margin: i32) -> Rect {
+    Rect {
+        x: rect.x + margin,
+        y: rect.y + margin,
+        width: (rect.width - 2 * margin).max(0),
+        height: (rect.height - 2 * margin).max(0),
+    }
+}
+
 // The top left corner nearest to (`x`, `y`) that keeps a window of `width` x `height` inside `bounds`
 pub fn inside(x: i32, y: i32, width: i32, height: i32, bounds: Rect) -> (i32, i32) {
     (
@@ -126,6 +136,11 @@ mod tests {
             width,
             height,
         }
+    }
+
+    #[test]
+    fn a_margin_comes_off_each_side() {
+        assert_eq!(inset(SCREEN, 12), rect(12, 12, 1896, 1056));
     }
 
     #[test]
