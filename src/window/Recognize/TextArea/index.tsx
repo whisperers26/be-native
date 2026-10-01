@@ -12,6 +12,7 @@ import { nanoid } from 'nanoid';
 import { getServiceName, getServiceSouceType, ServiceSourceType } from '../../../utils/service_instance';
 import { currentServiceInstanceKeyAtom, languageAtom, recognizeFlagAtom } from '../ControlArea';
 import { invoke_plugin } from '../../../utils/invoke_plugin';
+import { mergeLines } from '../../../utils/merge_lines';
 import * as builtinServices from '../../../services/recognize';
 import { useConfig } from '../../../hooks';
 import { base64Atom } from '../ImageArea';
@@ -32,7 +33,7 @@ interface TextAreaProps {
 export default function TextArea(props: TextAreaProps) {
     const { serviceInstanceConfigMap } = props;
     const [autoCopy] = useConfig('recognize_auto_copy', false);
-    const [deleteNewline] = useConfig('recognize_delete_newline', false);
+    const [mergeWrappedLines] = useConfig('recognize_merge_lines', true);
     const [hideWindow] = useConfig('recognize_hide_window', false);
     const recognizeFlag = useAtomValue(recognizeFlagAtom);
     const currentServiceInstanceKey = useAtomValue(currentServiceInstanceKeyAtom);
@@ -55,7 +56,7 @@ export default function TextArea(props: TextAreaProps) {
             base64 !== '' &&
             currentServiceInstanceKey &&
             autoCopy !== null &&
-            deleteNewline !== null &&
+            mergeWrappedLines !== null &&
             hideWindow !== null
         ) {
             setLoading(true);
@@ -73,8 +74,8 @@ export default function TextArea(props: TextAreaProps) {
                             (v: any) => {
                                 if (recognizeId !== id) return;
                                 v = v.trim();
-                                if (deleteNewline) {
-                                    v = v.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+                                if (mergeWrappedLines) {
+                                    v = mergeLines(v);
                                 }
                                 setText(v);
                                 setLoading(false);
@@ -121,8 +122,8 @@ export default function TextArea(props: TextAreaProps) {
                                 // Only the system service can resolve to undefined, and only on an OS the app does
                                 // not run on.
                                 v = v!.trim();
-                                if (deleteNewline) {
-                                    v = v.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+                                if (mergeWrappedLines) {
+                                    v = mergeLines(v);
                                 }
                                 setText(v);
                                 setLoading(false);
@@ -149,7 +150,7 @@ export default function TextArea(props: TextAreaProps) {
                 }
             }
         }
-    }, [base64, currentServiceInstanceKey, language, recognizeFlag, autoCopy, deleteNewline, hideWindow]);
+    }, [base64, currentServiceInstanceKey, language, recognizeFlag, autoCopy, mergeWrappedLines, hideWindow]);
 
     // known bug (known-issues.md): the Card's radius is none, sm, md or lg, so '10' falls back to lg; the cast keeps
     // the value as it is.
@@ -216,7 +217,7 @@ export default function TextArea(props: TextAreaProps) {
                             variant='light'
                             size='sm'
                             onPress={() => {
-                                setText(text!.replace(/\-\s+/g, '').replace(/\s+/g, ' '));
+                                setText(mergeLines(text!));
                             }}
                         >
                             <MdSmartButton className='text-[16px]' />

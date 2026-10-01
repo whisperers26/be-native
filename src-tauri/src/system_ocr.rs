@@ -42,14 +42,18 @@ pub fn system_ocr(app_handle: tauri::AppHandle, lang: &str) -> Result<String, St
     };
 
     match engine {
+        // The result's own Text() joins the lines with spaces, which loses where each line ended.
         Ok(v) => Ok(v
             .RecognizeAsync(&bitmap)
             .unwrap()
             .get()
             .unwrap()
-            .Text()
+            .Lines()
             .unwrap()
-            .to_string_lossy()),
+            .into_iter()
+            .map(|line| line.Text().unwrap().to_string_lossy())
+            .collect::<Vec<_>>()
+            .join("\n")),
         Err(e) => {
             if e.to_string().contains("0x00000000") {
                 Err("Language package not installed!\n\nSee: https://learn.microsoft.com/zh-cn/windows/powertoys/text-extractor#supported-languages".to_string())

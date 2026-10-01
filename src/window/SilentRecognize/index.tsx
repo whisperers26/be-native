@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { t } from 'i18next';
 
 import { getServiceName, whetherPluginService } from '../../utils/service_instance';
+import { mergeLines } from '../../utils/merge_lines';
 import { invoke_plugin } from '../../utils/invoke_plugin';
 import * as builtinServices from '../../services/recognize';
 import { store } from '../../utils/store';
@@ -23,7 +24,7 @@ async function recognize(): Promise<string> {
     const base64 = await invoke<string>('get_base64');
     const serviceInstanceList = (await store.get<string[]>('recognize_service_list')) ?? ['system', 'tesseract'];
     const language = (await store.get<string>('recognize_language')) ?? 'auto';
-    const deleteNewline = (await store.get<boolean>('recognize_delete_newline')) ?? false;
+    const mergeWrappedLines = (await store.get<boolean>('recognize_merge_lines')) ?? true;
     const instanceKey = serviceInstanceList[0];
     const config = (await store.get<ServiceConfig>(instanceKey)) ?? {};
     const serviceName = getServiceName(instanceKey);
@@ -43,8 +44,8 @@ async function recognize(): Promise<string> {
     }
 
     text = (text ?? '').trim();
-    if (deleteNewline) {
-        text = text.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+    if (mergeWrappedLines) {
+        text = mergeLines(text);
     }
     if (text === '') throw t('silent_recognize.no_text');
     return text;

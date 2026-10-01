@@ -29,7 +29,7 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `translate_second_language` | `en` | Used as the target when the detected source language equals the target |
 | `translate_detect_engine` | `baidu` | `baidu`, `google`, `tencent`, `niutrans`, `yandex`, `bing`, `local` (offline, Rust) |
 | `translate_auto_copy` | `disable` | `source`, `target`, `source_target`, `disable`; also set from the tray. Rust |
-| `translate_delete_newline` | `false` | |
+| `translate_merge_lines` | `true` | Join lines that only wrapped and keep paragraphs and list items (`mergeLines`, [frontend.md](frontend.md#translate-window)) |
 | `incremental_translate` | `false` | Append new text to the previous text |
 | `dynamic_translate` | `false` | Translate one second after typing |
 | `translate_remember_language` | `false` | Save languages chosen in the window as the defaults |
@@ -49,7 +49,7 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | Key | Default | Notes |
 | --- | --- | --- |
 | `recognize_language` | `auto` | |
-| `recognize_delete_newline` | `false` | |
+| `recognize_merge_lines` | `true` | The same, for the Recognize window and silent recognition |
 | `recognize_auto_copy` | `false` | |
 | `recognize_hide_window` | `false` | |
 | `recognize_close_on_blur` | `false` | |

@@ -56,9 +56,8 @@ describe('SilentRecognize window', () => {
         expect(fakeTauri.unhandled).toEqual([]);
     });
 
-    it('uses the recognition language and the newline setting', async () => {
+    it('uses the recognition language and merges wrapped lines', async () => {
         fakeTauri.store.set('recognize_language', 'en');
-        fakeTauri.store.set('recognize_delete_newline', true);
         fakeTauri.command('get_base64', () => 'aW1hZ2U=');
         fakeTauri.command('system_ocr', () => 'trans-\nlated text\nhere');
         render(<SilentRecognize />);
@@ -66,6 +65,16 @@ describe('SilentRecognize window', () => {
         await vi.waitFor(() => expect(closed()).toBe(true));
         expect(fakeTauri.clipboard).toBe('translated text here');
         expect(fakeTauri.calls.find((call) => call.cmd === 'system_ocr')?.args).toEqual({ lang: 'en-US' });
+    });
+
+    it('leaves the lines as they are when merging is off', async () => {
+        fakeTauri.store.set('recognize_merge_lines', false);
+        fakeTauri.command('get_base64', () => 'aW1hZ2U=');
+        fakeTauri.command('system_ocr', () => 'trans-\nlated text\nhere');
+        render(<SilentRecognize />);
+
+        await vi.waitFor(() => expect(closed()).toBe(true));
+        expect(fakeTauri.clipboard).toBe('trans-\nlated text\nhere');
     });
 
     it('notifies and leaves the clipboard alone when recognition fails', async () => {

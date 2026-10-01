@@ -18,6 +18,7 @@ import { useConfig, useSyncAtom, useVoice, useToastStyle } from '../../../../hoo
 import { invoke_plugin } from '../../../../utils/invoke_plugin';
 import * as recognizeServices from '../../../../services/recognize';
 import * as builtinTtsServices from '../../../../services/tts';
+import { mergeLines } from '../../../../utils/merge_lines';
 import detect from '../../../../utils/lang_detect';
 import { store } from '../../../../utils/store';
 import { focusWindow, showWindow } from '../../../../utils/window';
@@ -49,7 +50,7 @@ export default function SourceArea(props: SourceAreaProps) {
     const [detectLanguage, setDetectLanguage] = useAtom(detectLanguageAtom);
     const [incrementalTranslate] = useConfig('incremental_translate', false);
     const [dynamicTranslate] = useConfig('dynamic_translate', false);
-    const [deleteNewline] = useConfig('translate_delete_newline', false);
+    const [mergeWrappedLines] = useConfig('translate_merge_lines', true);
     const [recognizeLanguage] = useConfig('recognize_language', 'auto');
     const [recognizeServiceList] = useConfig('recognize_service_list', ['system', 'tesseract']);
     const [ttsServiceList] = useConfig('tts_service_list', ['lingva_tts']);
@@ -102,8 +103,8 @@ export default function SourceArea(props: SourceAreaProps) {
                     ).then(
                         (v: any) => {
                             let newText = v.trim();
-                            if (deleteNewline) {
-                                newText = v.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+                            if (mergeWrappedLines) {
+                                newText = mergeLines(v);
                             } else {
                                 newText = v.trim();
                             }
@@ -145,8 +146,8 @@ export default function SourceArea(props: SourceAreaProps) {
                         .then(
                             (v) => {
                                 let newText = v!.trim();
-                                if (deleteNewline) {
-                                    newText = v!.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+                                if (mergeWrappedLines) {
+                                    newText = mergeLines(v!);
                                 } else {
                                     newText = v!.trim();
                                 }
@@ -172,8 +173,8 @@ export default function SourceArea(props: SourceAreaProps) {
         } else {
             setWindowType('[SELECTION_TRANSLATE]');
             let newText = text.trim();
-            if (deleteNewline) {
-                newText = text.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+            if (mergeWrappedLines) {
+                newText = mergeLines(text);
             } else {
                 newText = text.trim();
             }
@@ -263,7 +264,7 @@ export default function SourceArea(props: SourceAreaProps) {
 
     useEffect(() => {
         if (
-            deleteNewline !== null &&
+            mergeWrappedLines !== null &&
             incrementalTranslate !== null &&
             recognizeLanguage !== null &&
             recognizeServiceList !== null &&
@@ -273,7 +274,7 @@ export default function SourceArea(props: SourceAreaProps) {
                 handleNewText(v);
             });
         }
-    }, [deleteNewline, incrementalTranslate, recognizeLanguage, recognizeServiceList, hideWindow]);
+    }, [mergeWrappedLines, incrementalTranslate, recognizeLanguage, recognizeServiceList, hideWindow]);
 
     useEffect(() => {
         const fit = () => {
@@ -455,7 +456,7 @@ export default function SourceArea(props: SourceAreaProps) {
                                     variant='light'
                                     size='sm'
                                     onPress={() => {
-                                        const newText = sourceText.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+                                        const newText = mergeLines(sourceText);
                                         setSourceText(newText);
                                         detect_language(newText).then(() => {
                                             syncSourceText();

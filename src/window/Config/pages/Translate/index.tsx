@@ -22,7 +22,7 @@ export default function Translate() {
     const [incrementalTranslate, setIncrementalTranslate] = useConfig('incremental_translate', false);
     const [historyDisable, setHistoryDisable] = useConfig('history_disable', false);
     const [dynamicTranslate, setDynamicTranslate] = useConfig('dynamic_translate', false);
-    const [deleteNewline, setDeleteNewline] = useConfig('translate_delete_newline', false);
+    const [mergeWrappedLines, setMergeWrappedLines] = useConfig('translate_merge_lines', true);
     const [rememberLanguage, setRememberLanguage] = useConfig('translate_remember_language', false);
     // const [translateFontSize, setTranslateFontSize] = useConfig('translate_font_size', 16);
     const [windowPosition, setWindowPosition] = useConfig('translate_window_position', 'smart');
@@ -192,11 +192,11 @@ export default function Translate() {
                     </div>
                     <div className='config-item'>
                         <h3 className='my-auto mx-0'>{t('config.translate.delete_newline')}</h3>
-                        {deleteNewline !== null && (
+                        {mergeWrappedLines !== null && (
                             <Switch
-                                isSelected={deleteNewline}
+                                isSelected={mergeWrappedLines}
                                 onValueChange={(v) => {
-                                    setDeleteNewline(v);
+                                    setMergeWrappedLines(v);
                                 }}
                             />
                         )}
