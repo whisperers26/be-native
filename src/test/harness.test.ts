@@ -7,7 +7,7 @@ import { Store } from 'tauri-plugin-store-api';
 import { v4 as uuidv4 } from 'uuid';
 import { describe, expect, it, vi } from 'vitest';
 import { fakeTauri } from './fake-tauri';
-import { httpMock } from './http';
+import { fetchMock, httpMock } from './http';
 import { FIXED_NOW } from './setup';
 
 describe('test harness', () => {
@@ -42,6 +42,16 @@ describe('test harness', () => {
         await expect(fetch('https://example.test/missing', { method: 'GET' })).rejects.toThrow(
             'httpMock: no response queued for GET https://example.test/missing'
         );
+    });
+
+    it('drops a one-time fetch stub that was never used when it resets', async () => {
+        fetchMock.mockRejectedValueOnce(new Error('left over from an earlier test'));
+
+        httpMock.reset();
+        httpMock.queue({ data: 'fresh' });
+
+        const response = await fetch('https://example.test/after-reset', { method: 'GET' });
+        expect(response.data).toBe('fresh');
     });
 
     it('answers Rust commands with defaults and overrides', async () => {
