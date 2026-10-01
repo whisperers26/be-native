@@ -8,7 +8,7 @@ read only the pages your task needs.
 
 Be Native, the owner's fork of [Pot](https://github.com/pot-app/pot-desktop),
 a cross-platform translation and OCR desktop app, continued after upstream was
-archived. It is a Tauri 1 app: a Rust backend in `src-tauri/` and a React 18
+archived. Writing improvement is planned next to translation. It is a Tauri 1 app: a Rust backend in `src-tauri/` and a React 18
 frontend in strict TypeScript in `src/`.
 
 ## Rules
@@ -28,6 +28,8 @@ frontend in strict TypeScript in `src/`.
 6. A refactor does not change runtime behaviour. If you find a bug on the way,
    add it to [known-issues.md](docs/agents/known-issues.md) and fix it on its
    own branch.
+7. When you run the app to test, keep its windows on the secondary monitor,
+   never the primary one. How: [testing.md](docs/agents/testing.md).
 
 ## Commands
 

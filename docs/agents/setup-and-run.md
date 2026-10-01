@@ -31,10 +31,12 @@ This starts Vite on http://localhost:1420 (`pnpm dev`; the port is fixed and mus
 
 What to expect:
 
+- A debug build calls itself "Be Native (Debug)" (About page, tray tooltip); `src-tauri/src/main.rs` adds the suffix. `tauri dev` names the executable after the product: `src-tauri\target\debug\Be Native.exe`.
+- Windows open on the monitor under the mouse cursor. When you test, keep them on the secondary monitor, not the owner's primary one ([testing.md](testing.md#real-app-smoke-test) has the command that parks the cursor there).
 - On first run (no settings file yet) the Config window opens. Otherwise the app starts with only a tray icon.
 - Closing a window does not quit. Quit or restart from the tray menu.
 - Restart `pnpm tauri dev` after switching branches. Vite keeps serving the modules it transformed before the switch, and those can still import files the new branch renamed or deleted (such as a `.jsx` that became `.tsx`). New windows then fail to load and stay hidden.
-- Only one instance runs at a time. The app identifier, `com.pot-app.desktop`, is the same as upstream Pot's, so an installed Pot and the dev build share settings, and whichever starts second exits with an "already running" notification. Quit the other one first.
+- Only one instance runs at a time. The app identifier, `com.pot-app.desktop`, is the same as upstream Pot's, so an installed Pot, an installed Be Native and the dev build share settings, and whichever starts second exits with an "already running" notification. Quit the other one first.
 - Global shortcuts are empty until set in Config → Hotkey. Without them, trigger windows through the local HTTP API (port setting `server_port`, default 60828):
 
   ```bash
@@ -44,7 +46,7 @@ What to expect:
   ```
 
 - With `dev_mode` on (Config → General), F12 opens the devtools of the focused window.
-- The updater reads `latest.json` from this fork's latest GitHub release. A build older than that release opens the Updater window at launch; a build at the latest version stays quiet. Turn off "check for updates" in Config → General to stop the launch check.
+- The updater reads `latest.json` from this fork's latest GitHub release. A release build older than that release opens the Updater window at launch; one at the latest version stays quiet, and "check for updates" in Config → General turns the launch check off. A debug build never checks at launch, since it is built from the working tree; Check Update in the tray menu and the About page still opens the Updater window.
 
 ## Data on disk
 
@@ -62,6 +64,16 @@ To start as on first run, quit the app and move `config.json` away.
 | --- | --- |
 | `pnpm build` | The frontend only, into `dist/`, in about 15 seconds. It warns that the main chunk is over 500 kB; that is expected. |
 | `pnpm tauri build` | A release binary plus MSI and NSIS installers in `src-tauri/target/release/bundle/`, in about 2.5 minutes. It then exits with "A public key has been found, but no private key. Make sure to set `TAURI_PRIVATE_KEY` environment variable.": only the signing of the updater bundles needs the private key. The installers are already written by then. |
+
+## Icons
+
+`public/icon.svg` is the master: a 1024 canvas with the tile inset by 102 on each side. To change the icon, edit it, render 1024 px PNGs from it, and regenerate:
+
+| Files | Rendered from | Command |
+| --- | --- | --- |
+| `src-tauri/icons/` (Windows, Linux), `public/icon.png` (820 px) | The tile alone, full bleed (`viewBox="102 102 820 820"`) | `pnpm tauri icon <png> -o src-tauri/icons` |
+| `src-tauri/icons_mac/` | The whole canvas, margin included | `pnpm tauri icon <png> -o src-tauri/icons_mac` |
+| `src-tauri/icons_mac/tray.ico` | The glyph alone in black on transparent (a macOS template image) | `pnpm tauri icon <png> -o <tmp>`, then copy its `icon.ico` |
 
 ## Releasing
 
