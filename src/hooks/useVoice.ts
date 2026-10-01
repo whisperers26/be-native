@@ -1,9 +1,14 @@
 import { useCallback } from 'react';
-let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-let source = null;
+
+// Older WebKit only has the prefixed name.
+type WebkitWindow = typeof window & { webkitAudioContext: typeof AudioContext };
+
+let audioContext = new (window.AudioContext || (window as WebkitWindow).webkitAudioContext)();
+let source: AudioBufferSourceNode | null = null;
 
 export const useVoice = () => {
-    const playOrStop = useCallback((data) => {
+    // @ts-expect-error called without a dependency list, so every render gets a new function
+    const playOrStop = useCallback((data: number[]) => {
         if (source) {
             // 如果正在播放，停止播放
             source.stop();
@@ -17,7 +22,8 @@ export const useVoice = () => {
                 source.connect(audioContext.destination);
                 source.start();
                 source.onended = () => {
-                    source.disconnect();
+                    // source is already null here after a manual stop, which also fires `ended`
+                    source!.disconnect();
                     source = null;
                 };
             });

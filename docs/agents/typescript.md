@@ -42,7 +42,7 @@ Every migration PR shows three things:
 | Layer | Scope | Status |
 | --- | --- | --- |
 | L0 | Toolchain, `check:transpile` | Done |
-| L1 | `src/utils`, `src/hooks`, `src/i18n`, `src/types` | Pending |
+| L1 | `src/utils`, `src/hooks`, `src/i18n`, `src/types` | Done |
 | L2 | `src/services` | Pending |
 | L3 | `src/components`, `src/window` | Pending |
 | L4 | `src/main`, `src/App`, `index.html`, Vite and Tailwind configs; `allowJs` off | Pending |
