@@ -33,6 +33,11 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
+            - name: No JavaScript in src
+              run: |
+                  found=$(find src -name '*.js' -o -name '*.jsx')
+                  if [ -n "$found" ]; then echo "JavaScript in src/:"; echo "$found"; exit 1; fi
+
             - name: Check docs
               run: pnpm check:docs
 

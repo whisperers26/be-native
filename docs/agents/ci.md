@@ -4,7 +4,7 @@
 
 | File | Runs on | What it does |
 | --- | --- | --- |
-| `.github/workflows/ci.yml` | Every PR to `main`, every push to `main` | Installs from the lockfile, runs `pnpm check:docs`, `pnpm typecheck`, `pnpm test`, builds the frontend with `pnpm build` |
+| `.github/workflows/ci.yml` | Every PR to `main`, every push to `main` | Installs from the lockfile, fails if `src/` holds a `.js` or `.jsx` file, runs `pnpm check:docs`, `pnpm typecheck`, `pnpm test`, builds the frontend with `pnpm build` |
 | `.github/workflows/package.yml` | Manual only (`workflow_dispatch`) | Upstream's signed multi-platform release. It needs pot-app's signing and Apple secrets, which this fork does not have. Do not run it. |
 
 CI covers the frontend only. Nothing builds or checks the Rust code in CI:

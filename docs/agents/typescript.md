@@ -1,6 +1,6 @@
 # TypeScript
 
-The frontend was converted from JavaScript to strict TypeScript, one layer per PR, without changing what it does. `src/` holds no JavaScript any more, and `tsconfig.json` does not allow it.
+The frontend was converted from JavaScript to strict TypeScript, one layer per PR, without changing what it does. `src/` holds no JavaScript any more: `tsconfig.json` does not allow it, and CI fails on a `.js` or `.jsx` file there.
 
 ## Configuration
 
