@@ -208,6 +208,22 @@ describe('mergeLines', () => {
         });
     });
 
+    describe('a word broken at the end of a line', () => {
+        it('is put together again without the hyphen', () => {
+            expect(mergeLines(lines('All the infor-', 'mation is here'))).toBe('All the information is here');
+            expect(mergeLines(lines('All the infor­', 'mation is here'))).toBe('All the information is here');
+        });
+
+        it('keeps a hyphen that belongs to it', () => {
+            expect(mergeLines(lines('It was said by Jean-', 'Paul Sartre'))).toBe('It was said by Jean-Paul Sartre');
+            expect(mergeLines(lines('The years of COVID-', '19 were long'))).toBe('The years of COVID-19 were long');
+        });
+
+        it('is not looked for after a dash', () => {
+            expect(mergeLines(lines('Translation -', 'Recognition'))).toBe(lines('Translation -', 'Recognition'));
+        });
+    });
+
     describe('in a narrow block', () => {
         it('keeps lines that could be labels', () => {
             expect(mergeLines(lines('File name', 'Date modified'))).toBe(lines('File name', 'Date modified'));

@@ -40,7 +40,7 @@ function startsUppercase(line: string): boolean {
     return first.toUpperCase() === first && first.toLowerCase() !== first;
 }
 
-// Whether `line` stops in the middle of something: after a comma, or inside brackets.
+// Whether `line` stops in the middle of a sentence: after a comma, or inside brackets.
 function unfinished(line: string): boolean {
     return (
         ENDS_COMMA.test(line) || BRACKETS.some(([open, close]) => line.lastIndexOf(open) > line.lastIndexOf(close))
@@ -51,7 +51,7 @@ function unfinished(line: string): boolean {
 // line starts a list item.
 function wrapped(line: string, next: string, widest: number, startsItem: (line: string) => boolean): boolean {
     if (startsItem(next)) return false;
-    if (unfinished(line)) return true;
+    if (unfinished(line) || (BROKEN_WORD.test(line) && STARTS_WORD.test(next))) return true;
     if (hasRoom(line, next, widest)) return false;
     if (widest < NARROW) {
         return startsLowercase(next) && !ENDS_SENTENCE.test(line) && line.includes(' ');
@@ -59,14 +59,28 @@ function wrapped(line: string, next: string, widest: number, startsItem: (line: 
     return true;
 }
 
+// A word broken at the end of a line: the last letter before the hyphen, then a hyphen or a soft hyphen.
+const BROKEN_WORD = /(\p{L})[-‐­]$/u;
+const STARTS_WORD = /^[\p{L}\p{N}]/u;
+
 function glue(head: string, tail: string): string {
+    const broken = BROKEN_WORD.exec(head);
+    if (broken && STARTS_WORD.test(tail)) {
+        // Between two small letters the hyphen was put in to break the word ("infor-" + "mation"). Otherwise it
+        // belongs to the word ("Jean-" + "Paul", "COVID-" + "19"). A soft hyphen is never part of it.
+        const added = head.endsWith('­') || (startsLowercase(broken[1]) && startsLowercase(tail));
+        return head.slice(0, -1) + (added ? '' : '-') + tail;
+    }
     return head + ' ' + tail;
 }
 
-// Whether every line starts with a capital and none ends in punctuation, as the items of a list without markers do.
-// Wrapped text hardly ever does: its lines start wherever the words fall.
+// Whether every line starts with a capital and none ends in punctuation or a hyphen, as the items of a list without
+// markers do. Wrapped text hardly ever does: its lines start wherever the words fall.
 function looksLikeList(lines: string[]): boolean {
-    return lines.every((line) => startsUppercase(line) && !ENDS_SENTENCE.test(line) && !ENDS_COMMA.test(line));
+    return lines.every(
+        (line) =>
+            startsUppercase(line) && !ENDS_SENTENCE.test(line) && !ENDS_COMMA.test(line) && !BROKEN_WORD.test(line)
+    );
 }
 
 // Merge lines that have no blank line between them.
