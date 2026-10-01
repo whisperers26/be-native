@@ -48,6 +48,7 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 - Streaming services call `setResult` repeatedly; a per-card request id drops updates from superseded requests.
 - A card can speak the result (first TTS instance), copy it, translate it back, retry, and send it to each collection service.
 - Each finished card result is saved to SQLite (`sqlite:history.db`, table `history`) unless `history_disable` is on.
+- Size. With `translate_remember_window_size` on, the window keeps the size Rust opened it with and saves it, in logical pixels, 100 ms after a resize. With it off, the window fits itself to what it shows: a `ResizeObserver` on the content measures it, `fitSize` (`auto_size.ts`) works out the size, and `fit_translate_window` applies it. The height is the content's, up to 75% of the screen's work area and 800 px; beyond that the content scrolls. The width starts at 420 px and grows in steps of 40 px while the window would be more than 0.7 times as tall as wide and a text of three lines or more could still use the room, up to 60% of the work area and 900 px. The width only grows, so new source text first narrows the window to 420 px again. The text boxes take their height from their text again when the window is resized.
 - Auto-copy (`translate_auto_copy`) is skipped while the clipboard monitor is on.
 - The window closes when it loses focus, unless `translate_close_on_blur` is off or the window is pinned (`translate_always_on_top`). Position and size can be remembered.
 

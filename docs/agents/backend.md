@@ -38,6 +38,7 @@
 | `screenshot` | `x`, `y` | — | Captures the monitor at that position to `pot_screenshot.png` |
 | `cursor_position` | — | `{ x, y, monitor: { x, y } }` | The cursor's physical position and the origin of the monitor under it; an error if either is unknown |
 | `show_window`, `focus_window` | — | — | Show or focus the calling window; in test mode, show it without activating it and do not focus it |
+| `fit_translate_window` | `width`, `height` | — | Resize the calling (Translate) window, in logical pixels, and keep it inside its monitor's work area; a window still where the `smart` position put it is placed beside its anchor again for the new size |
 | `test_mode` | — | boolean | Whether test mode is on |
 | `cut_image` | `left`, `top`, `width`, `height` | — | Crops it to `pot_screenshot_cut.png` |
 | `get_base64` | — | string | `pot_screenshot_cut.png` as base64; `""` if missing |
@@ -63,7 +64,7 @@ To add a command, write a `#[tauri::command]` function in the module it belongs 
 
 ## Windows
 
-`build_window(label, title)` creates a hidden, frameless, transparent window (on macOS, with an overlay title bar) that loads `index.html` on the monitor under the mouse, or focuses the window if it already exists. The frontend shows the window when it is ready, through `show_window` and `focus_window`. In test mode ([testing.md](testing.md#test-mode)) the window goes to the centre of the secondary monitor instead, and is neither focused nor activated. Sizes: Config 800×600; Translate from `translate_window_width` and `translate_window_height` (350×420), placed by `translate_window_position` (below); Recognize from `recognize_window_width` and `recognize_window_height` (800×400); Silent Recognize is never shown; Updater 600×400; Screenshot full screen.
+`build_window(label, title)` creates a hidden, frameless, transparent window (on macOS, with an overlay title bar) that loads `index.html` on the monitor under the mouse, or focuses the window if it already exists. The frontend shows the window when it is ready, through `show_window` and `focus_window`. In test mode ([testing.md](testing.md#test-mode)) the window goes to the centre of the secondary monitor instead, and is neither focused nor activated. Sizes: Config 800×600; Translate from `translate_window_width` and `translate_window_height` (350×420) when `translate_remember_window_size` is on, otherwise 420×240 until the window fits itself to its content ([frontend.md](frontend.md#translate-window)), placed by `translate_window_position` (below) and sized after it is placed; Recognize from `recognize_window_width` and `recognize_window_height` (800×400); Silent Recognize is never shown; Updater 600×400; Screenshot full screen.
 
 The `smart` position puts the Translate window beside what the text came from: the region of a screenshot translation (`cut_image` records it, `image_translate` takes it), otherwise the cursor. `placement::beside` picks the corner: right of the anchor, else left, below or above, the first side with room inside the monitor's work area (the whole monitor off Windows); if no side has room, where the window covers the least of the anchor, and over the middle of an anchor it cannot get out of. It is arithmetic on numbers the app already has, so it costs no extra call or window move. Input translation centres the window, as with `mouse`.
 
