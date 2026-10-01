@@ -14,6 +14,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { transformWithEsbuild } from 'vite';
+import { pairRenames } from './check-transpile/pair';
 
 const argv = process.argv.slice(2);
 const base = argv.includes('--base') ? argv[argv.indexOf('--base') + 1] : 'origin/main';
@@ -51,14 +52,17 @@ const problems: string[] = [];
 let identical = 0;
 let allowedCount = 0;
 
-const changes = git('diff', '--name-status', '--find-renames=30%', `${base}...HEAD`, '--', 'src')
-    .split('\n')
-    .filter(Boolean)
-    .map((line) => line.split('\t'));
+const changes = pairRenames(
+    git('diff', '--name-status', '--find-renames=30%', `${base}...HEAD`, '--', 'src')
+        .split('\n')
+        .filter(Boolean)
+        .map((line) => {
+            const [status, first, second] = line.split('\t');
+            return { status, oldPath: first, newPath: status.startsWith('R') ? second : first };
+        })
+);
 
-for (const [status, first, second] of changes) {
-    const oldPath = first;
-    const newPath = status.startsWith('R') ? second : first;
+for (const { status, oldPath, newPath } of changes) {
     if (newPath.includes('__snapshots__/') || oldPath.includes('__snapshots__/')) {
         problems.push(`${newPath}: snapshot file changed`);
         continue;
