@@ -17,6 +17,7 @@ frontend in `src/`.
    the fork, and merge it yourself with a merge commit once the checks pass.
    Procedure: [git-workflow.md](docs/agents/git-workflow.md).
 | [setup-and-run.md](docs/agents/setup-and-run.md) | Installing tools, running or building the app, finding its files |
+| [architecture.md](docs/agents/architecture.md) | New here, or unsure whether Rust or React owns something |
 2. If the owner explicitly asks to review a PR, open it and stop. Do not merge.
 3. Never push to, open PRs against, or add a remote for upstream
    `pot-app/pot-desktop`. Every `gh pr` command takes
@@ -47,6 +48,7 @@ Before opening a PR, run `pnpm check:docs` and `pnpm build`.
 | --- | --- |
 | [git-workflow.md](docs/agents/git-workflow.md) | Branching, committing, opening or merging a PR |
 | [setup-and-run.md](docs/agents/setup-and-run.md) | Installing tools, running or building the app, finding its files |
+| [architecture.md](docs/agents/architecture.md) | New here, or unsure whether Rust or React owns something |
 | [frontend.md](docs/agents/frontend.md) | Changing windows, pages, hooks, state, i18n or styling |
 | [backend.md](docs/agents/backend.md) | Changing Rust: commands, windows, tray, hotkeys, HTTP API, OCR, backup |
 | [services.md](docs/agents/services.md) | Adding or changing a translate, OCR, TTS or collection service, or plugins |
