@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`cambridge_dict translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "auto": "auto",
+    "en": "english",
+    "zh_cn": "chinese-simplified",
+    "zh_tw": "chinese-traditional",
+  },
+  "info": {
+    "icon": "logo/cambridge_dict.svg",
+    "name": "cambridge_dict",
+  },
+}
+`;
+
+exports[`cambridge_dict translate > parses a one-entry page into pronunciations with their audio, and explanations 1`] = `
+[
+  {
+    "options": {
+      "headers": {
+        "Content-Type": "text/html;charset=UTF-8",
+      },
+      "method": "GET",
+      "responseType": 2,
+    },
+    "url": "https://dictionary.cambridge.org/search/direct/?datasetsearch=english-chinese-simplified&q=hello",
+  },
+  {
+    "options": {
+      "responseType": 3,
+    },
+    "url": "https://dictionary.cambridge.org/media/english/uk_pron/u/ukh/ukhel/ukhello00.mp3",
+  },
+  {
+    "options": {
+      "responseType": 3,
+    },
+    "url": "https://dictionary.cambridge.org/media/english/us_pron/h/hel/hello/hello.mp3",
+  },
+]
+`;
