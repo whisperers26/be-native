@@ -15,6 +15,7 @@ mod system_ocr;
 mod tray;
 mod updater;
 mod window;
+mod writing;
 
 use agent_cli::agent_cli_run;
 use clipboard::*;
@@ -43,6 +44,7 @@ use window::translate_window_opened;
 use window::translate_window_origin;
 use window::translate_window_waiting;
 use window::updater_window;
+use writing::{get_writing_text, WritingText};
 
 // Global AppHandle
 pub static APP: OnceCell<tauri::AppHandle> = OnceCell::new();
@@ -99,6 +101,7 @@ fn main() {
                 config_window();
             }
             app.manage(StringWrapper(Mutex::new("".to_string())));
+            app.manage(WritingText(Mutex::new("".to_string())));
             // Update Tray Menu
             update_tray(app.app_handle(), "".to_string(), "".to_string());
             // Start http server
@@ -168,6 +171,7 @@ fn main() {
             test_mode,
             lang_detect,
             agent_cli_run,
+            get_writing_text,
             install_plugin,
             font_list
         ])
