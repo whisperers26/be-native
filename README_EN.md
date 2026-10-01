@@ -14,7 +14,7 @@
 
 <!-- fork:start -->
 
-> **Be Native** helps you read and write in a language that is not your own. Today it does selection translation, input translation, screenshot OCR and screenshot translation, with many translation, OCR, text-to-speech and vocabulary services plus plugins. Writing improvement, which rewrites what you wrote so it reads naturally, is planned and not implemented yet. It runs on Windows, macOS and Linux.
+> **Be Native** helps you read and write in a language that is not your own. It does selection translation, input translation, screenshot OCR, screenshot translation and writing improvement, which rewrites what you wrote so it reads naturally, with many translation, writing, OCR, text-to-speech and vocabulary services plus plugins. It runs on Windows, macOS and Linux.
 >
 > Be Native is built on [Pot](https://github.com/pot-app/pot-desktop) and is a personal fork of it. Upstream [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) has been archived; development continues in [whisperers26/be-native](https://github.com/whisperers26/be-native). Installers are published on this fork's [Releases](https://github.com/whisperers26/be-native/releases) page and the in-app updater reads them; the install instructions below are for upstream Pot.
 >
@@ -38,6 +38,7 @@
 > - Recognized and selected text has its wrapped lines merged by default: lines that were broken only because the text wrapped are joined, while paragraphs, headings and list items (bulleted, numbered or unmarked) keep their own lines. Words broken by a hyphen are put back together, and Chinese and Japanese are joined without spaces. It replaces Pot's "Delete Newline", which made everything one line and was off by default.
 > - The About page links to this fork: GitHub opens this repository and Feedback opens its issues. Upstream's website, e-mail and community links are gone.
 > - Backup (WebDAV, Aliyun Drive, local file) is removed: the settings no longer have a Backup page.
+> - Writing improvement: select text you wrote and press its hotkey, and a window shows it rewritten to read naturally. The default service is LLM7, which is free and online and needs no account or key (its free tier answers only a few requests a minute, so many requests have to wait); any OpenAI-compatible API, or your subscription through Claude Code or Codex, works too, and each service's prompt can be changed. The Tones button adds versions in five tones (professional, casual, friendly, confident, concise; editable in the settings), and Custom Prompt takes a request of your own. Each result is a box of its own, and the window grows smoothly downwards, moving up only when there is no room below. Click any result to put it in place of the text you selected.
 
 <!-- fork:end -->
 
