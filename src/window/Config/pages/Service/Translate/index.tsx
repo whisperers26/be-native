@@ -11,8 +11,14 @@ import { useConfig, deleteKey } from '../../../../../hooks';
 import ServiceItem from './ServiceItem';
 import SelectModal from './SelectModal';
 import ConfigModal from './ConfigModal';
+import type { DropResult } from 'react-beautiful-dnd';
+import type { PluginConfigInfo } from '../../../../../types/service';
 
-export default function Translate(props) {
+interface TranslateProps {
+    pluginList: Record<string, PluginConfigInfo>;
+}
+
+export default function Translate(props: TranslateProps) {
     const { pluginList } = props;
     const {
         isOpen: isSelectPluginOpen,
@@ -35,32 +41,35 @@ export default function Translate(props) {
     const { t } = useTranslation();
     const toastStyle = useToastStyle();
 
-    const reorder = (list, startIndex, endIndex) => {
+    const reorder = (list: string[], startIndex: number, endIndex: number) => {
         const result = Array.from(list);
         const [removed] = result.splice(startIndex, 1);
         result.splice(endIndex, 0, removed);
         return result;
     };
-    const onDragEnd = async (result) => {
+    // The list is null until the settings have been read. The three functions below run on a drag or a press on a
+    // card that is drawn from the list, or on a press in a dialog that opens after the page has loaded, so they take
+    // the list with `!`.
+    const onDragEnd = async (result: DropResult) => {
         if (!result.destination) return;
-        const items = reorder(translateServiceInstanceList, result.source.index, result.destination.index);
+        const items = reorder(translateServiceInstanceList!, result.source.index, result.destination.index);
         setTranslateServiceInstanceList(items);
     };
 
-    const deleteServiceInstance = (instanceKey) => {
-        if (translateServiceInstanceList.length === 1) {
+    const deleteServiceInstance = (instanceKey: string) => {
+        if (translateServiceInstanceList!.length === 1) {
             toast.error(t('config.service.least'), { style: toastStyle });
             return;
         } else {
-            setTranslateServiceInstanceList(translateServiceInstanceList.filter((x) => x !== instanceKey));
+            setTranslateServiceInstanceList(translateServiceInstanceList!.filter((x) => x !== instanceKey));
             deleteKey(instanceKey);
         }
     };
-    const updateServiceInstanceList = (instanceKey) => {
-        if (translateServiceInstanceList.includes(instanceKey)) {
+    const updateServiceInstanceList = (instanceKey: string) => {
+        if (translateServiceInstanceList!.includes(instanceKey)) {
             return;
         } else {
-            const newList = [...translateServiceInstanceList, instanceKey];
+            const newList = [...translateServiceInstanceList!, instanceKey];
             setTranslateServiceInstanceList(newList);
         }
     };
