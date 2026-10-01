@@ -50,7 +50,7 @@ export default function SourceArea(props: SourceAreaProps) {
     const [detectLanguage, setDetectLanguage] = useAtom(detectLanguageAtom);
     const [incrementalTranslate] = useConfig('incremental_translate', false);
     const [dynamicTranslate] = useConfig('dynamic_translate', false);
-    const [deleteNewline] = useConfig('translate_delete_newline', false);
+    const [mergeWrappedLines] = useConfig('translate_merge_lines', false);
     const [recognizeLanguage] = useConfig('recognize_language', 'auto');
     const [recognizeServiceList] = useConfig('recognize_service_list', ['system', 'tesseract']);
     const [ttsServiceList] = useConfig('tts_service_list', ['lingva_tts']);
@@ -103,7 +103,7 @@ export default function SourceArea(props: SourceAreaProps) {
                     ).then(
                         (v: any) => {
                             let newText = v.trim();
-                            if (deleteNewline) {
+                            if (mergeWrappedLines) {
                                 newText = mergeLines(v);
                             } else {
                                 newText = v.trim();
@@ -146,7 +146,7 @@ export default function SourceArea(props: SourceAreaProps) {
                         .then(
                             (v) => {
                                 let newText = v!.trim();
-                                if (deleteNewline) {
+                                if (mergeWrappedLines) {
                                     newText = mergeLines(v!);
                                 } else {
                                     newText = v!.trim();
@@ -173,7 +173,7 @@ export default function SourceArea(props: SourceAreaProps) {
         } else {
             setWindowType('[SELECTION_TRANSLATE]');
             let newText = text.trim();
-            if (deleteNewline) {
+            if (mergeWrappedLines) {
                 newText = mergeLines(text);
             } else {
                 newText = text.trim();
@@ -264,7 +264,7 @@ export default function SourceArea(props: SourceAreaProps) {
 
     useEffect(() => {
         if (
-            deleteNewline !== null &&
+            mergeWrappedLines !== null &&
             incrementalTranslate !== null &&
             recognizeLanguage !== null &&
             recognizeServiceList !== null &&
@@ -274,7 +274,7 @@ export default function SourceArea(props: SourceAreaProps) {
                 handleNewText(v);
             });
         }
-    }, [deleteNewline, incrementalTranslate, recognizeLanguage, recognizeServiceList, hideWindow]);
+    }, [mergeWrappedLines, incrementalTranslate, recognizeLanguage, recognizeServiceList, hideWindow]);
 
     useEffect(() => {
         const fit = () => {
