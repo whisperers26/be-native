@@ -31,6 +31,7 @@ const DEFAULT_COMMANDS: Record<string, Handler> = {
     copy_img: () => null,
     system_ocr: () => '',
     lang_detect: () => 'en',
+    agent_cli_run: () => '',
     set_proxy: () => true,
     unset_proxy: () => true,
     install_plugin: () => 0,
