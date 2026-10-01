@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { appCacheDir, join } from '@tauri-apps/api/path';
-import { currentMonitor } from '@tauri-apps/api/window';
+import { currentMonitor, PhysicalPosition } from '@tauri-apps/api/window';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import { appWindow } from '@tauri-apps/api/window';
 import { emit } from '@tauri-apps/api/event';
@@ -34,27 +34,44 @@ export default function Screenshot() {
 
     // What the poll below reads; it outlives the render it was created in.
     const origin = useRef<Point | null>(null);
+    const dragging = useRef(false);
     const pointerSeen = useRef(false);
+    const captures = useRef(0);
 
     // The image is always rendered, so the ref is set before any handler runs.
     const imgRef = useRef<HTMLImageElement>() as MutableRefObject<HTMLImageElement>;
+
+    // Capture the monitor whose origin is `position` and show it. The number makes every capture a new URL, so
+    // the image loads again although the file name stays the same.
+    async function capture(position: Point) {
+        await invoke('screenshot', { x: position.x, y: position.y });
+        const filePath = await join(await appCacheDir(), 'pot_screenshot.png');
+        origin.current = { x: position.x, y: position.y };
+        captures.current += 1;
+        setImgurl(`${convertFileSrc(filePath)}?${captures.current}`);
+    }
+
+    // Take the window to another monitor. It stays hidden until the new capture has loaded.
+    async function moveTo(position: Point) {
+        await appWindow.hide();
+        setCursor(null);
+        pointerSeen.current = false;
+        // A full-screen window cannot be moved.
+        await appWindow.setFullscreen(false);
+        await appWindow.setPosition(new PhysicalPosition(position.x, position.y));
+        await appWindow.setFullscreen(true);
+        await capture(position);
+    }
 
     useEffect(() => {
         currentMonitor().then((monitor) => {
             // @ts-expect-error known bug (known-issues.md): currentMonitor() can return null
             const position = monitor.position;
-            origin.current = { x: position.x, y: position.y };
-            invoke('screenshot', { x: position.x, y: position.y }).then(() => {
-                appCacheDir().then((appCacheDirPath) => {
-                    join(appCacheDirPath, 'pot_screenshot.png').then((filePath) => {
-                        setImgurl(convertFileSrc(filePath));
-                    });
-                });
-            });
+            void capture(position);
         });
     }, []);
 
-    // Until the mouse moves there is no mouse event to place the lines with, so ask Rust where the cursor is.
+    // The window gets no mouse events from another monitor, so ask Rust where the cursor is.
     useEffect(() => {
         let busy = false;
         const timer = setInterval(async () => {
@@ -63,7 +80,11 @@ export default function Screenshot() {
             try {
                 const position = await invoke<CursorPosition>('cursor_position');
                 const here = origin.current;
-                if (position.monitor.x === here.x && position.monitor.y === here.y && !pointerSeen.current) {
+                if (position.monitor.x !== here.x || position.monitor.y !== here.y) {
+                    // A region belongs to one monitor.
+                    if (!dragging.current) await moveTo(position.monitor);
+                } else if (!pointerSeen.current) {
+                    // Until the mouse moves, there is no mouse event to place the lines with.
                     setCursor({
                         x: (position.x - here.x) / window.devicePixelRatio,
                         y: (position.y - here.y) / window.devicePixelRatio,
@@ -120,6 +141,7 @@ export default function Screenshot() {
                 className='fixed top-0 left-0 bottom-0 right-0 cursor-none select-none'
                 onMouseDown={(e) => {
                     if (e.buttons === 1) {
+                        dragging.current = true;
                         setIsDown(true);
                         setMouseDownX(e.clientX);
                         setMouseDownY(e.clientY);
@@ -141,6 +163,7 @@ export default function Screenshot() {
                 }}
                 onMouseUp={async (e) => {
                     appWindow.hide();
+                    dragging.current = false;
                     setIsDown(false);
                     setIsMoved(false);
                     const imgWidth = imgRef.current.naturalWidth;
