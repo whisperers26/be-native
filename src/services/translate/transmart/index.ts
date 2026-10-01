@@ -1,11 +1,21 @@
 import { fetch, Body } from '@tauri-apps/api/http';
+import type { TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+interface TransmartResponse {
+    auto_translation?: string[];
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     const { config } = options;
 
     const { username: user, token } = config;
 
-    let header = {};
+    let header: Record<string, string> = {};
     if (user !== '' && token !== '') {
         header['user'] = user;
         header['token'] = token;
@@ -13,7 +23,7 @@ export async function translate(text, from, to, options = {}) {
 
     const url = 'https://transmart.qq.com/api/imt';
 
-    const res = await fetch(url, {
+    const res = await fetch<TransmartResponse>(url, {
         method: 'POST',
         body: Body.json({
             header: {
