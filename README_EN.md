@@ -33,7 +33,7 @@
 > - Claude Code and Codex are translation services: they use the `claude` or `codex` command-line tool already installed and signed in on your computer, so translations run on your subscription with no API key. Each translation gets a fresh session, and one is kept ready in the background so answers come about as fast as from an API; model and reasoning level are set in the service settings.
 > - RapidOCR is a built-in OCR service: the PP-OCRv5 models run on your computer, fully offline, and read small text and tight selections that the system OCR misses (Simplified and Traditional Chinese, English and Japanese).
 > - The translation window sizes itself to its text: it shows everything without scrolling where it can, gets wider rather than tall and narrow for longer text, and never fills the screen. Turn on "Remember Window Size" to keep the size you give it instead, which it now reopens with exactly.
-> - While a text is being recognized and translated, a small round progress indicator with the icon of the service at work is shown instead of an empty window; the window pours out of it, like liquid, once the translations are there. Click the indicator to open the window right away. "Window Animations" in the translation settings turns the animations off.
+> - While a text is being recognized and translated, a small round progress indicator with the icon of the service at work is shown instead of an empty window; the window pours out of it, like liquid, once the translations are there. Click the indicator to open the window right away. "Window Animations" in the General settings turns the animations off, for the writing window too.
 > - Text that mixes languages is detected by its larger part, so mostly English text with some Chinese in it is translated instead of being taken for Chinese.
 > - Recognized and selected text has its wrapped lines merged by default: lines that were broken only because the text wrapped are joined, while paragraphs, headings and list items (bulleted, numbered or unmarked) keep their own lines. Words broken by a hyphen are put back together, and Chinese and Japanese are joined without spaces. It replaces Pot's "Delete Newline", which made everything one line and was off by default.
 > - The About page links to this fork: GitHub opens this repository and Feedback opens its issues. Upstream's website, e-mail and community links are gone.
@@ -76,15 +76,21 @@
 
 </div>
 
-| Translation by selection                        | Translate by input                                                    | External calls                                                                           |
-| ----------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Select text and press the shortcut to translate | Press shortcut to open translation window, translate by hitting Enter | More efficient workflow by integrating other apps, see [External Calls](#external-calls) |
-| <img src="asset/eg1.gif"/>                      | <img src="asset/eg2.gif"/>                                            | <img src="asset/eg3.gif"/>                                                               |
+Every action below has its own shortcut. Set them in Settings → Hotkey; an action with no shortcut is not triggered.
 
-| Clipboard Listening                                                                                                          | Screenshot OCR                     | Screenshot Translation                   |
-| ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ---------------------------------------- |
-| Click the top left icon on any translation panel to start clipboard listening. Copied text will be translated automatically. | Press shortcut, select area to OCR | Press shortcut, select area to translate |
-| <img src="asset/eg4.gif"/>                                                                                                   | <img src="asset/eg5.gif"/>         | <img src="asset/eg6.gif"/>               |
+-   **Selection translation**: select text in any app, then press the selection translation shortcut. The translation window opens next to the pointer with the text translated by every service you turned on.
+-   **Input translation**: press the input translation shortcut, type or paste the text in the window that opens, and press Enter.
+-   **Clipboard listening**: click the top left icon of a translation window; from then on every text you copy is translated automatically.
+-   **Screenshot OCR**: press the shortcut, then drag over the part of the screen to read. The recognized text appears in a window, where you can copy or translate it.
+-   **Screenshot translation**: press the shortcut, then drag over the part of the screen to translate. The text in it is recognized and translated.
+-   **Silent OCR copy**: press its shortcut (also in the tray menu), then drag over the screen. No window opens: the recognized text goes straight to the clipboard, and a notification tells you if nothing could be read.
+-   **Writing improvement**: select text you wrote and press the writing shortcut. A window shows it rewritten to read naturally, one box per service.
+    -   Click a result to replace the selected text with it.
+    -   **Tones** adds one version for each tone (professional, casual, friendly, confident, concise); edit the tones in Settings → Writing.
+    -   **Custom Prompt** takes a request of your own, such as "make it shorter".
+-   **Progress indicator**: while text is being recognized and translated, a small round indicator with the icon of the service at work is shown instead of an empty window. Click it to open the window at once; otherwise the window opens out of it when the translations are ready.
+-   **Window animations**: the window transitions (the circle turning into the window, the window growing with its content) can be switched off with "Window Animations" in Settings → General. It covers the translation and the writing windows; the turning ring of the progress indicator is not affected.
+-   **External calls**: other apps can trigger every action above through the local HTTP API, see [External Calls](#external-calls).
 
 <div align="center">
 
@@ -92,6 +98,11 @@
 
 </div>
 
+-   [x] Writing improvement: rewrites what you wrote so it reads naturally, in several tones, with a free default service (LLM7)
+-   [x] Silent OCR copy: recognized text goes to the clipboard without opening a window
+-   [x] Use your Claude Code or Codex subscription for translation and writing, no API key needed
+-   [x] Offline OCR with RapidOCR, which reads small text that the system OCR misses
+-   [x] A translation window that sizes itself to its text, with optional window animations
 -   [x] Parallel translations with multiple services ([Supported Services](#supported-services))
 -   [x] OCR with multiple services ([Supported Services](#supported-services))
 -   [x] Text-to-Speech with multiple services ([Supported Services](#supported-services))

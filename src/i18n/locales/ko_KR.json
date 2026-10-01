@@ -116,6 +116,7 @@
                     "system": "시스템 설정"
                 },
                 "transparent": "투명 효과",
+                "window_animation": "창 애니메이션",
                 "dev_mode": "개발자 모드",
                 "proxy": {
                     "title": "프록시 설정",
@@ -167,7 +168,6 @@
                 "mouse": "마우스 위치 기준",
                 "pre_state": "창 위치 유지",
                 "remember_window_size": "창 크기 유지",
-                "window_animation": "창 애니메이션",
                 "close_on_blur": "다른 곳을 클릭하여 창 숨기기",
                 "always_on_top": "항상 위에",
                 "hide_source": "원본 텍스트 숨기기",

@@ -71,6 +71,7 @@
                     "system": "System"
                 },
                 "transparent": "Transparent Effect",
+                "window_animation": "Window Animations",
                 "dev_mode": "Developer Mode",
                 "proxy": {
                     "title": "Proxy",
@@ -123,7 +124,6 @@
                 "mouse": "Follow the Mouse",
                 "pre_state": "Remember Position",
                 "remember_window_size": "Remember Window Size",
-                "window_animation": "Window Animations",
                 "close_on_blur": "Close window when focus lost",
                 "always_on_top": "Always on Top",
                 "hide_source": "Hide Source Area",
@@ -201,7 +201,6 @@
                 "add_tone": "Add Tone",
                 "remove_tone": "Remove",
                 "reset_tones": "Reset to Defaults",
-                "window_animation": "Window Animations",
                 "close_on_blur": "Close window when focus lost"
             }
         },

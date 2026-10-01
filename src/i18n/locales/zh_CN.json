@@ -71,6 +71,7 @@
                     "system": "跟随系统"
                 },
                 "transparent": "透明效果",
+                "window_animation": "窗口动画",
                 "dev_mode": "开发模式",
                 "proxy": {
                     "title": "网络代理",
@@ -123,7 +124,6 @@
                 "mouse": "跟随鼠标",
                 "pre_state": "记住位置",
                 "remember_window_size": "记住窗口大小",
-                "window_animation": "窗口动画",
                 "close_on_blur": "失去焦点时关闭窗口",
                 "always_on_top": "窗口默认置顶",
                 "hide_source": "隐藏原文",
@@ -201,7 +201,6 @@
                 "add_tone": "添加语气",
                 "remove_tone": "删除",
                 "reset_tones": "恢复默认",
-                "window_animation": "窗口动画",
                 "close_on_blur": "失去焦点时关闭窗口"
             }
         },

@@ -36,7 +36,7 @@ export default function Writing() {
     const [configuredServiceList] = useConfig('writing_service_list', DEFAULT_SERVICE_LIST);
     const [tones] = useConfig<Tone[]>('writing_tones', DEFAULT_TONES);
     const [closeOnBlur] = useConfig('writing_close_on_blur', true);
-    const [windowAnimation] = useConfig('writing_window_animation', true);
+    const [windowAnimation] = useConfig('window_animation', true);
     const animated = windowAnimation !== false;
     const [testMode, setTestMode] = useState<boolean | null>(null);
     useEffect(() => {

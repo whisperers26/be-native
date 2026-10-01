@@ -34,7 +34,7 @@ describe('AgentCliConfig', () => {
 
         expect(await screen.findByLabelText('Configuration Name')).toHaveValue('Claude Code');
         expect(screen.getByLabelText('Executable')).toHaveValue('');
-        expect(screen.getByRole('combobox', { name: 'Model' })).toHaveValue('haiku');
+        expect(screen.getByRole('combobox', { name: 'Model' })).toHaveValue('Haiku 4.5');
         expect(screen.getByRole('button', { name: 'Off' })).toBeInTheDocument();
         expect(screen.getByLabelText('Instructions')).toHaveValue(DEFAULT_SYSTEM_PROMPT);
         expect(fakeTauri.unhandled).toEqual([]);
@@ -62,7 +62,7 @@ describe('AgentCliConfig', () => {
                 spec: {
                     provider: 'claude_code',
                     command: 'C:/bin/claude.exe',
-                    model: 'haiku',
+                    model: 'claude-haiku-4-5-20251001',
                     effort: 'off',
                     systemPrompt: DEFAULT_SYSTEM_PROMPT,
                 },
@@ -74,11 +74,22 @@ describe('AgentCliConfig', () => {
             expect(fakeTauri.store.get('claude_code@abc')).toEqual({
                 instanceName: 'Claude Code',
                 command: 'C:/bin/claude.exe',
-                model: 'haiku',
+                model: 'claude-haiku-4-5-20251001',
                 effort: 'off',
                 systemPrompt: DEFAULT_SYSTEM_PROMPT,
             })
         );
+    });
+
+    it('shows a chosen model by its name and saves its exact id', async () => {
+        renderForm(ClaudeCodeConfig, 'claude_code@abc');
+        const model = await screen.findByRole('combobox', { name: 'Model' });
+
+        fireEvent.change(model, { target: { value: 'Opus 5.5' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+        await vi.waitFor(() => expect(fakeTauri.store.get('claude_code@abc')).toMatchObject({ model: 'claude-opus-5-5' }));
+        expect(model).toHaveValue('Opus 5.5');
     });
 
     it('shows why the test translation failed and does not add the instance', async () => {

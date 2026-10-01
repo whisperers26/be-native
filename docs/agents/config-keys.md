@@ -11,6 +11,7 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `app_font`, `app_fallback_font` | `default` | Font family names |
 | `app_font_size` | `16` | Pixels. A number by default, but the General page saves a picked size as a string (`'18'`) |
 | `transparent` | `true` | Transparent window background (not macOS) |
+| `window_animation` | `true` | Off: the progress indicator, the circle-to-window opening and the windows' resizing (Translate and Writing) happen at once. The indicator's turning ring is not part of it |
 | `dev_mode` | `false` | F12 opens devtools |
 | `check_update` | `true` | Check for updates at launch (release builds only; a debug build never does). Rust |
 | `server_port` | `60828` | Local HTTP API port; restart to apply. Rust |
@@ -37,7 +38,6 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `translate_window_position` | `smart` | `smart` (beside the screenshot region or the cursor), `mouse` (at the cursor) or `pre_state` (last position) |
 | `translate_window_position_x`, `translate_window_position_y` | `0` | Saved position |
 | `translate_remember_window_size` | `false` | On: the window opens at the saved size, which follows the user's resizing. Off: it sizes itself to what it shows ([frontend.md](frontend.md#translate-window)) |
-| `translate_window_animation` | `true` | Off: the progress indicator and the window appear, open and resize at once |
 | `translate_window_width`, `translate_window_height` | `350`, `420` | Saved size, in logical pixels; used only while the size is remembered. Rust |
 | `translate_close_on_blur` | `true` | |
 | `translate_always_on_top` | `false` | |
@@ -50,7 +50,6 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | Key | Default | Notes |
 | --- | --- | --- |
 | `writing_tones` | Professional, Casual, Friendly, Confident, Concise | A list of `{ name, instruction }` (`DEFAULT_TONES` in `src/utils/writing_tones`): what the Tones button asks for |
-| `writing_window_animation` | `true` | Off: boxes and the window take their size at once |
 | `writing_close_on_blur` | `true` | |
 
 ## Recognize (OCR)

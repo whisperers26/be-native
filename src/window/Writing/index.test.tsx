@@ -166,7 +166,7 @@ describe('Writing window', () => {
         open();
         await screen.findByText('He and I go.');
 
-        fakeTauri.emit('writing_window_animation_changed', false);
+        fakeTauri.emit('window_animation_changed', false);
         await new Promise((done) => setTimeout(done, 50));
 
         expect(screen.getByText('He and I go.')).toBeInTheDocument();

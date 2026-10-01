@@ -27,7 +27,6 @@ export default function Translate() {
     // const [translateFontSize, setTranslateFontSize] = useConfig('translate_font_size', 16);
     const [windowPosition, setWindowPosition] = useConfig('translate_window_position', 'smart');
     const [rememberWindowSize, setRememberWindowSize] = useConfig('translate_remember_window_size', false);
-    const [windowAnimation, setWindowAnimation] = useConfig('translate_window_animation', true);
     const [hideSource, setHideSource] = useConfig('hide_source', false);
     const [hideLanguage, setHideLanguage] = useConfig('hide_language', false);
     const [hideWindow, setHideWindow] = useConfig('translate_hide_window', false);
@@ -272,17 +271,6 @@ export default function Translate() {
                                 isSelected={rememberWindowSize}
                                 onValueChange={(v) => {
                                     setRememberWindowSize(v);
-                                }}
-                            />
-                        )}
-                    </div>
-                    <div className='config-item'>
-                        <h3 className='my-auto mx-0'>{t('config.translate.window_animation')}</h3>
-                        {windowAnimation !== null && (
-                            <Switch
-                                isSelected={windowAnimation}
-                                onValueChange={(v) => {
-                                    setWindowAnimation(v);
                                 }}
                             />
                         )}

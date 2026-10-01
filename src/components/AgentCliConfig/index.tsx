@@ -24,13 +24,13 @@ import { DEFAULT_WRITING_PROMPT, writingMessage } from '../../utils/writing_prom
 import { INSTANCE_NAME_CONFIG_KEY } from '../../utils/service_instance';
 import { useConfig } from '../../hooks/useConfig';
 import { useToastStyle } from '../../hooks';
-import type { AgentCliProvider } from '../../utils/agent_cli';
+import type { AgentCliModel, AgentCliProvider } from '../../utils/agent_cli';
 import type { ServiceConfigProps } from '../../types/service';
 
 interface AgentCliConfigProps extends ServiceConfigProps {
     provider: AgentCliProvider;
-    /** Model names to suggest. The field takes any name; with no suggestions it is a plain text field. */
-    models: string[];
+    /** Models to suggest. The field takes any name; with no suggestions it is a plain text field. */
+    models: AgentCliModel[];
     /** The reasoning levels the tool accepts, as `services.translate.agent_cli.efforts.<level>` keys. */
     efforts: string[];
     defaultModel: string;
@@ -137,13 +137,15 @@ export default function AgentCliConfig(props: AgentCliConfigProps) {
                                 variant='bordered'
                                 className='max-w-[50%]'
                                 placeholder={t('services.translate.agent_cli.model_placeholder')}
-                                inputValue={config.model}
+                                // A suggested model shows by its name and is saved by its value; any other text is kept as typed.
+                                inputValue={models.find((model) => model.value === config.model)?.label ?? config.model}
                                 onInputChange={(value) => {
-                                    setConfig({ ...config, model: value });
+                                    const model = models.find((model) => model.label === value)?.value ?? value;
+                                    setConfig({ ...config, model });
                                 }}
                             >
                                 {models.map((model) => (
-                                    <AutocompleteItem key={model}>{model}</AutocompleteItem>
+                                    <AutocompleteItem key={model.value}>{model.label}</AutocompleteItem>
                                 ))}
                             </Autocomplete>
                         </>
