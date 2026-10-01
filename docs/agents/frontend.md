@@ -34,6 +34,7 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 | `src/hooks/` | `useConfig`, `useGetState`, `useSyncAtom`, `useToastStyle`, `useVoice` |
 | `src/utils/` | Store and env setup, `debounce`, language detection, language tables, service instance keys, the plugin loader |
 | `src/i18n/` | i18next setup and `locales/*.json` |
+| `src/types/` | Shared TypeScript types; so far the service types (`service.ts`) |
 | `src/services/` | Built-in services: [services.md](services.md) |
 
 ## Translate window
