@@ -19,6 +19,8 @@ import * as _geminipro from './geminipro';
 import * as _ollama from './ollama';
 import * as _ecdict from './ecdict';
 import * as _lingva from './lingva';
+import * as _claude_code from './claude_code';
+import * as _codex from './codex';
 import type { TranslateService } from '../../types/service';
 
 // `satisfies` checks each module against the contract in src/types/service.ts and emits nothing.
@@ -43,3 +45,5 @@ export const geminipro = _geminipro satisfies TranslateService;
 export const ollama = _ollama satisfies TranslateService;
 export const ecdict = _ecdict satisfies TranslateService;
 export const lingva = _lingva satisfies TranslateService;
+export const claude_code = _claude_code satisfies TranslateService;
+export const codex = _codex satisfies TranslateService;

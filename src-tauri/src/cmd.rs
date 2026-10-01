@@ -18,6 +18,9 @@ pub fn reload_store() {
     let state = APP.get().unwrap().state::<StoreWrapper>();
     let mut store = state.0.lock().unwrap();
     store.load().unwrap();
+    drop(store);
+    // A Claude Code or Codex service may have been added, changed or removed
+    crate::agent_cli::sync();
 }
 
 #[tauri::command]

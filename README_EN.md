@@ -30,6 +30,7 @@
 > - The app is named Be Native and has its own icon; a debug build (`pnpm tauri dev`) calls itself "Be Native (Debug)" and does not check for updates at launch.
 > - Selecting a screen region shows a horizontal and a vertical line through the pointer instead of a small crosshair; the lines stay on one monitor and follow the pointer to another.
 > - Silent text recognition: its own hotkey (also in the tray menu and the HTTP API as `/ocr_copy`) selects a screen region and copies the recognized text to the clipboard without opening a window.
+> - Claude Code and Codex are translation services: they use the `claude` or `codex` command-line tool already installed and signed in on your computer, so translations run on your subscription with no API key. Each translation gets a fresh session, and one is kept ready in the background so answers come about as fast as from an API; model and reasoning level are set in the service settings.
 
 <!-- fork:end -->
 

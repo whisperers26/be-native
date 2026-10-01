@@ -32,8 +32,9 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 | `src/main`, `src/App` | Boot and choosing the window component |
 | `src/window/<Name>/` | One directory per window; subcomponents in subdirectories |
 | `src/components/WindowControl/` | Minimise, maximise and close buttons for frameless windows (hidden on macOS) |
+| `src/components/AgentCliConfig/` | The settings form shared by the Claude Code and Codex translate services |
 | `src/hooks/` | `useConfig`, `useGetState`, `useSyncAtom`, `useToastStyle`, `useVoice` |
-| `src/utils/` | Store and env setup, `debounce`, language detection, language tables, service instance keys, the plugin loader |
+| `src/utils/` | Store and env setup, `debounce`, language detection, language tables, service instance keys, the plugin loader, the Claude Code and Codex session helper (`agent_cli`) |
 | `src/i18n/` | i18next setup and `locales/*.json` |
 | `src/types/` | Shared TypeScript types; so far the service types (`service.ts`) |
 | `src/services/` | Built-in services: [services.md](services.md) |
@@ -80,7 +81,7 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 ## Talking to Rust
 
 - Commands: `invoke('<name>', args)` from `@tauri-apps/api/tauri`. What each one does: [backend.md](backend.md).
-- Events listened to: `new_text`, `new_image`, `reload_plugin_list`, `<key>_changed`, and Tauri's `tauri://blur`, `tauri://focus`, `tauri://move`, `tauri://resize`, `tauri://update-download-progress`.
+- Events listened to: `new_text`, `new_image`, `agent_cli_stream`, `reload_plugin_list`, `<key>_changed`, and Tauri's `tauri://blur`, `tauri://focus`, `tauri://move`, `tauri://resize`, `tauri://update-download-progress`.
 - Events emitted: `<key>_changed`, `success` (Screenshot), `reload_plugin_list` (plugin install and uninstall).
 - Requests to outside services go through Tauri's HTTP client (`fetch` from `@tauri-apps/api/http`), which runs in Rust, so CORS does not apply.
 

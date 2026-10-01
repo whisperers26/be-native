@@ -6,7 +6,7 @@ Built-in translation, OCR ("recognize"), text-to-speech and collection (word boo
 
 | Kind | Registry | Main function | Built-ins |
 | --- | --- | --- | --- |
-| translate | `src/services/translate/index` | `translate(text, from, to, options)` | 21 |
+| translate | `src/services/translate/index` | `translate(text, from, to, options)` | 23 |
 | recognize | `src/services/recognize/index` | `recognize(base64, language, options)` | 15 |
 | tts | `src/services/tts/index` | `tts(text, lang, options)` | 1 |
 | collection | `src/services/collection/index` | `collection(source, target, options)` | 2 |
@@ -35,7 +35,7 @@ The types live in `src/types/service.ts`: `ServiceModule` is what every module p
 | collection | `collection(sourceText, result, { config })` | Ignored |
 
 - `config` is the instance's settings object from the store, or `{}` if none was ever saved.
-- `detect` is the detected source language, as an app code. `setResult(partial)` streams partial text; openai, geminipro, chatglm and ollama use it.
+- `detect` is the detected source language, as an app code. `setResult(partial)` streams partial text; openai, geminipro, chatglm, ollama, claude_code and codex use it.
 - A dictionary result (`DictionaryResult`) is `{ pronunciations: [{ region?, symbol, voice }], explanations: [{ trait, explains: string[] }], associations?: string[], sentence?: [{ source, target? }] }`. google, youdao, bing_dict, cambridge_dict and ecdict can return one (cambridge_dict leaves out `associations` and `sentence`); the Translate window renders it specially.
 - Services signal errors by throwing, usually a string such as `` `Http Request Error\nHttp Status: ${status}\n...` ``, sometimes an `Error`. Callers show `e.toString()`.
 - The Translate window calls every enabled translate instance. TTS, and the OCR step of image translation, use the first instance in their list. The Recognize window lets the user pick.
@@ -65,9 +65,23 @@ Services with no settings (bing, yandex, bing_dict, cambridge_dict, ecdict and l
 
 ## Unusual services
 
+- Not using HTTP at all: claude_code and codex (`invoke('agent_cli_run')`, see above).
 - Not using Tauri's `fetch`: chatglm (global `fetch`), openai and geminipro when streaming (`window.fetch`), ollama (the `ollama/browser` package), tesseract (`tesseract.js`, with its worker and core in `public/`), qrcode (canvas and `jsqr`), system OCR (`invoke('system_ocr')`).
 - Reading the cut screenshot from disk instead of using the `base64` argument: baidu_img_ocr, simple_latex_ocr, and system OCR (in Rust).
 - Signing requests with the current time or random values: alibaba, baidu and baidu_field, tencent (translate and OCR), volcengine (translate and OCR), the three iflytek OCR services, youdao, chatglm (a JWT signed with `jose`), deepl's free endpoint.
+
+## Command-line services (Claude Code, Codex)
+
+`claude_code` and `codex` translate through the command-line tool the user has installed and signed in to, so a translation uses that account's subscription and the app holds no key or token. Rust runs the tools (`src-tauri/src/agent_cli.rs`); the frontend's side is `src/utils/agent_cli` and the shared settings form `src/components/AgentCliConfig/`.
+
+- **One translation, one session.** A session is one process of the tool. It gets one prompt, and is killed when its answer is complete.
+- **A session waits in the background.** Starting the process is the slow part (about half a second for Claude Code), so Rust keeps one started session per distinct spec (provider, executable, model, reasoning level, instructions) of the enabled instances in `translate_service_list`. It is started at launch and on every `reload_store`; sessions whose spec is no longer in the settings are killed. A translation takes the waiting session and Rust starts the next one at once. A waiting session has sent no request, so it uses nothing. With no waiting session (two translations at once, or the settings form's test run), one is started on demand.
+- **Claude Code** runs as `claude -p --input-format stream-json --output-format stream-json --verbose --include-partial-messages --system-prompt <instructions> --tools "" --strict-mcp-config --setting-sources "" --no-session-persistence --disable-slash-commands`, plus `--model` and `--effort` when set, in the temp directory. That drops Claude Code's own system prompt, tools, MCP servers, settings files (hooks, plugins, CLAUDE.md) and skills, which leaves a request of about 500 input tokens. The reasoning level `off` sets `MAX_THINKING_TOKENS=0`; thinking is most of the time and the usage of a short translation (measured with haiku: 0.9 s without, 5 s with).
+- **Codex** runs as `codex exec --json --skip-git-repo-check --sandbox read-only -`, plus `--model` and `-c model_reasoning_effort=<level>` when set, with the instructions and the text on stdin. Codex starts working only when its prompt ends, so its waiting session has saved only the process start. This half follows Codex's documented CLI and has not been run against the real tool.
+- **The prompt.** The instructions are the system prompt (Claude Code) or lead the prompt (Codex). The message is `Target language: <name>`, `Source language: <name>` unless it is to be detected, a blank line, then the text (`translationPrompt`).
+- **Calling.** `runAgentCli(spec, prompt, setResult)` invokes `agent_cli_run` with a fresh id and listens for `agent_cli_stream` events `{ id, text }`, the text so far, which it passes to `setResult` with a `_` cursor. Errors (tool not found, not signed in, unknown model) reject with the tool's own message.
+- **The executable** is the `command` setting, or, when that is empty, `claude` or `codex` found on `PATH`, in `~/.local/bin`, in `%APPDATA%\npm` (Windows) or in `/usr/local/bin` and `/opt/homebrew/bin` (elsewhere).
+- Instance settings: `command`, `model`, `effort`, `systemPrompt`. Rust reads them from the store to start the waiting session, so a change to their names needs both sides.
 
 ## External plugins
 

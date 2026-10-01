@@ -247,6 +247,31 @@
                 "lingva": {
                     "title": "Lingva"
                 },
+                "claude_code": {
+                    "title": "Claude Code"
+                },
+                "codex": {
+                    "title": "Codex"
+                },
+                "agent_cli": {
+                    "description": "使用本機已安裝並登入的 {{tool}} 命令列工具進行翻譯，因此消耗的是該帳號的訂閱額度。每次翻譯都在獨立的工作階段中完成；背景始終保留一個待命的工作階段，以便快速傳回結果。",
+                    "command": "可執行檔",
+                    "command_placeholder": "留空則自動尋找",
+                    "model": "模型",
+                    "model_placeholder": "工具的預設模型",
+                    "effort": "推理等級",
+                    "instructions": "指令",
+                    "efforts": {
+                        "off": "關閉",
+                        "default": "工具預設",
+                        "minimal": "極低",
+                        "low": "低",
+                        "medium": "中",
+                        "high": "高",
+                        "xhigh": "極高",
+                        "max": "最高"
+                    }
+                },
                 "bing": {
                     "title": "Bing 翻譯"
                 },

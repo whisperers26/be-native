@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod agent_cli;
 mod backup;
 mod clipboard;
 mod cmd;
@@ -15,6 +16,7 @@ mod tray;
 mod updater;
 mod window;
 
+use agent_cli::agent_cli_run;
 use backup::*;
 use clipboard::*;
 use cmd::*;
@@ -131,6 +133,8 @@ fn main() {
                 clipboard_monitor.to_string(),
             )));
             start_clipboard_monitor(app.handle());
+            // Start the sessions that wait for a Claude Code or Codex translation
+            agent_cli::sync();
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -150,6 +154,7 @@ fn main() {
             screenshot,
             cursor_position,
             lang_detect,
+            agent_cli_run,
             webdav,
             local,
             install_plugin,
@@ -160,9 +165,9 @@ fn main() {
         .build(context)
         .expect("error while running tauri application")
         // 窗口关闭不退出
-        .run(|_app_handle, event| {
-            if let tauri::RunEvent::ExitRequested { api, .. } = event {
-                api.prevent_exit();
-            }
+        .run(|_app_handle, event| match event {
+            tauri::RunEvent::ExitRequested { api, .. } => api.prevent_exit(),
+            tauri::RunEvent::Exit => agent_cli::shutdown(),
+            _ => {}
         });
 }
