@@ -72,6 +72,7 @@ Shared run configurations live in `.run/` and appear in the run menu:
 | --- | --- |
 | Tauri dev | `pnpm tauri dev`: the app |
 | Unit tests | `pnpm test` |
+| Typecheck | `pnpm typecheck` |
 | Smoke test | `pnpm smoke`, against the running app ([testing.md](testing.md)) |
 | Docs check | `pnpm check:docs` |
 
