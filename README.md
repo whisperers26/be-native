@@ -476,6 +476,7 @@ Rust >= 1.80.0
 
     ```bash
     pnpm test # Unit and component tests
+    pnpm typecheck # TypeScript type check
     pnpm smoke # Real-app smoke test (Windows; start the app with pnpm tauri dev first)
     ```
 
