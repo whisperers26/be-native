@@ -1,0 +1,69 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`google translate > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "auto": "auto",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fa": "fa",
+    "fr": "fr",
+    "he": "he",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "ja",
+    "km": "km",
+    "ko": "ko",
+    "mn_cy": "mn",
+    "ms": "ms",
+    "nb_no": "no",
+    "nl": "nl",
+    "nn_no": "no",
+    "pl": "pl",
+    "pt_br": "pt",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "sv": "sv",
+    "th": "th",
+    "tr": "tr",
+    "uk": "uk",
+    "vi": "vi",
+    "zh_cn": "zh-CN",
+    "zh_tw": "zh-TW",
+  },
+  "info": {
+    "icon": "logo/google.svg",
+    "name": "google",
+  },
+}
+`;
+
+exports[`google translate > sentence: sends a GET to translate.google.com and joins the translated segments 1`] = `
+[
+  {
+    "options": {
+      "headers": {
+        "content-type": "application/json",
+      },
+      "method": "GET",
+      "query": {
+        "client": "gtx",
+        "hl": "zh-CN",
+        "ie": "UTF-8",
+        "kc": "7",
+        "oe": "UTF-8",
+        "otf": "1",
+        "q": "Hello, world!",
+        "sl": "en",
+        "ssel": "0",
+        "tl": "zh-CN",
+        "tsel": "0",
+      },
+    },
+    "url": "https://translate.google.com/translate_a/single?dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t",
+  },
+]
+`;
