@@ -88,7 +88,8 @@
                     "translate": "Translate",
                     "disable": "Disable",
                     "ocr_recognize": "Text Recognition",
-                    "ocr_translate": "Screenshot Translation"
+                    "ocr_translate": "Screenshot Translation",
+                    "ocr_copy": "Silent Text Recognition (copy only)"
                 }
             },
             "translate": {
@@ -151,6 +152,7 @@
                 "input_translate": "Text Translation",
                 "ocr_recognize": "Text Recognition",
                 "ocr_translate": "Screenshot Translation",
+                "ocr_copy": "Silent Text Recognition (copy only)",
                 "is_register": "The hotkey is already registered",
                 "success": "Hotkey register success",
                 "set_hotkey": "Press to Set Hotkey"
