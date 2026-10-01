@@ -12,7 +12,7 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `app_font_size` | `16` | Pixels. A number by default, but the General page saves a picked size as a string (`'18'`) |
 | `transparent` | `true` | Transparent window background (not macOS) |
 | `dev_mode` | `false` | F12 opens devtools |
-| `check_update` | `true` | Check for updates at launch. Rust |
+| `check_update` | `true` | Check for updates at launch (release builds only; a debug build never does). Rust |
 | `server_port` | `60828` | Local HTTP API port; restart to apply. Rust |
 | `tray_click_event` | `config` | Windows tray left click: `config`, `translate`, `ocr_recognize`, `ocr_translate`, `disable`. Rust |
 | `proxy_enable` | `false` | Applied at launch only |

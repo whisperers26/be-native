@@ -1,10 +1,10 @@
 <img width="200px" src="public/icon.svg" align="left"/>
 
-# Pot (派了个萌的翻译器)
+# Be Native
 
-> 🌈 一个跨平台的划词翻译软件 ([QQ 频道](https://pd.qq.com/s/akns94e1r))
+> 🌈 像母语者一样阅读和写作：跨平台的划词翻译与文字识别软件
 
-![License](https://img.shields.io/github/license/pot-app/pot-desktop.svg)
+![License](https://img.shields.io/github/license/whisperers26/be-native.svg)
 ![Tauri](https://img.shields.io/badge/Tauri-1.6.8-blue?logo=tauri)
 ![TypeScript](https://img.shields.io/badge/-TypeScript-blue?logo=typescript&logoColor=white)
 ![Rust](https://img.shields.io/badge/-Rust-orange?logo=rust&logoColor=white)
@@ -14,8 +14,9 @@
 
 <!-- fork:start -->
 
-> [!NOTE]
-> **Be Native** 是 Pot 的个人分支（fork）。上游仓库 [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) 已归档，开发在 [whisperers26/be-native](https://github.com/whisperers26/be-native) 继续进行。安装包发布在本分支的 [Releases](https://github.com/whisperers26/be-native/releases) 页面，应用内更新也读取这里；下文的安装说明针对的是上游的 Pot。
+> **Be Native** 帮助你用非母语阅读和写作。目前它提供划词翻译、输入翻译、截图 OCR 和截图翻译，支持多个翻译、文字识别、语音合成和生词本接口以及插件；写作润色功能（把你写的文字改得更地道）正在计划中，尚未实现。支持 Windows、macOS 和 Linux。
+>
+> Be Native 基于 [Pot](https://github.com/pot-app/pot-desktop)，是它的个人分支（fork）。上游仓库 [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) 已归档，开发在 [whisperers26/be-native](https://github.com/whisperers26/be-native) 继续进行。安装包发布在本分支的 [Releases](https://github.com/whisperers26/be-native/releases) 页面，应用内更新也读取这里；下文的安装说明针对的是上游的 Pot。
 >
 > 本分支的改动：
 >
@@ -26,6 +27,7 @@
 > - 真实应用冒烟测试（`pnpm smoke`，Windows）通过本地 HTTP 接口检查应用的各个窗口。
 > - 前端代码是严格模式（strict）的 TypeScript，CI 会拒绝 `src/` 下的 JavaScript 文件。
 > - 推送 `v*` 标签会构建并在 GitHub 发布带签名的安装包，应用内更新读取最新的发布，不再读取上游的更新源。
+> - 应用更名为 Be Native 并换了新图标；调试版本（`pnpm tauri dev`）显示为 “Be Native (Debug)”，启动时不检查更新。
 
 <!-- fork:end -->
 

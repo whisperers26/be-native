@@ -1,10 +1,10 @@
 <img width="200px" src="public/icon.svg" align="left"/>
 
-# Pot (간편 번역기)
+# Be Native
 
-> A cross-platform translator application ([Telegram Group](https://t.me/pot_app))
+> 🌈 원어민처럼 읽고 쓰기: 크로스 플랫폼 번역 및 OCR 앱
 
-![License](https://img.shields.io/github/license/pot-app/pot-desktop.svg)
+![License](https://img.shields.io/github/license/whisperers26/be-native.svg)
 ![Tauri](https://img.shields.io/badge/Tauri-1.6.8-blue?logo=tauri)
 ![TypeScript](https://img.shields.io/badge/-TypeScript-blue?logo=typescript&logoColor=white)
 ![Rust](https://img.shields.io/badge/-Rust-orange?logo=rust&logoColor=white)
@@ -14,8 +14,9 @@
 
 <!-- fork:start -->
 
-> [!NOTE]
-> **Be Native**는 Pot의 개인 포크입니다. 업스트림 저장소 [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop)은 보관(archived)되었으며, 개발은 [whisperers26/be-native](https://github.com/whisperers26/be-native)에서 계속됩니다. 설치 파일은 이 포크의 [Releases](https://github.com/whisperers26/be-native/releases) 페이지에 배포되며 앱 내 업데이트도 이를 읽습니다. 아래 설치 안내는 업스트림 Pot용입니다.
+> **Be Native**는 모국어가 아닌 언어로 읽고 쓰는 것을 돕습니다. 현재 선택 번역, 입력 번역, 스크린샷 OCR, 스크린샷 번역을 제공하며, 여러 번역·문자 인식·음성 합성·단어장 서비스와 플러그인을 지원합니다. 작성한 글을 더 자연스럽게 다듬어 주는 글쓰기 개선 기능은 계획 중이며 아직 구현되지 않았습니다. Windows, macOS, Linux에서 동작합니다.
+>
+> Be Native는 [Pot](https://github.com/pot-app/pot-desktop)을 기반으로 한 개인 포크입니다. 업스트림 저장소 [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop)은 보관(archived)되었으며, 개발은 [whisperers26/be-native](https://github.com/whisperers26/be-native)에서 계속됩니다. 설치 파일은 이 포크의 [Releases](https://github.com/whisperers26/be-native/releases) 페이지에 배포되며 앱 내 업데이트도 이를 읽습니다. 아래 설치 안내는 업스트림 Pot용입니다.
 >
 > 이 포크의 변경 사항:
 >
@@ -26,6 +27,7 @@
 > - 실제 앱 스모크 테스트(`pnpm smoke`, Windows)가 로컬 HTTP API로 앱의 창을 검사합니다.
 > - 프런트엔드는 strict 모드의 TypeScript이며, CI는 `src/` 아래의 JavaScript 파일을 거부합니다.
 > - `v*` 태그를 푸시하면 서명된 설치 파일을 빌드해 GitHub 릴리스로 배포하며, 앱 내 업데이트는 업스트림 피드 대신 최신 릴리스를 읽습니다.
+> - 앱 이름을 Be Native로 바꾸고 새 아이콘을 넣었습니다. 디버그 빌드(`pnpm tauri dev`)는 "Be Native (Debug)"로 표시되며 시작 시 업데이트를 확인하지 않습니다.
 
 <!-- fork:end -->
 

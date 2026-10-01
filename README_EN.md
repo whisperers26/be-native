@@ -1,10 +1,10 @@
 <img width="200px" src="public/icon.svg" align="left"/>
 
-# Pot (A cute translator)
+# Be Native
 
-> A cross-platform translator application ([Telegram Group](https://t.me/pot_app))
+> 🌈 Read and write like a native speaker: a cross-platform translation and OCR app
 
-![License](https://img.shields.io/github/license/pot-app/pot-desktop.svg)
+![License](https://img.shields.io/github/license/whisperers26/be-native.svg)
 ![Tauri](https://img.shields.io/badge/Tauri-1.6.8-blue?logo=tauri)
 ![TypeScript](https://img.shields.io/badge/-TypeScript-blue?logo=typescript&logoColor=white)
 ![Rust](https://img.shields.io/badge/-Rust-orange?logo=rust&logoColor=white)
@@ -14,8 +14,9 @@
 
 <!-- fork:start -->
 
-> [!NOTE]
-> **Be Native** is a personal fork of Pot. Upstream [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) has been archived; development continues in [whisperers26/be-native](https://github.com/whisperers26/be-native). Installers are published on this fork's [Releases](https://github.com/whisperers26/be-native/releases) page and the in-app updater reads them; the install instructions below are for upstream Pot.
+> **Be Native** helps you read and write in a language that is not your own. Today it does selection translation, input translation, screenshot OCR and screenshot translation, with many translation, OCR, text-to-speech and vocabulary services plus plugins. Writing improvement, which rewrites what you wrote so it reads naturally, is planned and not implemented yet. It runs on Windows, macOS and Linux.
+>
+> Be Native is built on [Pot](https://github.com/pot-app/pot-desktop) and is a personal fork of it. Upstream [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) has been archived; development continues in [whisperers26/be-native](https://github.com/whisperers26/be-native). Installers are published on this fork's [Releases](https://github.com/whisperers26/be-native/releases) page and the in-app updater reads them; the install instructions below are for upstream Pot.
 >
 > Changes in this fork:
 >
@@ -26,6 +27,7 @@
 > - A real-app smoke test (`pnpm smoke`, Windows) checks the app's windows through its local HTTP API.
 > - The frontend is strict TypeScript; CI rejects JavaScript files under `src/`.
 > - Pushing a `v*` tag builds and publishes signed installers as a GitHub release; the in-app updater reads the latest release instead of upstream's feed.
+> - The app is named Be Native and has its own icon; a debug build (`pnpm tauri dev`) calls itself "Be Native (Debug)" and does not check for updates at launch.
 
 <!-- fork:end -->
 

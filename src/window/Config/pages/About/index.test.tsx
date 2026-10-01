@@ -13,7 +13,7 @@ import { initEnv } from '../../../../utils/env';
 import Page from './index';
 
 describe('About settings page', () => {
-    it('shows the version and links', async () => {
+    it('shows the app name, the version and links', async () => {
         await initEnv();
         render(
             <NextUIProvider>
@@ -23,6 +23,7 @@ describe('About settings page', () => {
             </NextUIProvider>
         );
 
+        expect(await screen.findByRole('heading', { name: 'Be Native' })).toBeInTheDocument();
         expect(await screen.findByText('3.0.7')).toBeInTheDocument();
         expect(await screen.findByText('Website')).toBeInTheDocument();
         expect(await screen.findByText('GitHub')).toBeInTheDocument();

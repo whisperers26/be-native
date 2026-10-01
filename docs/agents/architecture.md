@@ -50,4 +50,4 @@ Closing a window never quits the app; only Quit or Restart in the tray does. A s
 - Windows run with `--disable-web-security` and a permissive content security policy.
 - Plugins are run with `eval`, with full Tauri API access, and can start programs.
 - The HTTP API has no authentication.
-- The app identifier (`com.pot-app.desktop`) is still upstream's. The updater feed and update signing key are the fork's own.
+- The product name is "Be Native" (`productName` in `tauri.conf.json`). The app identifier (`com.pot-app.desktop`), the crate (`pot`), the log and screenshot file names and the `.potext` plugin extension are still upstream's, so settings and plugins carry over. The updater feed and update signing key are the fork's own.
