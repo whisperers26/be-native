@@ -6,7 +6,7 @@
 
 ![License](https://img.shields.io/github/license/pot-app/pot-desktop.svg)
 ![Tauri](https://img.shields.io/badge/Tauri-1.6.8-blue?logo=tauri)
-![JavaScript](https://img.shields.io/badge/-JavaScript-yellow?logo=javascript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/-TypeScript-blue?logo=typescript&logoColor=white)
 ![Rust](https://img.shields.io/badge/-Rust-orange?logo=rust&logoColor=white)
 ![Windows](https://img.shields.io/badge/-Windows-blue?logo=windows&logoColor=white)
 ![MacOS](https://img.shields.io/badge/-macOS-black?&logo=apple&logoColor=white)
@@ -24,6 +24,7 @@
 > - CI checks every pull request (docs check and frontend build).
 > - Automated tests (Vitest) pin the frontend's behaviour: `pnpm test`.
 > - A real-app smoke test (`pnpm smoke`, Windows) checks the app's windows through its local HTTP API.
+> - The frontend is strict TypeScript; CI rejects JavaScript files under `src/`.
 
 <!-- fork:end -->
 

@@ -6,7 +6,7 @@
 
 ![License](https://img.shields.io/github/license/pot-app/pot-desktop.svg)
 ![Tauri](https://img.shields.io/badge/Tauri-1.6.8-blue?logo=tauri)
-![JavaScript](https://img.shields.io/badge/-JavaScript-yellow?logo=javascript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/-TypeScript-blue?logo=typescript&logoColor=white)
 ![Rust](https://img.shields.io/badge/-Rust-orange?logo=rust&logoColor=white)
 ![Windows](https://img.shields.io/badge/-Windows-blue?logo=windows&logoColor=white)
 ![MacOS](https://img.shields.io/badge/-macOS-black?&logo=apple&logoColor=white)
@@ -24,6 +24,7 @@
 > - 每个 Pull Request 都会经过 CI 检查（文档检查和前端构建）。
 > - 前端行为由自动化测试（Vitest）固定，命令为 `pnpm test`。
 > - 真实应用冒烟测试（`pnpm smoke`，Windows）通过本地 HTTP 接口检查应用的各个窗口。
+> - 前端代码是严格模式（strict）的 TypeScript，CI 会拒绝 `src/` 下的 JavaScript 文件。
 
 <!-- fork:end -->
 
