@@ -9,6 +9,14 @@ const ENDS_SENTENCE = /[.!?…:]["')\]]*$/;
 const ENDS_COMMA = /,$/;
 const BRACKETS = ['()', '[]'];
 
+// A bullet. The characters that also appear inside text count only with a space after them.
+const BULLET = /^(?:[•‣⁃∙◦▪▫■□●○◆◇▶►➢➤✓✔☐☑★☆※]|[-–—*+·]\s)/;
+// A number or letter that only a list starts a line with: `1)`, `(a)`, `iv)`, `①`.
+const ORDINAL = /^(?:\(?(?:\d{1,3}|[A-Za-z]|[ivxIVX]{1,4})\)|[①-⒛⓪-⓿❶-➓])/;
+// One that a wrapped line can start with as well, as in "on May\n3. The next day" or "J.\nF. Kennedy": `1.`, `1.2`,
+// `a.`, `iv.`. It marks a list only when the text has more than one.
+const LOOSE_ORDINAL = /^(?:\d{1,3}(?:\.\d{1,3})*\.|\d{1,3}(?:\.\d{1,3})+|[A-Za-z]\.|[ivxIVX]{1,4}\.)\s/;
+
 function width(line: string): number {
     return [...line].length;
 }
@@ -39,8 +47,10 @@ function unfinished(line: string): boolean {
     );
 }
 
-// Whether the break between `line` and `next` is there only because the text wrapped.
-function wrapped(line: string, next: string, widest: number): boolean {
+// Whether the break between `line` and `next` is there only because the text wrapped. `startsItem` tells whether a
+// line starts a list item.
+function wrapped(line: string, next: string, widest: number, startsItem: (line: string) => boolean): boolean {
+    if (startsItem(next)) return false;
     if (unfinished(line)) return true;
     if (hasRoom(line, next, widest)) return false;
     if (widest < NARROW) {
@@ -60,30 +70,35 @@ function looksLikeList(lines: string[]): boolean {
 }
 
 // Merge lines that have no blank line between them.
-function mergeBlock(lines: string[]): string {
+function mergeBlock(lines: string[], startsItem: (line: string) => boolean): string {
     if (looksLikeList(lines)) return lines.join('\n');
     const widest = Math.max(...lines.map(width));
     let merged = lines[0];
     for (let i = 1; i < lines.length; i++) {
-        merged = wrapped(lines[i - 1], lines[i], widest) ? glue(merged, lines[i]) : merged + '\n' + lines[i];
+        merged = wrapped(lines[i - 1], lines[i], widest, startsItem)
+            ? glue(merged, lines[i])
+            : merged + '\n' + lines[i];
     }
     return merged;
 }
 
 /**
  * Join the lines of `text` that are broken only because the text wrapped, as recognized and copied text is, and keep
- * the breaks its author made: paragraphs, headings, lists. Spaces are trimmed and runs of them, and of blank lines,
+ * the breaks its author made: paragraphs, headings, list items. Spaces are trimmed and runs of them, and of blank lines,
  * become one.
  */
 export function mergeLines(text: string): string {
     const lines = text.split(/\r\n|\r|\n/).map((line) => line.replace(/[ \t ]+/g, ' ').trim());
+    const numbered = lines.filter((line) => LOOSE_ORDINAL.test(line)).length > 1;
+    const startsItem = (line: string) =>
+        BULLET.test(line) || ORDINAL.test(line) || (numbered && LOOSE_ORDINAL.test(line));
     const blocks: string[] = [];
     let block: string[] = [];
     for (const line of [...lines, '']) {
         if (line !== '') {
             block.push(line);
         } else if (block.length > 0) {
-            blocks.push(mergeBlock(block));
+            blocks.push(mergeBlock(block, startsItem));
             block = [];
         }
     }

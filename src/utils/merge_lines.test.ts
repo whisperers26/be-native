@@ -113,6 +113,101 @@ describe('mergeLines', () => {
         expect(mergeLines('  ')).toBe('');
     });
 
+    describe('lists', () => {
+        it('starts a line at every bullet, whatever the item before ends with', () => {
+            expect(
+                mergeLines(
+                    lines(
+                        'The application does three things for its user:',
+                        '• translates the text selected in any other window',
+                        '• reads the text of a screenshot',
+                        '- keeps what was translated',
+                        '* runs plugins'
+                    )
+                )
+            ).toBe(
+                lines(
+                    'The application does three things for its user:',
+                    '• translates the text selected in any other window',
+                    '• reads the text of a screenshot',
+                    '- keeps what was translated',
+                    '* runs plugins'
+                )
+            );
+        });
+
+        it('joins the wrapped lines of an item to it', () => {
+            expect(
+                mergeLines(
+                    lines(
+                        '• translates the text selected in any other window',
+                        'and shows it beside the selection',
+                        '• reads the text of a screenshot and copies it to',
+                        'the clipboard',
+                        'A paragraph follows the list and wraps onto a second',
+                        'line of its own.'
+                    )
+                )
+            ).toBe(
+                lines(
+                    '• translates the text selected in any other window and shows it beside the selection',
+                    '• reads the text of a screenshot and copies it to the clipboard',
+                    'A paragraph follows the list and wraps onto a second line of its own.'
+                )
+            );
+        });
+
+        it('starts a line at every number of a numbered list', () => {
+            expect(
+                mergeLines(
+                    lines(
+                        '1. Download the installer from the releases page of',
+                        'the project',
+                        '2. Run it and follow the steps that it shows you',
+                        '3. Start the application from the menu',
+                        '3.1 Or from the icon in the tray'
+                    )
+                )
+            ).toBe(
+                lines(
+                    '1. Download the installer from the releases page of the project',
+                    '2. Run it and follow the steps that it shows you',
+                    '3. Start the application from the menu',
+                    '3.1 Or from the icon in the tray'
+                )
+            );
+        });
+
+        it('takes a single number or letter with a full stop for part of the sentence', () => {
+            expect(
+                mergeLines(lines('The meeting was moved from the first of May to May', '3. Everyone was told about it.'))
+            ).toBe('The meeting was moved from the first of May to May 3. Everyone was told about it.');
+            expect(
+                mergeLines(lines('The speech was given in the city of Berlin by John', 'F. Kennedy in the year 1963.'))
+            ).toBe('The speech was given in the city of Berlin by John F. Kennedy in the year 1963.');
+        });
+
+        it('starts a line at a number or letter in brackets', () => {
+            expect(
+                mergeLines(
+                    lines(
+                        'The user of the application may do any of these:',
+                        'a) copy the text that was recognized in a picture',
+                        '(b) translate it into another language',
+                        '2) keep it for later'
+                    )
+                )
+            ).toBe(
+                lines(
+                    'The user of the application may do any of these:',
+                    'a) copy the text that was recognized in a picture',
+                    '(b) translate it into another language',
+                    '2) keep it for later'
+                )
+            );
+        });
+    });
+
     describe('in a narrow block', () => {
         it('keeps lines that could be labels', () => {
             expect(mergeLines(lines('File name', 'Date modified'))).toBe(lines('File name', 'Date modified'));
