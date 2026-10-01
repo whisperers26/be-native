@@ -10,9 +10,17 @@ import ReactMarkdown from 'react-markdown';
 
 import { useConfig, useToastStyle } from '../../hooks';
 import { osType } from '../../utils/env';
+import type { UnlistenFn } from '@tauri-apps/api/event';
 
-let unlisten = 0;
+// 0 until the download-progress listener has been registered.
+let unlisten: Promise<UnlistenFn> | 0 = 0;
 let eventId = 0;
+
+// The payload of Tauri's download-progress event: contentLength is null when the server sends no Content-Length.
+interface DownloadProgress {
+    chunkLength: number;
+    contentLength: number | null;
+}
 
 export default function Updater() {
     const [transparent] = useConfig('transparent', true);
@@ -29,7 +37,8 @@ export default function Updater() {
         checkUpdate().then(
             (update) => {
                 if (update.shouldUpdate) {
-                    setBody(update.manifest.body);
+                    // checkUpdate sets the manifest whenever shouldUpdate is true.
+                    setBody(update.manifest!.body);
                 } else {
                     setBody(t('updater.latest'));
                 }
@@ -40,11 +49,12 @@ export default function Updater() {
             }
         );
         if (unlisten === 0) {
-            unlisten = listen('tauri://update-download-progress', (e) => {
+            unlisten = listen<DownloadProgress>('tauri://update-download-progress', (e) => {
                 if (eventId === 0) {
                     eventId = e.id;
                 }
                 if (e.id === eventId) {
+                    // @ts-expect-error known bug (known-issues.md): contentLength can be null
                     setTotal(e.payload.contentLength);
                     setDownloaded((a) => {
                         return a + e.payload.chunkLength;
