@@ -312,9 +312,56 @@ pub fn recognize_window() {
     window.emit("new_image", "").unwrap();
 }
 
+#[cfg(target_os = "windows")]
+unsafe extern "system" fn no_title_bar_proc(
+    hwnd: windows::Win32::Foundation::HWND,
+    msg: u32,
+    wparam: windows::Win32::Foundation::WPARAM,
+    lparam: windows::Win32::Foundation::LPARAM,
+    id: usize,
+    _data: usize,
+) -> windows::Win32::Foundation::LRESULT {
+    use windows::Win32::Foundation::{LPARAM, LRESULT};
+    use windows::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass};
+    use windows::Win32::UI::WindowsAndMessaging::{WM_NCACTIVATE, WM_NCDESTROY, WM_NCPAINT};
+
+    match msg {
+        // -1 keeps the default handler from repainting the non-client area
+        WM_NCACTIVATE => DefSubclassProc(hwnd, msg, wparam, LPARAM(-1)),
+        WM_NCPAINT => LRESULT(0),
+        WM_NCDESTROY => {
+            let _ = RemoveWindowSubclass(hwnd, Some(no_title_bar_proc), id);
+            DefSubclassProc(hwnd, msg, wparam, lparam)
+        }
+        _ => DefSubclassProc(hwnd, msg, wparam, lparam),
+    }
+}
+
+// Windows paints an old-style title bar on the frameless full-screen window when it is
+// activated, which shows until the WebView has drawn over it
+#[cfg(target_os = "windows")]
+fn suppress_title_bar(window: &Window) {
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::UI::Shell::SetWindowSubclass;
+
+    let Ok(hwnd) = window.hwnd() else {
+        warn!("Screenshot window handle not found");
+        return;
+    };
+    let hwnd = hwnd.0 as isize;
+    // A window can only be subclassed from the thread that owns it
+    window
+        .run_on_main_thread(move || unsafe {
+            let _ = SetWindowSubclass(HWND(hwnd as _), Some(no_title_bar_proc), 1, 0);
+        })
+        .unwrap_or_default();
+}
+
 #[cfg(not(target_os = "macos"))]
 fn screenshot_window() -> Window {
     let (window, _exists) = build_window("screenshot", "Screenshot");
+    #[cfg(target_os = "windows")]
+    suppress_title_bar(&window);
 
     window.set_skip_taskbar(true).unwrap();
     #[cfg(target_os = "macos")]
