@@ -1,6 +1,16 @@
 import { fetch, Body } from '@tauri-apps/api/http';
+import type { TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+interface CaiyunResponse {
+    target: string[];
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     const { config } = options;
 
     const { token } = config;
@@ -23,7 +33,7 @@ export async function translate(text, from, to, options = {}) {
         'x-authorization': 'token ' + token,
     };
 
-    let res = await fetch(url, {
+    let res = await fetch<CaiyunResponse>(url, {
         method: 'POST',
         headers: headers,
         body: Body.json(body),
@@ -35,6 +45,7 @@ export async function translate(text, from, to, options = {}) {
         if (target[0]) {
             return target[0];
         } else {
+            // @ts-expect-error known bug (known-issues.md): result is the response object, which has no trim
             throw JSON.stringify(result.trim());
         }
     } else {
