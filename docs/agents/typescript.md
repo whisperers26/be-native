@@ -41,7 +41,7 @@ Two settings exist to keep the migration behaviour-free:
 
 Every migration PR shows three things:
 
-1. `pnpm check:transpile` passes. It compiles every renamed or modified source file under `src/` twice, as it was on the base (`origin/main` by default, `--base <ref>` to change) and as it is now, with the esbuild that Vite uses, and requires identical JavaScript. New files must compile to nothing (types only), and no snapshot file may change. If a difference is intended and explained in the PR, name the file with `--allow <path>`.
+1. `pnpm check:transpile` passes. It compiles every renamed or modified source file under `src/` twice, as it was on the base (`origin/main` by default, `--base <ref>` to change) and as committed at `HEAD`, with the esbuild that Vite uses, and requires identical JavaScript. It reads commits only, so it refuses to run while `src/` has uncommitted changes: commit first. New files must compile to nothing (types only), and no snapshot file may change. If a difference is intended and explained in the PR, name the file with `--allow <path>`.
 2. `pnpm test` passes with the test files changed at most in their types and the snapshots untouched.
 3. For windows and services, the real-app smoke test matches the JavaScript baseline ([testing.md](testing.md)).
 
