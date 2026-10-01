@@ -26,6 +26,10 @@ git switch -c <type>/<slug>
 `<slug>` is a few lowercase words joined by `-`, for example
 `fix/ocr-empty-result`.
 
+If `git switch -c` says the branch already exists, it is left over from a
+merged PR: delete it with `git branch -d <type>/<slug>` and create it again
+from `main`. Never build on the old one.
+
 ## Commits
 
 Small commits, one topic each. A commit should show its own change and nothing
@@ -71,11 +75,14 @@ say why when the diff does not make it obvious.
    ```
 
 5. Merge with a merge commit. Never squash: squashing collapses the small
-   commits above into one.
+   commits above into one. Then delete your local copy of the branch:
+   `--delete-branch` removes it on GitHub, but with `--repo` it leaves the
+   local one behind.
 
    ```bash
    gh pr merge <branch> --repo whisperers26/be-native --merge --delete-branch
-   git switch main && git pull --ff-only
+   git switch main && git pull --ff-only --prune
+   git branch -d <branch>
    ```
 
 ### When the owner asks to review
