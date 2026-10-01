@@ -157,7 +157,8 @@
                 "ocr_copy": "Silent Text Recognition (copy only)",
                 "is_register": "The hotkey is already registered",
                 "success": "Hotkey register success",
-                "set_hotkey": "Press to Set Hotkey"
+                "set_hotkey": "Press to Set Hotkey",
+                "selection_writing": "Writing Improvement"
             },
             "service": {
                 "label": "Service",
