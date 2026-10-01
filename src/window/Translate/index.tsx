@@ -15,6 +15,7 @@ import TargetArea from './components/TargetArea';
 import { osType } from '../../utils/env';
 import { useConfig } from '../../hooks';
 import { store } from '../../utils/store';
+import { isTestMode } from '../../utils/window';
 import { info } from 'tauri-plugin-log-api';
 import type { LogicalPosition, LogicalSize, PhysicalPosition, PhysicalSize } from '@tauri-apps/api/window';
 import type { DropResult } from 'react-beautiful-dnd';
@@ -66,12 +67,14 @@ void listen('tauri://move', () => {
     }
 });
 
+const TEST_MODE_SERVICE_LIST = ['google'];
+
 export default function Translate() {
     const [closeOnBlur] = useConfig('translate_close_on_blur', true);
     const [alwaysOnTop] = useConfig('translate_always_on_top', false);
     const [windowPosition] = useConfig('translate_window_position', 'mouse');
     const [rememberWindowSize] = useConfig('translate_remember_window_size', false);
-    const [translateServiceInstanceList, setTranslateServiceInstanceList] = useConfig('translate_service_list', [
+    const [configuredServiceInstanceList, setTranslateServiceInstanceList] = useConfig('translate_service_list', [
         'deepl',
         'bing',
         'lingva',
@@ -84,6 +87,13 @@ export default function Translate() {
     const [collectionServiceInstanceList] = useConfig<string[]>('collection_service_list', []);
     const [hideLanguage] = useConfig('hide_language', false);
     const [pined, setPined] = useState(false);
+    const [testMode, setTestMode] = useState<boolean | null>(null);
+    // In test mode only Google translates: it is free, and the owner's services may be paid for.
+    const translateServiceInstanceList =
+        testMode === null ? null : testMode ? TEST_MODE_SERVICE_LIST : configuredServiceInstanceList;
+    useEffect(() => {
+        void isTestMode().then(setTestMode);
+    }, []);
     const [pluginList, setPluginList] = useState<PluginList | null>(null);
     const [serviceInstanceConfigMap, setServiceInstanceConfigMap] = useState<ServiceConfigMap | null>(null);
     const reorder = (list: string[], startIndex: number, endIndex: number) => {
@@ -94,7 +104,7 @@ export default function Translate() {
     };
 
     const onDragEnd = async (result: DropResult) => {
-        if (!result.destination) return;
+        if (!result.destination || testMode) return;
         const items = reorder(translateServiceInstanceList!, result.source.index, result.destination.index);
         setTranslateServiceInstanceList(items);
     };
@@ -113,8 +123,9 @@ export default function Translate() {
         }
     }, [alwaysOnTop]);
     // 保存窗口位置
+    // Not in test mode: a test must leave the owner's saved position and size as they are.
     useEffect(() => {
-        if (windowPosition !== null && windowPosition === 'pre_state') {
+        if (testMode === false && windowPosition !== null && windowPosition === 'pre_state') {
             const unlistenMove = listen('tauri://move', async () => {
                 if (moveTimeout) {
                     clearTimeout(moveTimeout);
@@ -142,10 +153,10 @@ export default function Translate() {
                 });
             };
         }
-    }, [windowPosition]);
+    }, [windowPosition, testMode]);
     // 保存窗口大小
     useEffect(() => {
-        if (rememberWindowSize !== null && rememberWindowSize) {
+        if (testMode === false && rememberWindowSize !== null && rememberWindowSize) {
             const unlistenResize = listen('tauri://resize', async () => {
                 if (resizeTimeout) {
                     clearTimeout(resizeTimeout);
@@ -172,7 +183,7 @@ export default function Translate() {
                 });
             };
         }
-    }, [rememberWindowSize]);
+    }, [rememberWindowSize, testMode]);
 
     const loadPluginList = async () => {
         const serviceTypeList = ['translate', 'tts', 'recognize', 'collection'];

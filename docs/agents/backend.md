@@ -38,6 +38,7 @@
 | `screenshot` | `x`, `y` | — | Captures the monitor at that position to `pot_screenshot.png` |
 | `cursor_position` | — | `{ x, y, monitor: { x, y } }` | The cursor's physical position and the origin of the monitor under it; an error if either is unknown |
 | `show_window`, `focus_window` | — | — | Show or focus the calling window; in test mode, show it without activating it and do not focus it |
+| `test_mode` | — | boolean | Whether test mode is on |
 | `cut_image` | `left`, `top`, `width`, `height` | — | Crops it to `pot_screenshot_cut.png` |
 | `get_base64` | — | string | `pot_screenshot_cut.png` as base64; `""` if missing |
 | `copy_img` | `width`, `height` | — | Copies the cut image to the clipboard |

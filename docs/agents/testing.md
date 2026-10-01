@@ -91,6 +91,10 @@ A debug build has a test mode for testing in the background. `GET /test_mode?on=
 
 - New windows open at the centre of the secondary monitor (the first monitor that is not the primary one; the primary one if it is alone) instead of on the monitor under the mouse cursor, sized by that monitor's scale. The cursor is not read or moved.
 - On Windows, windows are shown without being activated and are never focused, so the window the owner is typing in keeps the focus. A window that never had the focus cannot lose it, so the Translate window does not close itself (`translate_close_on_blur`). On Linux and macOS a shown window still takes the focus.
+- The Translate window translates with Google alone (`google`, with its default settings), whatever `translate_service_list` holds: Google is free, while the owner's services may spend an AI subscription or a paid API. The setting itself is not changed. Do not test a paid service against the real provider unless the owner asks for it; use the unit tests, which fake the network.
+- The Translate window does not save its size or position (`translate_remember_window_size`, `translate_window_position`), so a test cannot change what the owner saved.
+
+The Translate window reads test mode when it opens, so turn it on before opening the window. OCR, language detection and text-to-speech still use the configured services.
 
 To open a window by hand without disturbing the owner, turn test mode on, send the HTTP request, and turn it off when done:
 
