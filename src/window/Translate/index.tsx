@@ -16,10 +16,13 @@ import { osType } from '../../utils/env';
 import { useConfig } from '../../hooks';
 import { store } from '../../utils/store';
 import { info } from 'tauri-plugin-log-api';
+import type { LogicalPosition, LogicalSize, PhysicalPosition, PhysicalSize } from '@tauri-apps/api/window';
+import type { DropResult } from 'react-beautiful-dnd';
+import type { PluginList, ServiceConfigMap } from '../../types/service';
 
-let blurTimeout = null;
-let resizeTimeout = null;
-let moveTimeout = null;
+let blurTimeout: ReturnType<typeof setTimeout> | null = null;
+let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
+let moveTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const listenBlur = () => {
     return listen('tauri://blur', () => {
@@ -78,21 +81,21 @@ export default function Translate() {
     ]);
     const [recognizeServiceInstanceList] = useConfig('recognize_service_list', ['system', 'tesseract']);
     const [ttsServiceInstanceList] = useConfig('tts_service_list', ['lingva_tts']);
-    const [collectionServiceInstanceList] = useConfig('collection_service_list', []);
+    const [collectionServiceInstanceList] = useConfig<string[]>('collection_service_list', []);
     const [hideLanguage] = useConfig('hide_language', false);
     const [pined, setPined] = useState(false);
-    const [pluginList, setPluginList] = useState(null);
-    const [serviceInstanceConfigMap, setServiceInstanceConfigMap] = useState(null);
-    const reorder = (list, startIndex, endIndex) => {
+    const [pluginList, setPluginList] = useState<PluginList | null>(null);
+    const [serviceInstanceConfigMap, setServiceInstanceConfigMap] = useState<ServiceConfigMap | null>(null);
+    const reorder = (list: string[], startIndex: number, endIndex: number) => {
         const result = Array.from(list);
         const [removed] = result.splice(startIndex, 1);
         result.splice(endIndex, 0, removed);
         return result;
     };
 
-    const onDragEnd = async (result) => {
+    const onDragEnd = async (result: DropResult) => {
         if (!result.destination) return;
-        const items = reorder(translateServiceInstanceList, result.source.index, result.destination.index);
+        const items = reorder(translateServiceInstanceList!, result.source.index, result.destination.index);
         setTranslateServiceInstanceList(items);
     };
     // 是否自动关闭窗口
@@ -118,11 +121,16 @@ export default function Translate() {
                 }
                 moveTimeout = setTimeout(async () => {
                     if (appWindow.label === 'translate') {
-                        let position = await appWindow.outerPosition();
+                        // Physical at first, logical after toLogical. A PhysicalPosition also fits LogicalPosition,
+                        // so TypeScript does not narrow the union and the call needs the cast.
+                        let position: PhysicalPosition | LogicalPosition = await appWindow.outerPosition();
                         const monitor = await currentMonitor();
+                        // @ts-expect-error known bug (known-issues.md): currentMonitor() can return null
                         const factor = monitor.scaleFactor;
-                        position = position.toLogical(factor);
+                        position = (position as PhysicalPosition).toLogical(factor);
+                        // @ts-expect-error parseInt takes a string, and x is a number, which it converts
                         await store.set('translate_window_position_x', parseInt(position.x));
+                        // @ts-expect-error parseInt takes a string, and y is a number, which it converts
                         await store.set('translate_window_position_y', parseInt(position.y));
                         await store.save();
                     }
@@ -144,11 +152,15 @@ export default function Translate() {
                 }
                 resizeTimeout = setTimeout(async () => {
                     if (appWindow.label === 'translate') {
-                        let size = await appWindow.outerSize();
+                        // Physical at first, then logical, as the position above.
+                        let size: PhysicalSize | LogicalSize = await appWindow.outerSize();
                         const monitor = await currentMonitor();
+                        // @ts-expect-error known bug (known-issues.md): currentMonitor() can return null
                         const factor = monitor.scaleFactor;
-                        size = size.toLogical(factor);
+                        size = (size as PhysicalSize).toLogical(factor);
+                        // @ts-expect-error parseInt takes a string, and height is a number, which it converts
                         await store.set('translate_window_height', parseInt(size.height));
+                        // @ts-expect-error parseInt takes a string, and width is a number, which it converts
                         await store.set('translate_window_width', parseInt(size.width));
                         await store.save();
                     }
@@ -164,7 +176,7 @@ export default function Translate() {
 
     const loadPluginList = async () => {
         const serviceTypeList = ['translate', 'tts', 'recognize', 'collection'];
-        let temp = {};
+        let temp: PluginList = {};
         for (const serviceType of serviceTypeList) {
             temp[serviceType] = {};
             if (await exists(`plugins/${serviceType}`, { dir: BaseDirectory.AppConfig })) {
@@ -182,7 +194,8 @@ export default function Translate() {
                         );
                         pluginInfo.icon = convertFileSrc(iconPath);
                     }
-                    temp[serviceType][plugin.name] = pluginInfo;
+                    // readDir lists children, and every child has a name.
+                    temp[serviceType][plugin.name!] = pluginInfo;
                 }
             }
         }
@@ -197,17 +210,18 @@ export default function Translate() {
     }, []);
 
     const loadServiceInstanceConfigMap = async () => {
-        const config = {};
-        for (const serviceInstanceKey of translateServiceInstanceList) {
+        // Runs only once all four lists have been read (the effect below checks), so none of them is null.
+        const config: ServiceConfigMap = {};
+        for (const serviceInstanceKey of translateServiceInstanceList!) {
             config[serviceInstanceKey] = (await store.get(serviceInstanceKey)) ?? {};
         }
-        for (const serviceInstanceKey of recognizeServiceInstanceList) {
+        for (const serviceInstanceKey of recognizeServiceInstanceList!) {
             config[serviceInstanceKey] = (await store.get(serviceInstanceKey)) ?? {};
         }
-        for (const serviceInstanceKey of ttsServiceInstanceList) {
+        for (const serviceInstanceKey of ttsServiceInstanceList!) {
             config[serviceInstanceKey] = (await store.get(serviceInstanceKey)) ?? {};
         }
-        for (const serviceInstanceKey of collectionServiceInstanceList) {
+        for (const serviceInstanceKey of collectionServiceInstanceList!) {
             config[serviceInstanceKey] = (await store.get(serviceInstanceKey)) ?? {};
         }
         setServiceInstanceConfigMap({ ...config });
