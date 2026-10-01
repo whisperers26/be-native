@@ -41,6 +41,19 @@ pub fn inside(x: i32, y: i32, width: i32, height: i32, bounds: Rect) -> (i32, i3
     )
 }
 
+// The rectangle part of the way from `from` to `to`: `from` at 0, `to` at 1. The way is fast at
+// first and slows down towards `to`.
+pub fn between(from: Rect, to: Rect, part: f64) -> Rect {
+    let eased = 1.0 - (1.0 - part.clamp(0.0, 1.0)).powi(3);
+    let mix = |a: i32, b: i32| a + ((b - a) as f64 * eased).round() as i32;
+    Rect {
+        x: mix(from.x, to.x),
+        y: mix(from.y, to.y),
+        width: mix(from.width, to.width),
+        height: mix(from.height, to.height),
+    }
+}
+
 // The top left corner for a window of `width` x `height` beside `anchor`, inside `bounds`.
 //
 // The window goes right of the anchor, else left, below or above it: the first side with room for
@@ -123,6 +136,21 @@ mod tests {
     #[test]
     fn a_window_past_the_edges_moves_back_inside() {
         assert_eq!(inside(1700, 900, 350, 420, SCREEN), (1570, 660));
+    }
+
+    #[test]
+    fn the_way_between_two_rectangles_starts_at_one_and_ends_at_the_other() {
+        let from = rect(100, 200, 420, 240);
+        let to = rect(40, 260, 660, 450);
+        assert_eq!(between(from, to, 0.0), from);
+        assert_eq!(between(from, to, 1.0), to);
+        assert_eq!(between(from, to, 7.0), to);
+    }
+
+    #[test]
+    fn the_way_between_two_rectangles_slows_down() {
+        let half = between(rect(0, 0, 400, 200), rect(0, 0, 800, 200), 0.5);
+        assert_eq!(half, rect(0, 0, 750, 200));
     }
 
     #[test]
