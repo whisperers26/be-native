@@ -1,17 +1,27 @@
 import { fetch, Body } from '@tauri-apps/api/http';
 import CryptoJS from 'crypto-js';
+import type { RecognizeOptions } from '../../../types/service';
 
-export async function recognize(base64, language, options = {}) {
+interface VolcengineMultiLangResponse {
+    data?: { ocr_infos: { text: string }[] };
+}
+
+export async function recognize(
+    base64: string,
+    language: string,
+    options: RecognizeOptions = {} as RecognizeOptions
+): Promise<string> {
     const { config } = options;
 
     const { appid, secret } = config;
 
     let text = await multi_lang_ocr(base64, appid, secret);
 
+    // @ts-expect-error known bug (known-issues.md): multi_lang_ocr returns undefined when the reply has no data
     return text.trim();
 }
 
-async function multi_lang_ocr(img_base64, appid, secret) {
+async function multi_lang_ocr(img_base64: string, appid: string, secret: string) {
     let res = await query(img_base64, 'MultiLanguageOCR', '2022-08-31', appid, secret);
     if (res.ok) {
         let result = res.data;
@@ -28,7 +38,7 @@ async function multi_lang_ocr(img_base64, appid, secret) {
     }
 }
 
-async function query(img_base64, action, serviceVersion, appid, secret) {
+async function query(img_base64: string, action: string, serviceVersion: string, appid: string, secret: string) {
     const schema = 'https';
     const host = 'visual.volcengineapi.com';
     const contentType = 'application/x-www-form-urlencoded';
@@ -79,7 +89,7 @@ async function query(img_base64, action, serviceVersion, appid, secret) {
     };
 
     // 签名
-    const signed_headers = {
+    const signed_headers: Record<string, string> = {
         // key is lower case and sorted
         'content-type': contentType,
         host: host,
@@ -131,7 +141,7 @@ async function query(img_base64, action, serviceVersion, appid, secret) {
 
     // 发送请求
     let url = schema + '://' + host + path + '?' + norm_query;
-    let res = await fetch(url, {
+    let res = await fetch<VolcengineMultiLangResponse>(url, {
         method: method,
         headers: headers,
         body: Body.text(body),
