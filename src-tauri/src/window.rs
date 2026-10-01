@@ -6,6 +6,7 @@ use crate::StringWrapper;
 use crate::APP;
 use dirs::cache_dir;
 use log::{info, warn};
+use mouse_position::mouse_position::{Mouse, Position};
 use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::Manager;
 use tauri::Monitor;
@@ -82,8 +83,6 @@ fn get_current_monitor(x: i32, y: i32) -> Monitor {
 // this to follow the cursor to another monitor, which it cannot see through its own mouse events.
 #[tauri::command(async)]
 pub fn cursor_position() -> Result<serde_json::Value, String> {
-    use mouse_position::mouse_position::Mouse;
-
     let Mouse::Position { x, y } = Mouse::get_mouse_position() else {
         return Err("Mouse position not found".to_string());
     };
@@ -92,17 +91,20 @@ pub fn cursor_position() -> Result<serde_json::Value, String> {
     Ok(serde_json::json!({ "x": x, "y": y, "monitor": { "x": origin.x, "y": origin.y } }))
 }
 
-// Creating a window on the mouse monitor
-fn build_window(label: &str, title: &str) -> (Window, bool) {
-    use mouse_position::mouse_position::{Mouse, Position};
-
-    let mouse_position = match Mouse::get_mouse_position() {
+// The physical position that decides where a new window goes: the mouse
+fn placement_point() -> Position {
+    match Mouse::get_mouse_position() {
         Mouse::Position { x, y } => Position { x, y },
         Mouse::Error => {
             warn!("Mouse position not found, using (0, 0) as default");
             Position { x: 0, y: 0 }
         }
-    };
+    }
+}
+
+// Creating a window on the mouse monitor
+fn build_window(label: &str, title: &str) -> (Window, bool) {
+    let mouse_position = placement_point();
     let current_monitor = get_current_monitor(mouse_position.x, mouse_position.y);
     let position = current_monitor.position();
 
@@ -158,15 +160,8 @@ pub fn config_window() {
 }
 
 fn translate_window() -> Window {
-    use mouse_position::mouse_position::{Mouse, Position};
     // Mouse physical position
-    let mut mouse_position = match Mouse::get_mouse_position() {
-        Mouse::Position { x, y } => Position { x, y },
-        Mouse::Error => {
-            warn!("Mouse position not found, using (0, 0) as default");
-            Position { x: 0, y: 0 }
-        }
-    };
+    let mut mouse_position = placement_point();
     let (window, exists) = build_window("translate", "Translate");
     if exists {
         return window;
