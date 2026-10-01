@@ -109,7 +109,8 @@ fn handle_ocr_copy(request: Request) {
 
 fn handle_writing(mut request: Request) {
     let mut content = String::new();
-    request.as_reader().read_to_string(&mut content).unwrap();
+    // A body that is not text improves nothing
+    let _ = request.as_reader().read_to_string(&mut content);
     text_writing(content);
     response_ok(request);
 }
