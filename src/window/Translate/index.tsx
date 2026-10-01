@@ -339,14 +339,18 @@ export default function Translate() {
             // as short as the box and scrolls, so the height of all of it is the height it scrolls over.
             const sourceText = content.querySelector<HTMLTextAreaElement>('textarea:not([readonly])');
             const sourceBox = sourceText?.parentElement;
-            if (content.offsetHeight === 0 || !sourceText || !sourceBox) return;
+            // A pixel more than it measures: `offsetHeight` rounds to the nearest pixel, and a content a fraction
+            // of a pixel taller than the room it gets brings a scrollbar, which takes width from the text. (The
+            // exact height, from `getBoundingClientRect`, is scaled while the window opens.)
+            const contentHeight = content.offsetHeight === 0 ? 0 : content.offsetHeight + 1;
+            if (contentHeight === 0 || !sourceText || !sourceBox) return;
             const sourceHeight = sourceText.scrollHeight + sourceBox.clientHeight - sourceText.offsetHeight;
             const size = fitSize(
                 {
                     // While the window waits, the size is that of the unseen layout.
                     width: waiting ? layoutRef.current.width : window.innerWidth,
                     // What lies above the scrolling part, and all of what scrolls, with all of the source text.
-                    height: scroll.offsetTop + content.offsetHeight - sourceBox.clientHeight + sourceHeight,
+                    height: scroll.offsetTop + contentHeight - sourceBox.clientHeight + sourceHeight,
                     textHeights: textAreas.map((textArea) =>
                         textArea === sourceText ? textArea.scrollHeight : textArea.offsetHeight
                     ),

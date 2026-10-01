@@ -130,7 +130,8 @@ describe('Translate window', () => {
             await vi.waitFor(() =>
                 expect(fakeTauri.calls.find((call) => call.cmd === 'fit_translate_window')?.args).toEqual({
                     width: 420,
-                    height: 535,
+                    // 35 px above the content, its 500 px, and a pixel to spare
+                    height: 536,
                     glide: true,
                 })
             );
