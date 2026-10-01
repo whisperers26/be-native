@@ -133,6 +133,8 @@ fn main() {
                 clipboard_monitor.to_string(),
             )));
             start_clipboard_monitor(app.handle());
+            // Start the sessions that wait for a Claude Code or Codex translation
+            agent_cli::sync();
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -163,9 +165,9 @@ fn main() {
         .build(context)
         .expect("error while running tauri application")
         // 窗口关闭不退出
-        .run(|_app_handle, event| {
-            if let tauri::RunEvent::ExitRequested { api, .. } = event {
-                api.prevent_exit();
-            }
+        .run(|_app_handle, event| match event {
+            tauri::RunEvent::ExitRequested { api, .. } => api.prevent_exit(),
+            tauri::RunEvent::Exit => agent_cli::shutdown(),
+            _ => {}
         });
 }
