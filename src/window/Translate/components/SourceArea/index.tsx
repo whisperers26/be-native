@@ -18,6 +18,7 @@ import { useConfig, useSyncAtom, useVoice, useToastStyle } from '../../../../hoo
 import { invoke_plugin } from '../../../../utils/invoke_plugin';
 import * as recognizeServices from '../../../../services/recognize';
 import * as builtinTtsServices from '../../../../services/tts';
+import { mergeLines } from '../../../../utils/merge_lines';
 import detect from '../../../../utils/lang_detect';
 import { store } from '../../../../utils/store';
 import { focusWindow, showWindow } from '../../../../utils/window';
@@ -103,7 +104,7 @@ export default function SourceArea(props: SourceAreaProps) {
                         (v: any) => {
                             let newText = v.trim();
                             if (deleteNewline) {
-                                newText = v.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+                                newText = mergeLines(v);
                             } else {
                                 newText = v.trim();
                             }
@@ -146,7 +147,7 @@ export default function SourceArea(props: SourceAreaProps) {
                             (v) => {
                                 let newText = v!.trim();
                                 if (deleteNewline) {
-                                    newText = v!.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+                                    newText = mergeLines(v!);
                                 } else {
                                     newText = v!.trim();
                                 }
@@ -173,7 +174,7 @@ export default function SourceArea(props: SourceAreaProps) {
             setWindowType('[SELECTION_TRANSLATE]');
             let newText = text.trim();
             if (deleteNewline) {
-                newText = text.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+                newText = mergeLines(text);
             } else {
                 newText = text.trim();
             }
@@ -455,7 +456,7 @@ export default function SourceArea(props: SourceAreaProps) {
                                     variant='light'
                                     size='sm'
                                     onPress={() => {
-                                        const newText = sourceText.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+                                        const newText = mergeLines(sourceText);
                                         setSourceText(newText);
                                         detect_language(newText).then(() => {
                                             syncSourceText();
