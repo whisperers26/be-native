@@ -36,10 +36,11 @@ frontend in `src/`.
 | `pnpm install` | Install frontend dependencies |
 | `pnpm tauri dev` | Run the app: Vite on port 1420 plus a Rust debug build |
 | `pnpm build` | Build the frontend into `dist/` |
+| `pnpm test` | Run the unit and component tests (Vitest) |
 | `pnpm check:docs` | Check doc links, README fork sections, and this index |
 
-Before opening a PR, run `pnpm check:docs` and `pnpm build`; CI runs the same
-checks on every PR.
+Before opening a PR, run `pnpm check:docs`, `pnpm test` and `pnpm build`; CI
+runs the same checks on every PR.
 
 ## Wiki
 
@@ -51,6 +52,7 @@ checks on every PR.
 | [frontend.md](docs/agents/frontend.md) | Changing windows, pages, hooks, state, i18n or styling |
 | [backend.md](docs/agents/backend.md) | Changing Rust: commands, windows, tray, hotkeys, HTTP API, OCR, backup |
 | [services.md](docs/agents/services.md) | Adding or changing a translate, OCR, TTS or collection service, or plugins |
+| [testing.md](docs/agents/testing.md) | Writing or running tests, or a test failed |
 | [config-keys.md](docs/agents/config-keys.md) | Reading, adding or changing a setting |
 | [known-issues.md](docs/agents/known-issues.md) | Seeing odd behaviour, or about to fix a bug |
 | [ci.md](docs/agents/ci.md) | Changing CI, or a check failed on your PR |
