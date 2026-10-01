@@ -6,12 +6,22 @@ use crate::StringWrapper;
 use crate::APP;
 use dirs::cache_dir;
 use log::{info, warn};
+use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::Manager;
 use tauri::Monitor;
 use tauri::Window;
 use tauri::WindowBuilder;
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 use window_shadows::set_shadow;
+
+// Test mode lets the app be tested in the background: windows open on the secondary monitor and
+// never take the focus. The HTTP API switches it, in debug builds only.
+static TEST_MODE: AtomicBool = AtomicBool::new(false);
+
+pub fn set_test_mode(on: bool) {
+    info!("Test mode: {}", on);
+    TEST_MODE.store(on, Ordering::Relaxed);
+}
 
 // Get daemon window instance
 fn get_daemon_window() -> Window {

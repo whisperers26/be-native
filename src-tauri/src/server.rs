@@ -48,6 +48,9 @@ fn http_handle(request: Request) {
         "/ocr_copy" => handle_ocr_copy(request),
         "/ocr_copy?screenshot=false" => handle_ocr_copy(request),
         "/ocr_copy?screenshot=true" => handle_ocr_copy(request),
+        "/test_mode?on=true" | "/test_mode?on=false" if cfg!(debug_assertions) => {
+            handle_test_mode(request)
+        }
         _ => warn!("Unknown request url: {}", request.url()),
     }
 }
@@ -98,6 +101,11 @@ fn handle_ocr_copy(request: Request) {
     } else {
         ocr_copy();
     }
+    response_ok(request);
+}
+
+fn handle_test_mode(request: Request) {
+    set_test_mode(request.url().ends_with("true"));
     response_ok(request);
 }
 
