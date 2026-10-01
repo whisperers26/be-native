@@ -37,12 +37,15 @@ export default function ResultCard(props: ResultCardProps) {
     const [isLoading, setIsLoading] = useState(false);
     // Counts the requests made: an answer to an older one, or to a box that is gone, is dropped.
     const run = useRef(0);
+    const abort = useRef<AbortController | null>(null);
 
     const serviceName = getServiceName(spec.service);
     const service = (builtinServices as WritingServices)[serviceName];
 
     const ask = () => {
         const id = ++run.current;
+        abort.current?.abort();
+        abort.current = new AbortController();
         setResult('');
         setError('');
         if (!service) {
@@ -56,6 +59,7 @@ export default function ResultCard(props: ResultCardProps) {
                 config,
                 style: spec.style,
                 request: spec.request,
+                signal: abort.current.signal,
                 setResult: (partial) => {
                     if (run.current === id) setResult(partial);
                 },
@@ -82,6 +86,7 @@ export default function ResultCard(props: ResultCardProps) {
         ask();
         return () => {
             run.current = -1;
+            abort.current?.abort();
             onBusy(spec.id, false);
         };
     }, []);

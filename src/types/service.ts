@@ -45,6 +45,8 @@ export interface WritingOptions {
     /** The user's own extra request. */
     request?: string;
     setResult?: (partial: string) => void;
+    /** Aborted when the rewrite is no longer wanted. A service that makes its requests wait their turn checks it. */
+    signal?: AbortSignal;
 }
 
 export interface ServiceConfigProps {
