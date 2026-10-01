@@ -300,9 +300,17 @@ export default function SourceArea(props: SourceAreaProps) {
             textAreaRef.current.style.height = textAreaRef.current.scrollHeight + 'px';
         };
         fit();
-        // The text wraps differently when the window's width changes.
-        window.addEventListener('resize', fit);
-        return () => window.removeEventListener('resize', fit);
+        // The text wraps differently when the box gets another width, with the window or while the window's
+        // content is laid out unseen.
+        let width = textAreaRef.current.offsetWidth;
+        const observer = new ResizeObserver(() => {
+            if (textAreaRef.current !== null && textAreaRef.current.offsetWidth !== width) {
+                width = textAreaRef.current.offsetWidth;
+                fit();
+            }
+        });
+        observer.observe(textAreaRef.current);
+        return () => observer.disconnect();
     }, [sourceText]);
 
     const detect_language = async (text: string) => {
