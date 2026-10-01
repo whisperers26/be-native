@@ -3,8 +3,8 @@ import { osType } from '../../../utils/env';
 import { invoke } from '@tauri-apps/api';
 import { Language } from './info';
 
-export async function recognize(_, lang) {
-    const linuxLangMap = {
+export async function recognize(_: string, lang: string): Promise<string | undefined> {
+    const linuxLangMap: Record<string, string> = {
         auto: 'auto',
         zh_cn: 'chi_sim',
         zh_tw: 'chi_tra',
@@ -29,7 +29,7 @@ export async function recognize(_, lang) {
         uk: 'ukr',
         he: 'heb',
     };
-    const windowsLangMap = {
+    const windowsLangMap: Record<string, string> = {
         auto: 'auto',
         zh_cn: 'zh-CN',
         zh_tw: 'zh-TW',
@@ -54,7 +54,7 @@ export async function recognize(_, lang) {
         uk: 'uk-UA',
         he: 'he-IL',
     };
-    const macOSLangMap = {
+    const macOSLangMap: Record<string, string> = {
         auto: 'auto',
         zh_cn: 'zh-Hans',
         zh_tw: 'zh-Hant',
