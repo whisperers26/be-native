@@ -81,6 +81,8 @@ Results go to `test-results/smoke/<time>/` (gitignored): `report.json` and one P
 
 The baseline from the JavaScript code is kept at `test-results/smoke/baseline-js/` on the owner's machine. After a refactor, run the smoke test again and compare the screenshots with it: layout, labels and the shown image must match; live translation results may differ.
 
+Leave the computer alone while the smoke test runs. The Translate window closes itself when it loses focus (`translate_close_on_blur`, on by default), so a click elsewhere can fail the `translate` or `input` scenario with "window … has no area"; the app's log then shows `Blur` and `Confirm Blur`. Run it again.
+
 ## Render tests
 
 Every window (`src/window/<Name>/index.test.tsx`), every settings page (`src/window/Config/pages/<Page>/index.test.tsx`) and `src/App.test.tsx` has a render test:
