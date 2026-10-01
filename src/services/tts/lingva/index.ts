@@ -1,6 +1,15 @@
 import { fetch } from '@tauri-apps/api/http';
+import type { TtsOptions } from '../../../types/service';
 
-export async function tts(text, lang, options = {}) {
+interface LingvaAudioResponse {
+    audio?: number[];
+}
+
+export async function tts(
+    text: string,
+    lang: string,
+    options: TtsOptions = {} as TtsOptions
+): Promise<number[] | undefined> {
     const { config } = options;
 
     let { requestPath = 'lingva.pot-app.com' } = config;
@@ -12,7 +21,7 @@ export async function tts(text, lang, options = {}) {
     if (!requestPath.startsWith('http')) {
         requestPath = 'https://' + requestPath;
     }
-    const res = await fetch(`${requestPath}/api/v1/audio/${lang}/${encodeURIComponent(text)}`);
+    const res = await fetch<LingvaAudioResponse>(`${requestPath}/api/v1/audio/${lang}/${encodeURIComponent(text)}`);
 
     if (res.ok) {
         return res.data['audio'];
