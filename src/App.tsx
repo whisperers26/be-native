@@ -6,6 +6,7 @@ import React, { useEffect } from 'react';
 import { useTheme } from 'next-themes';
 
 import { invoke } from '@tauri-apps/api/tauri';
+import SilentRecognize from './window/SilentRecognize';
 import Screenshot from './window/Screenshot';
 import Translate from './window/Translate';
 import Recognize from './window/Recognize';
@@ -21,6 +22,7 @@ const windowMap: Record<string, React.JSX.Element> = {
     translate: <Translate />,
     screenshot: <Screenshot />,
     recognize: <Recognize />,
+    silent_recognize: <SilentRecognize />,
     config: <Config />,
     updater: <Updater />,
 };
