@@ -15,7 +15,7 @@
 <!-- fork:start -->
 
 > [!NOTE]
-> **Be Native**는 Pot의 개인 포크입니다. 업스트림 저장소 [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop)은 보관(archived)되었으며, 개발은 [whisperers26/be-native](https://github.com/whisperers26/be-native)에서 계속됩니다. 이 포크는 릴리스를 배포하지 않으므로, 아래 설치 안내는 업스트림 Pot을 설치합니다.
+> **Be Native**는 Pot의 개인 포크입니다. 업스트림 저장소 [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop)은 보관(archived)되었으며, 개발은 [whisperers26/be-native](https://github.com/whisperers26/be-native)에서 계속됩니다. 설치 파일은 이 포크의 [Releases](https://github.com/whisperers26/be-native/releases) 페이지에 배포되며 앱 내 업데이트도 이를 읽습니다. 아래 설치 안내는 업스트림 Pot용입니다.
 >
 > 이 포크의 변경 사항:
 >
@@ -25,6 +25,7 @@
 > - 자동화 테스트(Vitest)가 프런트엔드 동작을 고정합니다: `pnpm test`.
 > - 실제 앱 스모크 테스트(`pnpm smoke`, Windows)가 로컬 HTTP API로 앱의 창을 검사합니다.
 > - 프런트엔드는 strict 모드의 TypeScript이며, CI는 `src/` 아래의 JavaScript 파일을 거부합니다.
+> - `v*` 태그를 푸시하면 서명된 설치 파일을 빌드해 GitHub 릴리스로 배포하며, 앱 내 업데이트는 업스트림 피드 대신 최신 릴리스를 읽습니다.
 
 <!-- fork:end -->
 
