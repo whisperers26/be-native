@@ -1,6 +1,12 @@
 import { fetch } from '@tauri-apps/api/http';
+import type { DictionaryResult, TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     const { config } = options;
 
     let { custom_url } = config;
@@ -12,7 +18,8 @@ export async function translate(text, from, to, options = {}) {
         custom_url = 'https://' + custom_url;
     }
 
-    let res = await fetch(
+    // The reply is a nested array whose entries are found by position, so its shape is left open.
+    let res = await fetch<any[]>(
         `${custom_url}/translate_a/single?dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t`,
         {
             method: 'GET',
@@ -36,7 +43,7 @@ export async function translate(text, from, to, options = {}) {
         let result = res.data;
         // 词典模式
         if (result[1]) {
-            let target = { pronunciations: [], explanations: [], associations: [], sentence: [] };
+            let target: DictionaryResult = { pronunciations: [], explanations: [], associations: [], sentence: [] };
             // 发音
             if (result[0][1][3]) {
                 target.pronunciations.push({ symbol: result[0][1][3], voice: '' });
@@ -45,7 +52,7 @@ export async function translate(text, from, to, options = {}) {
             for (let i of result[1]) {
                 target.explanations.push({
                     trait: i[0],
-                    explains: i[2].map((x) => {
+                    explains: i[2].map((x: any[]) => {
                         return x[0];
                     }),
                 });
