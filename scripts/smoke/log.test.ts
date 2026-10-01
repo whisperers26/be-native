@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { classifyLogLines } from './log';
 
-// pot.log lines look like "[date][time][LEVEL][target] message" (tauri-plugin-log).
+// The app's log lines look like "[date][time][LEVEL][target] message" (tauri-plugin-log).
 const logged = (level: string, message: string) => `[2026-10-01][01:45:28][${level}][webview::unknown] ${message}`;
 
 describe('classifyLogLines', () => {
