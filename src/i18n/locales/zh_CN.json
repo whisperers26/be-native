@@ -190,6 +190,19 @@
                 "check_update": "检查更新",
                 "view_log": "查看日志",
                 "view_config": "查看配置文件"
+            },
+            "writing": {
+                "label": "写作",
+                "title": "写作润色设置",
+                "tones": "语气",
+                "tones_description": "写作窗口的“语气”按钮会按下面每一种语气各改写一次。“指令”是发给服务的说明。",
+                "tone_name": "名称",
+                "tone_instruction": "指令",
+                "add_tone": "添加语气",
+                "remove_tone": "删除",
+                "reset_tones": "恢复默认",
+                "window_animation": "窗口动画",
+                "close_on_blur": "失去焦点时关闭窗口"
             }
         },
         "updater": {

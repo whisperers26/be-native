@@ -190,6 +190,19 @@
                 "check_update": "Check Update",
                 "view_log": "View Log",
                 "view_config": "View Config"
+            },
+            "writing": {
+                "label": "Writing",
+                "title": "Writing Settings",
+                "tones": "Tones",
+                "tones_description": "The Tones button of the writing window asks for one rewrite in each of these. The instruction is what the service is told.",
+                "tone_name": "Name",
+                "tone_instruction": "Instruction",
+                "add_tone": "Add Tone",
+                "remove_tone": "Remove",
+                "reset_tones": "Reset to Defaults",
+                "window_animation": "Window Animations",
+                "close_on_blur": "Close window when focus lost"
             }
         },
         "updater": {
