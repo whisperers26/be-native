@@ -38,6 +38,15 @@ export interface CollectionOptions {
     config: ServiceConfig;
 }
 
+export interface WritingOptions {
+    config: ServiceConfig;
+    /** How the result should read: a tone's instruction. */
+    style?: string;
+    /** The user's own extra request. */
+    request?: string;
+    setResult?: (partial: string) => void;
+}
+
 export interface ServiceConfigProps {
     name?: string;
     instanceKey: string;
@@ -78,6 +87,11 @@ export type TtsService = ServiceModule<{
 // Collection services have no Language.
 export type CollectionService = ServiceModule<{
     collection: (source: string, target: TranslateResult, options: CollectionOptions) => Promise<unknown>;
+}>;
+
+// Writing services have no Language: the rewrite stays in the language of the text.
+export type WritingService = ServiceModule<{
+    improve: (text: string, options: WritingOptions) => Promise<string>;
 }>;
 
 /** What the Translate window reads from a plugin's info.json (docs/agents/services.md). */
