@@ -421,7 +421,6 @@
             },
             "about": {
                 "title": "À propos de l'application",
-                "website": "Site Web",
                 "check_update": "Vérifier les mises à jour",
                 "feedback": "Commentaires",
                 "label": "À propos",

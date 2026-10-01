@@ -421,7 +421,6 @@
             },
             "about": {
                 "title": "Sobre a Aplicação",
-                "website": "Website",
                 "check_update": "Procurar Atualização",
                 "feedback": "Realimentação",
                 "label": "Sobre",

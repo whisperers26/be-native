@@ -246,7 +246,6 @@
             "about": {
                 "label": "정보",
                 "title": "애플리케이션 정보",
-                "website": "웹사이트",
                 "github": "GitHub",
                 "feedback": "피드백",
                 "check_update": "업데이트 확인",

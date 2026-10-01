@@ -203,7 +203,6 @@
             "about": {
                 "label": "About",
                 "title": "About Application",
-                "website": "Website",
                 "github": "GitHub",
                 "feedback": "Feedback",
                 "check_update": "Check Update",

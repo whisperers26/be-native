@@ -383,7 +383,6 @@
             },
             "about": {
                 "title": "Informazioni sull'applicazione",
-                "website": "Sito web",
                 "check_update": "Controlla aggiornamento",
                 "feedback": "Feedback",
                 "label": "Informazioni",
