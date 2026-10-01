@@ -54,3 +54,28 @@ export type ServiceConfigComponent = ComponentType<ServiceConfigProps>;
  * `Language` for every kind but collection. Each registry checks its modules against it with `satisfies`.
  */
 export type ServiceModule<Members> = { info: ServiceInfo; Config: ServiceConfigComponent } & Members;
+
+/*
+ * What every module in each registry provides (docs/agents/services.md). A registry checks its modules against its
+ * contract with `satisfies`; a window that looks a service up by a name known only at run time casts the registry to
+ * `Record<string, <Kind>Service>`.
+ */
+export type TranslateService = ServiceModule<{
+    Language: Record<string, string>;
+    translate: (text: string, from: string, to: string, options: TranslateOptions) => Promise<TranslateResult>;
+}>;
+
+export type RecognizeService = ServiceModule<{
+    Language: Record<string, string>;
+    recognize: (base64: string, language: string, options: RecognizeOptions) => Promise<string | undefined>;
+}>;
+
+export type TtsService = ServiceModule<{
+    Language: Record<string, string>;
+    tts: (text: string, lang: string, options: TtsOptions) => Promise<number[] | undefined>;
+}>;
+
+// Collection services have no Language.
+export type CollectionService = ServiceModule<{
+    collection: (source: string, target: TranslateResult, options: CollectionOptions) => Promise<unknown>;
+}>;
