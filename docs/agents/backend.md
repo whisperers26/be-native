@@ -60,6 +60,8 @@ To add a command, write a `#[tauri::command]` function in the module it belongs 
 
 `build_window(label, title)` creates a hidden, frameless, transparent window (on macOS, with an overlay title bar) that loads `index.html` on the monitor under the mouse, or focuses the window if it already exists. The frontend shows the window when it is ready. Sizes: Config 800×600; Translate from `translate_window_width` and `translate_window_height` (350×420), at the cursor or at a saved position; Recognize from `recognize_window_width` and `recognize_window_height` (800×400); Updater 600×400; Screenshot full screen.
 
+On Windows the Screenshot window is subclassed (`suppress_title_bar`) so that the system never paints its non-client area. Without that, activating the window paints an old-style title bar across the top of the screen, which shows whenever the WebView has not drawn over it yet.
+
 ## Events
 
 | Event | Direction | Payload |
