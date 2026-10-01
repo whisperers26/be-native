@@ -20,11 +20,10 @@ export const WAITING_SIZE = 88;
 
 /**
  * `waiting`: the indicator alone. `opening`: the window is on its way to its size. `shown`: the window as it always
- * was. Rust opens a window that has nothing to wait for (the input window) at its size already.
+ * was. Rust opens a window that has nothing to wait for (the input window) at its size already, and the window
+ * asks Rust which it is (`translate_window_waiting`) when it starts.
  */
-export const stageAtom = atom<'waiting' | 'opening' | 'shown'>(
-    window.innerWidth <= WAITING_SIZE * 2 ? 'waiting' : 'shown'
-);
+export const stageAtom = atom<'waiting' | 'opening' | 'shown'>('waiting');
 
 /** Whether the window has everything it waits for before it opens. */
 export function isReady(

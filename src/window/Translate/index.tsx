@@ -9,12 +9,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { BsPinFill } from 'react-icons/bs';
 import { invoke } from '@tauri-apps/api';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
 import LanguageArea from './components/LanguageArea';
 import SourceArea, { sourceHeightAtom, sourceTextAtom } from './components/SourceArea';
 import TargetArea from './components/TargetArea';
-import { fitSize, limitsFor } from './auto_size';
+import Progress from './components/Progress';
+import { fitSize, limitsFor, MIN_WIDTH } from './auto_size';
+import { cardProgressAtom, isReady, servicesInProgress, sourceBusyAtom, stageAtom } from './progress';
+import * as builtinTranslateServices from '../../services/translate';
+import * as builtinRecognizeServices from '../../services/recognize';
+import { getServiceName, whetherPluginService } from '../../utils/service_instance';
 import { osType } from '../../utils/env';
 import { useConfig } from '../../hooks';
 import { store } from '../../utils/store';
@@ -22,7 +27,8 @@ import { isTestMode } from '../../utils/window';
 import { info } from 'tauri-plugin-log-api';
 import type { LogicalPosition, PhysicalPosition } from '@tauri-apps/api/window';
 import type { DropResult } from 'react-beautiful-dnd';
-import type { PluginList, ServiceConfigMap } from '../../types/service';
+import type { PluginList, RecognizeService, ServiceConfigMap, TranslateService } from '../../types/service';
+import type { Size } from './auto_size';
 
 let blurTimeout: ReturnType<typeof setTimeout> | null = null;
 let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -71,6 +77,8 @@ void listen('tauri://move', () => {
 });
 
 const TEST_MODE_SERVICE_LIST = ['google'];
+// How long the window takes to open from its progress indicator: a little longer than Rust takes to resize it.
+const OPENING = 260;
 
 export default function Translate() {
     const [closeOnBlur] = useConfig('translate_close_on_blur', true);
@@ -90,6 +98,15 @@ export default function Translate() {
     const [collectionServiceInstanceList] = useConfig<string[]>('collection_service_list', []);
     const [hideLanguage] = useConfig('hide_language', false);
     const [pined, setPined] = useState(false);
+    const [stage, setStage] = useAtom(stageAtom);
+    // Rust says whether it opened the window to wait in or at its size (the input window).
+    useEffect(() => {
+        void invoke<boolean>('translate_window_waiting').then((waiting) => {
+            if (!waiting) {
+                setStage('shown');
+            }
+        });
+    }, []);
     const [testMode, setTestMode] = useState<boolean | null>(null);
     // In test mode only Google translates: it is free, and the owner's services may be paid for.
     const translateServiceInstanceList =
@@ -97,7 +114,6 @@ export default function Translate() {
     useEffect(() => {
         void isTestMode().then(setTestMode);
     }, []);
-    const [serviceInstanceConfigMap, setServiceInstanceConfigMap] = useState<ServiceConfigMap | null>(null);
     const reorder = (list: string[], startIndex: number, endIndex: number) => {
         const result = Array.from(list);
         const [removed] = result.splice(startIndex, 1);
@@ -158,7 +174,8 @@ export default function Translate() {
     }, [windowPosition, testMode]);
     // 保存窗口大小
     useEffect(() => {
-        if (testMode === false && rememberWindowSize !== null && rememberWindowSize) {
+        // Not before the window has opened from its progress indicator: that is not the user resizing it.
+        if (testMode === false && stage === 'shown' && rememberWindowSize !== null && rememberWindowSize) {
             const unlistenResize = listen('tauri://resize', async () => {
                 if (resizeTimeout) {
                     clearTimeout(resizeTimeout);
@@ -181,9 +198,10 @@ export default function Translate() {
                 });
             };
         }
-    }, [rememberWindowSize, testMode]);
+    }, [rememberWindowSize, testMode, stage]);
 
     const [pluginList, setPluginList] = useState<PluginList | null>(null);
+    const [serviceInstanceConfigMap, setServiceInstanceConfigMap] = useState<ServiceConfigMap | null>(null);
     const sourceText = useAtomValue(sourceTextAtom);
     // The part of the window that scrolls, and all of what it shows.
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -192,11 +210,61 @@ export default function Translate() {
     // Whether the next fit works the width out anew, which it does for new source text, and how to ask for a fit.
     const fitAnew = useRef(true);
     const requestFit = useRef<(() => void) | null>(null);
+
+    // Until the window opens it is a progress indicator, and what it will show is laid out unseen at this size,
+    // which becomes the size it opens to.
+    const [layout, setLayout] = useState<Size>({ width: MIN_WIDTH, height: 240 });
+    const layoutRef = useRef(layout);
+    const sourceBusy = useAtomValue(sourceBusyAtom);
+    const cards = useAtomValue(cardProgressAtom);
+    const [pressed, setPressed] = useState(false);
+    const cardCount =
+        translateServiceInstanceList !== null && serviceInstanceConfigMap !== null
+            ? translateServiceInstanceList.filter((key) => (serviceInstanceConfigMap[key] ?? {})['enable'] ?? true)
+                  .length
+            : null;
+    // Pressing the indicator opens the window with whatever it has.
+    const ready = pressed || isReady(sourceBusy, sourceText, cards, cardCount);
+    const readyRef = useRef(ready);
+    readyRef.current = ready;
+    const opened = useRef(false);
+    const open = (size: Size) => {
+        if (opened.current) return;
+        opened.current = true;
+        setStage('opening');
+        void invoke('fit_translate_window', { width: size.width, height: size.height });
+        setTimeout(() => setStage('shown'), OPENING);
+    };
+    // A remembered size is the size the window opens to.
+    useEffect(() => {
+        if (stage !== 'waiting' || rememberWindowSize !== true) return;
+        void (async () => {
+            const size = {
+                width: (await store.get<number>('translate_window_width')) ?? 350,
+                height: (await store.get<number>('translate_window_height')) ?? 420,
+            };
+            layoutRef.current = size;
+            setLayout(size);
+            if (readyRef.current) {
+                open(size);
+            }
+        })();
+    }, [rememberWindowSize]);
+    useEffect(() => {
+        if (stage !== 'waiting' || !ready) return;
+        if (rememberWindowSize === true) {
+            open(layoutRef.current);
+        } else {
+            requestFit.current?.();
+        }
+    }, [ready]);
+
     // A size that is not remembered follows what the window shows.
     useEffect(() => {
         const scroll = scrollRef.current;
         const content = contentRef.current;
-        if (rememberWindowSize !== false || scroll === null || content === null) return;
+        if (rememberWindowSize !== false || stage === 'opening' || scroll === null || content === null) return;
+        const waiting = stage === 'waiting';
         let fitTimeout: ReturnType<typeof setTimeout> | null = null;
         // The size last asked for. Rust takes a moment to get the window there, and what the window measures of
         // itself on the way says nothing about where it should end up.
@@ -221,14 +289,10 @@ export default function Translate() {
             const sourceHeight = sourceText.scrollHeight + sourceBox.clientHeight - sourceText.offsetHeight;
             const size = fitSize(
                 {
-                    width: window.innerWidth,
-                    // What surrounds the scrolling part, and all of what scrolls, with all of the source text.
-                    height:
-                        window.innerHeight -
-                        scroll.clientHeight +
-                        content.offsetHeight -
-                        sourceBox.clientHeight +
-                        sourceHeight,
+                    // While the window waits, the size is that of the unseen layout.
+                    width: waiting ? layoutRef.current.width : window.innerWidth,
+                    // What lies above the scrolling part, and all of what scrolls, with all of the source text.
+                    height: scroll.offsetTop + content.offsetHeight - sourceBox.clientHeight + sourceHeight,
                     textHeights: textAreas.map((textArea) =>
                         textArea === sourceText ? textArea.scrollHeight : textArea.offsetHeight
                     ),
@@ -242,7 +306,19 @@ export default function Translate() {
             if (size.sourceHeight !== undefined) {
                 setSourceHeight(size.sourceHeight);
             }
-            if (size.width !== window.innerWidth || size.height !== window.innerHeight) {
+            if (waiting) {
+                if (size.width !== layoutRef.current.width || size.height !== layoutRef.current.height) {
+                    layoutRef.current = { width: size.width, height: size.height };
+                    setLayout(layoutRef.current);
+                    // Measure again at the new size, until it stays.
+                    fitTimeout = setTimeout(fit, 30);
+                } else if (readyRef.current) {
+                    open(layoutRef.current);
+                }
+                return;
+            }
+            // A height that is not a whole number of physical pixels comes back a pixel off.
+            if (size.width !== window.innerWidth || Math.abs(size.height - window.innerHeight) > 1) {
                 asked = { width: size.width, height: size.height, at: performance.now() };
                 void invoke('fit_translate_window', { width: size.width, height: size.height });
                 // Measure again once the window is there: at a new width the text has wrapped differently.
@@ -266,13 +342,37 @@ export default function Translate() {
                 clearTimeout(fitTimeout);
             }
         };
-    }, [rememberWindowSize, pluginList !== null]);
+    }, [rememberWindowSize, pluginList !== null, stage]);
     // The width only grows while the text stays the same, so that the window does not go back and forth between
     // two widths. New text gets a new width.
     useEffect(() => {
         fitAnew.current = true;
         requestFit.current?.();
     }, [sourceText]);
+
+    // The icons for the progress indicator: the service recognizing the image, or the services translating.
+    const progressIcons = (): string[] => {
+        if (pluginList === null) return [];
+        const icon = (kind: 'translate' | 'recognize', key: string): string | undefined => {
+            const name = getServiceName(key);
+            if (whetherPluginService(key)) return pluginList[kind][name]?.icon;
+            const builtin =
+                kind === 'translate'
+                    ? (builtinTranslateServices as Record<string, TranslateService>)[name]
+                    : (builtinRecognizeServices as Record<string, RecognizeService>)[name];
+            return builtin?.info.icon === 'system' ? `logo/${osType}.svg` : builtin?.info.icon;
+        };
+        let icons: (string | undefined)[];
+        if (sourceBusy === 'image' && recognizeServiceInstanceList !== null) {
+            icons = [icon('recognize', recognizeServiceInstanceList[0])];
+        } else {
+            const services = servicesInProgress(cards);
+            icons = (services.length > 0 ? services : (translateServiceInstanceList ?? []).slice(0, 1)).map((key) =>
+                icon('translate', key)
+            );
+        }
+        return icons.filter((src): src is string => src !== undefined);
+    };
 
     const loadPluginList = async () => {
         const serviceTypeList = ['translate', 'tts', 'recognize', 'collection'];
@@ -344,123 +444,156 @@ export default function Translate() {
 
     return (
         pluginList && (
-            <div
-                className={`bg-background h-screen w-screen ${
-                    osType === 'Linux' && 'rounded-[10px] border-1 border-default-100'
-                }`}
-            >
+            <>
+                {stage !== 'shown' && (
+                    <Progress
+                        icons={progressIcons()}
+                        leaving={stage === 'opening'}
+                        onPress={() => setPressed(true)}
+                    />
+                )}
                 <div
-                    className='fixed top-[5px] left-[5px] right-[5px] h-[30px]'
-                    data-tauri-drag-region='true'
-                />
-                <div className={`h-[35px] w-full flex ${osType === 'Darwin' ? 'justify-end' : 'justify-between'}`}>
-                    <Button
-                        isIconOnly
-                        size='sm'
-                        variant='flat'
-                        disableAnimation
-                        className='my-auto bg-transparent'
-                        onPress={() => {
-                            if (pined) {
-                                if (closeOnBlur) {
-                                    unlisten = listenBlur();
-                                }
-                                appWindow.setAlwaysOnTop(false);
-                            } else {
-                                unlistenBlur();
-                                appWindow.setAlwaysOnTop(true);
-                            }
-                            setPined(!pined);
-                        }}
-                    >
-                        <BsPinFill className={`text-[20px] ${pined ? 'text-primary' : 'text-default-400'}`} />
-                    </Button>
-                    <Button
-                        isIconOnly
-                        size='sm'
-                        variant='flat'
-                        disableAnimation
-                        className={`my-auto ${osType === 'Darwin' && 'hidden'} bg-transparent`}
-                        onPress={() => {
-                            void appWindow.close();
-                        }}
-                    >
-                        <AiFillCloseCircle className='text-[20px] text-default-400' />
-                    </Button>
-                </div>
-                <div className={`${osType === 'Linux' ? 'h-[calc(100vh-37px)]' : 'h-[calc(100vh-35px)]'} px-[8px]`}>
+                    className={`bg-background ${stage === 'shown' && 'h-screen w-screen'} ${
+                        osType === 'Linux' && 'rounded-[10px] border-1 border-default-100'
+                    }`}
+                    // Until the window has opened, its content keeps the size it will open to, unseen at first and
+                    // then uncovered as the window grows over it.
+                    style={
+                        stage === 'shown'
+                            ? undefined
+                            : {
+                                  position: 'fixed',
+                                  top: 0,
+                                  left: 0,
+                                  width: layout.width,
+                                  height: layout.height,
+                                  overflow: 'hidden',
+                                  visibility: stage === 'waiting' ? 'hidden' : 'visible',
+                                  opacity: stage === 'waiting' ? 0 : 1,
+                                  transition: 'opacity 200ms ease-out',
+                              }
+                    }
+                >
                     <div
-                        ref={scrollRef}
-                        className='h-full overflow-y-auto'
+                        className='fixed top-[5px] left-[5px] right-[5px] h-[30px]'
+                        data-tauri-drag-region='true'
+                    />
+                    <div className={`h-[35px] w-full flex ${osType === 'Darwin' ? 'justify-end' : 'justify-between'}`}>
+                        <Button
+                            isIconOnly
+                            size='sm'
+                            variant='flat'
+                            disableAnimation
+                            className='my-auto bg-transparent'
+                            onPress={() => {
+                                if (pined) {
+                                    if (closeOnBlur) {
+                                        unlisten = listenBlur();
+                                    }
+                                    appWindow.setAlwaysOnTop(false);
+                                } else {
+                                    unlistenBlur();
+                                    appWindow.setAlwaysOnTop(true);
+                                }
+                                setPined(!pined);
+                            }}
+                        >
+                            <BsPinFill className={`text-[20px] ${pined ? 'text-primary' : 'text-default-400'}`} />
+                        </Button>
+                        <Button
+                            isIconOnly
+                            size='sm'
+                            variant='flat'
+                            disableAnimation
+                            className={`my-auto ${osType === 'Darwin' && 'hidden'} bg-transparent`}
+                            onPress={() => {
+                                void appWindow.close();
+                            }}
+                        >
+                            <AiFillCloseCircle className='text-[20px] text-default-400' />
+                        </Button>
+                    </div>
+                    <div
+                        className={`${osType === 'Linux' ? 'h-[calc(100vh-37px)]' : 'h-[calc(100vh-35px)]'} px-[8px]`}
+                        // The height of the window it will be, not of the one it waits in.
+                        style={
+                            stage === 'shown' ? undefined : { height: layout.height - (osType === 'Linux' ? 37 : 35) }
+                        }
                     >
-                        <div ref={contentRef}>
-                            <div>
-                                {serviceInstanceConfigMap !== null && (
-                                    <SourceArea
-                                        pluginList={pluginList}
-                                        serviceInstanceConfigMap={serviceInstanceConfigMap}
-                                    />
-                                )}
-                            </div>
-                            <div className={`${hideLanguage && 'hidden'}`}>
-                                <LanguageArea />
-                                <Spacer y={2} />
-                            </div>
-                            <DragDropContext onDragEnd={onDragEnd}>
-                                <Droppable
-                                    droppableId='droppable'
-                                    direction='vertical'
-                                >
-                                    {(provided) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.droppableProps}
-                                        >
-                                            {translateServiceInstanceList !== null &&
-                                                serviceInstanceConfigMap !== null &&
-                                                translateServiceInstanceList.map((serviceInstanceKey, index) => {
-                                                    const config = serviceInstanceConfigMap[serviceInstanceKey] ?? {};
-                                                    const enable = config['enable'] ?? true;
-
-                                                    return enable ? (
-                                                        <Draggable
-                                                            key={serviceInstanceKey}
-                                                            draggableId={serviceInstanceKey}
-                                                            index={index}
-                                                        >
-                                                            {(provided) => (
-                                                                <div
-                                                                    ref={provided.innerRef}
-                                                                    {...provided.draggableProps}
-                                                                >
-                                                                    <TargetArea
-                                                                        {...provided.dragHandleProps}
-                                                                        index={index}
-                                                                        name={serviceInstanceKey}
-                                                                        translateServiceInstanceList={
-                                                                            translateServiceInstanceList
-                                                                        }
-                                                                        pluginList={pluginList}
-                                                                        serviceInstanceConfigMap={
-                                                                            serviceInstanceConfigMap
-                                                                        }
-                                                                    />
-                                                                    <Spacer y={2} />
-                                                                </div>
-                                                            )}
-                                                        </Draggable>
-                                                    ) : (
-                                                        <></>
-                                                    );
-                                                })}
-                                        </div>
+                        <div
+                            ref={scrollRef}
+                            className='h-full overflow-y-auto'
+                        >
+                            <div ref={contentRef}>
+                                <div>
+                                    {serviceInstanceConfigMap !== null && (
+                                        <SourceArea
+                                            pluginList={pluginList}
+                                            serviceInstanceConfigMap={serviceInstanceConfigMap}
+                                        />
                                     )}
-                                </Droppable>
-                            </DragDropContext>
+                                </div>
+                                <div className={`${hideLanguage && 'hidden'}`}>
+                                    <LanguageArea />
+                                    <Spacer y={2} />
+                                </div>
+                                <DragDropContext onDragEnd={onDragEnd}>
+                                    <Droppable
+                                        droppableId='droppable'
+                                        direction='vertical'
+                                    >
+                                        {(provided) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.droppableProps}
+                                            >
+                                                {translateServiceInstanceList !== null &&
+                                                    serviceInstanceConfigMap !== null &&
+                                                    translateServiceInstanceList.map((serviceInstanceKey, index) => {
+                                                        const config =
+                                                            serviceInstanceConfigMap[serviceInstanceKey] ?? {};
+                                                        const enable = config['enable'] ?? true;
+
+                                                        return enable ? (
+                                                            <Draggable
+                                                                key={serviceInstanceKey}
+                                                                draggableId={serviceInstanceKey}
+                                                                index={index}
+                                                            >
+                                                                {(provided) => (
+                                                                    <div
+                                                                        ref={provided.innerRef}
+                                                                        {...provided.draggableProps}
+                                                                    >
+                                                                        <TargetArea
+                                                                            {...provided.dragHandleProps}
+                                                                            index={index}
+                                                                            name={serviceInstanceKey}
+                                                                            translateServiceInstanceList={
+                                                                                translateServiceInstanceList
+                                                                            }
+                                                                            pluginList={pluginList}
+                                                                            serviceInstanceConfigMap={
+                                                                                serviceInstanceConfigMap
+                                                                            }
+                                                                        />
+                                                                        <Spacer y={2} />
+                                                                    </div>
+                                                                )}
+                                                            </Draggable>
+                                                        ) : (
+                                                            <></>
+                                                        );
+                                                    })}
+                                            </div>
+                                        )}
+                                    </Droppable>
+                                </DragDropContext>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </>
         )
     );
 }
