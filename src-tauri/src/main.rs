@@ -33,6 +33,7 @@ use tauri_plugin_log::LogTarget;
 use tray::*;
 use updater::check_update;
 use window::config_window;
+use window::cursor_position;
 use window::updater_window;
 
 // Global AppHandle
@@ -147,6 +148,7 @@ fn main() {
             update_tray,
             updater_window,
             screenshot,
+            cursor_position,
             lang_detect,
             webdav,
             local,

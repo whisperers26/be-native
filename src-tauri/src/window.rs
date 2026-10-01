@@ -68,6 +68,20 @@ fn get_current_monitor(x: i32, y: i32) -> Monitor {
     }
 }
 
+// The cursor's physical position and the origin of the monitor under it. The screenshot window polls
+// this to follow the cursor to another monitor, which it cannot see through its own mouse events.
+#[tauri::command(async)]
+pub fn cursor_position() -> Result<serde_json::Value, String> {
+    use mouse_position::mouse_position::Mouse;
+
+    let Mouse::Position { x, y } = Mouse::get_mouse_position() else {
+        return Err("Mouse position not found".to_string());
+    };
+    let monitor = monitor_at(x, y).ok_or("Monitor not found")?;
+    let origin = monitor.position();
+    Ok(serde_json::json!({ "x": x, "y": y, "monitor": { "x": origin.x, "y": origin.y } }))
+}
+
 // Creating a window on the mouse monitor
 fn build_window(label: &str, title: &str) -> (Window, bool) {
     use mouse_position::mouse_position::{Mouse, Position};
