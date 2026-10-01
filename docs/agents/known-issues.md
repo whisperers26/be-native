@@ -17,6 +17,9 @@ Bugs in code inherited from upstream, not fixed yet. Each one was confirmed by r
 - **Uninstalled plugins leave instances behind.** Uninstalling removes only list entries equal to the plugin's bare name, but instances are stored as `<plugin>@<id>`; they stay in the service lists, and the Translate window then reads info for a plugin that no longer exists.
 - **TTS plugin settings look in the wrong list.** The TTS settings dialog passes `pluginType='translate'` to the plugin settings form.
 - **Aliyun backup without a login throws.** The Backup page shows "log in first" and then calls `.then` on an undefined result. The `local` backup also ignores the file name it is given.
+- **useVoice builds a new callback on every render.** It calls `useCallback` without a dependency list, so nothing is memoized.
+- **useVoice's `ended` handler can throw.** Stopping playback by hand sets `source` to `null`, and stopping also fires `ended`, whose handler then calls `disconnect()` on `null`.
+- **Toast text is not made selectable.** `useToastStyle` returns `select: 'text'`, which is not a CSS property (the CSS one is `user-select`).
 - **The Recognize window can stay loading.** Opened through the HTTP API with `/ocr_recognize?screenshot=false` (seen on Windows 11 on 2026-10-01), the window shows the image but never a result, even after pressing Recognize. System OCR does return (each run is followed by its language-detection request), but the result is not rendered. The recognition effect can run before the instance and language atoms are both set, and its stale-result guard drops earlier results; the exact cause is not pinned down. The smoke test checks only that this window opens.
 
 ## Services
