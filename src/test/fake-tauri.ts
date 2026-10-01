@@ -26,6 +26,7 @@ const DEFAULT_COMMANDS: Record<string, Handler> = {
     get_base64: () => '',
     reload_store: () => null,
     screenshot: () => null,
+    cursor_position: () => ({ x: 0, y: 0, monitor: { x: 0, y: 0 } }),
     cut_image: () => null,
     copy_img: () => null,
     system_ocr: () => '',
