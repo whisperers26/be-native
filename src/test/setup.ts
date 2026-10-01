@@ -31,7 +31,8 @@ export const FIXED_NOW = new Date('2026-01-02T03:04:05.678Z');
 // so freezing Date with them here would silently keep setTimeout real in every test.)
 const RealDate = Date;
 class FrozenDate extends RealDate {
-    constructor(...args: ConstructorParameters<typeof Date>) {
+    // ConstructorParameters picks a single overload (one value), so name the empty call too.
+    constructor(...args: [] | ConstructorParameters<typeof Date>) {
         if (args.length === 0) super(FIXED_NOW.getTime());
         else super(...args);
     }
