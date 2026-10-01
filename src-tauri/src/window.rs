@@ -337,6 +337,16 @@ pub fn recognize_window() {
     window.emit("new_image", "").unwrap();
 }
 
+// A window that is never shown: it copies the text of the cut screenshot and closes itself
+pub fn silent_recognize_window() {
+    let (window, exists) = build_window("silent_recognize", "Silent Recognize");
+    if exists {
+        window.emit("new_image", "").unwrap();
+        return;
+    }
+    window.set_skip_taskbar(true).unwrap();
+}
+
 #[cfg(target_os = "windows")]
 unsafe extern "system" fn no_title_bar_proc(
     hwnd: windows::Win32::Foundation::HWND,
@@ -445,6 +455,34 @@ pub fn ocr_recognize() {
     #[cfg(not(target_os = "macos"))]
     {
         on_region_selected(&screenshot_window(), recognize_window);
+    }
+}
+pub fn ocr_copy() {
+    #[cfg(target_os = "macos")]
+    {
+        let app_handle = APP.get().unwrap();
+        let mut app_cache_dir_path = cache_dir().expect("Get Cache Dir Failed");
+        app_cache_dir_path.push(&app_handle.config().tauri.bundle.identifier);
+        if !app_cache_dir_path.exists() {
+            // 创建目录
+            fs::create_dir_all(&app_cache_dir_path).expect("Create Cache Dir Failed");
+        }
+        app_cache_dir_path.push("pot_screenshot_cut.png");
+
+        let path = app_cache_dir_path.to_string_lossy().replace("\\\\?\\", "");
+        println!("Screenshot path: {}", path);
+        if let Ok(_output) = std::process::Command::new("/usr/sbin/screencapture")
+            .arg("-i")
+            .arg("-r")
+            .arg(path)
+            .output()
+        {
+            silent_recognize_window();
+        }
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        on_region_selected(&screenshot_window(), silent_recognize_window);
     }
 }
 pub fn ocr_translate() {
