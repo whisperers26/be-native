@@ -224,6 +224,72 @@ describe('mergeLines', () => {
         });
     });
 
+    describe('Chinese, Japanese and Korean', () => {
+        it('joins Chinese lines without a space', () => {
+            expect(
+                mergeLines(
+                    lines(
+                        '这是一个跨平台的划词翻译和文字识别软件，它可以',
+                        '在任何应用中翻译选中的文字，并把结果显示在选区',
+                        '旁边。',
+                        '第二段从这里开始，同样会换到下一行继续写下去直',
+                        '到结束。'
+                    )
+                )
+            ).toBe(
+                lines(
+                    '这是一个跨平台的划词翻译和文字识别软件，它可以在任何应用中翻译选中的文字，并把结果显示在选区旁边。',
+                    '第二段从这里开始，同样会换到下一行继续写下去直到结束。'
+                )
+            );
+        });
+
+        it('joins Chinese to Latin text without a space', () => {
+            expect(
+                mergeLines(lines('这个软件的前端部分全部使用严格模式的 TypeScript', '编写，后端部分则使用 Rust 编写。'))
+            ).toBe('这个软件的前端部分全部使用严格模式的 TypeScript编写，后端部分则使用 Rust 编写。');
+        });
+
+        it('joins Japanese lines without a space', () => {
+            expect(
+                mergeLines(lines('これは翻訳と文字認識のためのデスクトップアプリで', 'す。どのアプリでも使えます。'))
+            ).toBe('これは翻訳と文字認識のためのデスクトップアプリです。どのアプリでも使えます。');
+        });
+
+        it('joins Korean lines with a space', () => {
+            expect(
+                mergeLines(lines('이것은 번역과 문자 인식을 위한 데스크톱 앱이며 어떤', '앱에서도 사용할 수 있습니다.'))
+            ).toBe('이것은 번역과 문자 인식을 위한 데스크톱 앱이며 어떤 앱에서도 사용할 수 있습니다.');
+        });
+
+        it('starts a line at every Chinese list marker', () => {
+            expect(
+                mergeLines(
+                    lines(
+                        '本软件提供以下几种功能',
+                        '一、在任何应用中翻译选中的文字并显示',
+                        '在选区旁边',
+                        '二、识别截图中的文字',
+                        '（三）保存翻译记录',
+                        '4、运行插件'
+                    )
+                )
+            ).toBe(
+                lines(
+                    '本软件提供以下几种功能',
+                    '一、在任何应用中翻译选中的文字并显示在选区旁边',
+                    '二、识别截图中的文字',
+                    '（三）保存翻译记录',
+                    '4、运行插件'
+                )
+            );
+        });
+
+        it('keeps short lines that could be labels', () => {
+            expect(mergeLines(lines('文件名称', '修改日期'))).toBe(lines('文件名称', '修改日期'));
+        });
+    });
+
     describe('in a narrow block', () => {
         it('keeps lines that could be labels', () => {
             expect(mergeLines(lines('File name', 'Date modified'))).toBe(lines('File name', 'Date modified'));
