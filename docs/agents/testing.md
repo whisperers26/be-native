@@ -4,7 +4,7 @@
 
 | Command | What it does |
 | --- | --- |
-| `pnpm test` | Runs every `*.test.ts(x)` under `src/` once (Vitest, jsdom) |
+| `pnpm test` | Runs every `*.test.ts(x)` under `src/`, and every `*.test.ts` under `scripts/`, once (Vitest, jsdom) |
 | `pnpm test:watch` | The same, re-running on change |
 | `pnpm test src/services/translate/deepl` | Only the tests under one path (no `--`: with it, pnpm passes the path in a way Vitest ignores and the whole suite runs) |
 
