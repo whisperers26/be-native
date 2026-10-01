@@ -4,7 +4,8 @@
  * For every source file under src/ that this branch renamed or modified (compared with --base,
  * default origin/main), it transpiles the base version and the HEAD version with the esbuild that
  * Vite uses and compares the JavaScript. Added files must transpile to nothing but `export {}`
- * (types only). Snapshot files must be byte-identical to the base.
+ * (types only). Snapshot files must be byte-identical to the base. It compares commits, so it refuses
+ * to run while src/ has uncommitted changes, which it could not see.
  *
  * Usage: pnpm check:transpile [--base <ref>] [--allow <path>]...
  * --allow names a HEAD path whose difference was reviewed and is explained in the PR.
@@ -14,6 +15,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { transformWithEsbuild } from 'vite';
+import { uncommittedPaths } from './check-transpile/dirty';
 import { pairRenames } from './check-transpile/pair';
 
 const argv = process.argv.slice(2);
@@ -46,6 +48,14 @@ function diff(oldText: string, newText: string): string {
     } catch (error) {
         return String((error as { stdout?: string }).stdout ?? error);
     }
+}
+
+const uncommitted = uncommittedPaths(git('status', '--porcelain', '--', 'src'));
+if (uncommitted.length > 0) {
+    console.error('check:transpile compares commits and cannot see uncommitted changes under src/:');
+    for (const path of uncommitted) console.error(`  ${path}`);
+    console.error('Commit them (or stash them) and run it again.');
+    process.exit(1);
 }
 
 const problems: string[] = [];
