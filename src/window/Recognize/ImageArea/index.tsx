@@ -8,22 +8,26 @@ import { invoke } from '@tauri-apps/api';
 import { atom, useAtom } from 'jotai';
 
 import { useConfig } from '../../../hooks';
+import type { MutableRefObject } from 'react';
+import type { UnlistenFn } from '@tauri-apps/api/event';
 
 export const base64Atom = atom('');
-let unlisten = null;
+let unlisten: Promise<UnlistenFn> | null = null;
 
 export default function ImageArea() {
     const [hideWindow] = useConfig('recognize_hide_window', false);
     const [base64, setBase64] = useAtom(base64Atom);
-    const imgRef = useRef();
+    // The image is rendered only while base64 is not empty, so the ref is not always set.
+    const imgRef = useRef<HTMLImageElement | null>() as MutableRefObject<HTMLImageElement | null>;
     const { t } = useTranslation();
     const load_img = () => {
-        invoke('get_base64').then((v) => {
+        invoke<string>('get_base64').then((v) => {
             setBase64(v);
             if (hideWindow) {
                 appWindow.hide();
             } else {
                 appWindow.show();
+                // @ts-expect-error setFocus takes no argument; the extra true is ignored
                 appWindow.setFocus(true);
             }
         });
@@ -43,11 +47,13 @@ export default function ImageArea() {
         }
     }, [hideWindow]);
 
+    // known bug (known-issues.md): the Card's radius is none, sm, md or lg, so '10' falls back to lg; the cast keeps
+    // the value as it is.
     return (
         <Card
             shadow='none'
             className='bg-content1 h-full ml-[12px] mr-[6px]'
-            radius='10'
+            radius={'10' as unknown as 'lg'}
         >
             <CardBody className='bg-content1 h-full p-0'>
                 {base64 !== '' && (
@@ -66,9 +72,10 @@ export default function ImageArea() {
                         size='sm'
                         variant='light'
                         onPress={async () => {
+                            // known bug (known-issues.md): the ref is unset while no image is shown
                             await invoke('copy_img', {
-                                width: imgRef.current.naturalWidth,
-                                height: imgRef.current.naturalHeight,
+                                width: imgRef.current!.naturalWidth,
+                                height: imgRef.current!.naturalHeight,
                             });
                         }}
                     >

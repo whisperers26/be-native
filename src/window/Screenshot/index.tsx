@@ -6,6 +6,7 @@ import { appWindow } from '@tauri-apps/api/window';
 import { emit } from '@tauri-apps/api/event';
 import { warn } from 'tauri-plugin-log-api';
 import { invoke } from '@tauri-apps/api';
+import type { MutableRefObject } from 'react';
 
 export default function Screenshot() {
     const [imgurl, setImgurl] = useState('');
@@ -16,10 +17,12 @@ export default function Screenshot() {
     const [mouseMoveX, setMouseMoveX] = useState(0);
     const [mouseMoveY, setMouseMoveY] = useState(0);
 
-    const imgRef = useRef();
+    // The image is always rendered, so the ref is set before any handler runs.
+    const imgRef = useRef<HTMLImageElement>() as MutableRefObject<HTMLImageElement>;
 
     useEffect(() => {
         currentMonitor().then((monitor) => {
+            // @ts-expect-error known bug (known-issues.md): currentMonitor() can return null
             const position = monitor.position;
             invoke('screenshot', { x: position.x, y: position.y }).then(() => {
                 appCacheDir().then((appCacheDirPath) => {

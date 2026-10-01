@@ -19,14 +19,24 @@ import {
     INSTANCE_NAME_CONFIG_KEY,
     getDisplayInstanceName,
 } from '../../../utils/service_instance';
+import type { RecognizeService, ServiceConfigMap } from '../../../types/service';
 
-export const currentServiceInstanceKeyAtom = atom();
-export const languageAtom = atom();
-export const recognizeFlagAtom = atom();
+export const currentServiceInstanceKeyAtom = atom<string>();
+export const languageAtom = atom<string>();
+export const recognizeFlagAtom = atom<string>();
 
-export default function ControlArea(props) {
+// The registry is looked up by a name known only at run time.
+type RecognizeServices = Record<string, RecognizeService>;
+
+interface ControlAreaProps {
+    serviceInstanceConfigMap: ServiceConfigMap;
+    serviceInstanceList: string[];
+}
+
+export default function ControlArea(props: ControlAreaProps) {
     const { serviceInstanceConfigMap, serviceInstanceList } = props;
-    const pluginList = useAtomValue(pluginListAtom);
+    // The window renders this area only once it has loaded the plugin list.
+    const pluginList = useAtomValue(pluginListAtom)!;
     const [recognizeLanguage] = useConfig('recognize_language', 'auto');
     const [serverPort] = useConfig('server_port', 60828);
     const setRecognizeFlag = useSetAtom(recognizeFlagAtom);
@@ -35,7 +45,7 @@ export default function ControlArea(props) {
     const text = useAtomValue(textAtom);
     const { t } = useTranslation();
 
-    function getInstanceName(instanceKey, serviceNameSupplier) {
+    function getInstanceName(instanceKey: string, serviceNameSupplier: () => string) {
         const instanceConfig = serviceInstanceConfigMap[instanceKey] ?? {};
         return getDisplayInstanceName(instanceConfig[INSTANCE_NAME_CONFIG_KEY], serviceNameSupplier);
     }
@@ -64,10 +74,13 @@ export default function ControlArea(props) {
                                     src={
                                         getServiceSouceType(currentServiceInstanceKey) === ServiceSourceType.PLUGIN
                                             ? pluginList[getServiceName(currentServiceInstanceKey)].icon
-                                            : builtinService[getServiceName(currentServiceInstanceKey)].info.icon ===
-                                                'system'
+                                            : (builtinService as RecognizeServices)[
+                                                    getServiceName(currentServiceInstanceKey)
+                                                ].info.icon === 'system'
                                               ? `logo/${osType}.svg`
-                                              : builtinService[getServiceName(currentServiceInstanceKey)].info.icon
+                                              : (builtinService as RecognizeServices)[
+                                                    getServiceName(currentServiceInstanceKey)
+                                                ].info.icon
                                     }
                                 />
                             }
@@ -86,7 +99,7 @@ export default function ControlArea(props) {
                         aria-label='service name'
                         className='max-h-[70vh] overflow-y-auto'
                         onAction={(key) => {
-                            setCurrentServiceInstanceKey(key);
+                            setCurrentServiceInstanceKey(key as string);
                         }}
                     >
                         {serviceInstanceList.map((instanceKey) => {
@@ -99,9 +112,12 @@ export default function ControlArea(props) {
                                             src={
                                                 getServiceSouceType(instanceKey) === ServiceSourceType.PLUGIN
                                                     ? pluginList[getServiceName(instanceKey)].icon
-                                                    : builtinService[getServiceName(instanceKey)].info.icon === 'system'
+                                                    : (builtinService as RecognizeServices)[getServiceName(instanceKey)]
+                                                            .info.icon === 'system'
                                                       ? `logo/${osType}.svg`
-                                                      : builtinService[getServiceName(instanceKey)].info.icon
+                                                      : (builtinService as RecognizeServices)[
+                                                            getServiceName(instanceKey)
+                                                        ].info.icon
                                             }
                                         />
                                     }
@@ -135,13 +151,14 @@ export default function ControlArea(props) {
                         aria-label='language'
                         className='max-h-[70vh] overflow-y-auto'
                         onAction={(key) => {
-                            setLanguage(key);
+                            setLanguage(key as string);
                         }}
                     >
                         <DropdownItem key='auto'>{t('languages.auto')}</DropdownItem>
+                        {/* NextUI's collection children type does not accept a list after a fixed item */}
                         {languageList.map((name) => {
                             return <DropdownItem key={name}>{t(`languages.${name}`)}</DropdownItem>;
-                        })}
+                        }) as any}
                     </DropdownMenu>
                 </Dropdown>
             )}

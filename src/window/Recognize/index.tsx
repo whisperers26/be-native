@@ -15,10 +15,11 @@ import { useConfig } from '../../hooks';
 import ControlArea from './ControlArea';
 import ImageArea from './ImageArea';
 import TextArea from './TextArea';
+import type { PluginInfo, ServiceConfigMap } from '../../types/service';
 
-export const pluginListAtom = atom();
+export const pluginListAtom = atom<Record<string, PluginInfo>>();
 
-let blurTimeout = null;
+let blurTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const listenBlur = () => {
     return listen('tauri://blur', () => {
@@ -55,10 +56,10 @@ export default function Recognize() {
     const [closeOnBlur] = useConfig('recognize_close_on_blur', false);
     const [pined, setPined] = useState(false);
     const [serviceInstanceList] = useConfig('recognize_service_list', ['system', 'tesseract']);
-    const [serviceInstanceConfigMap, setServiceInstanceConfigMap] = useState(null);
+    const [serviceInstanceConfigMap, setServiceInstanceConfigMap] = useState<ServiceConfigMap | null>(null);
 
     const loadPluginList = async () => {
-        let temp = {};
+        let temp: Record<string, PluginInfo> = {};
         if (await exists(`plugins/recognize`, { dir: BaseDirectory.AppConfig })) {
             const plugins = await readDir(`plugins/recognize`, { dir: BaseDirectory.AppConfig });
             for (const plugin of plugins) {
@@ -74,14 +75,16 @@ export default function Recognize() {
                     );
                     pluginInfo.icon = convertFileSrc(iconPath);
                 }
-                temp[plugin.name] = pluginInfo;
+                // readDir lists children, and every child has a name.
+                temp[plugin.name!] = pluginInfo;
             }
         }
         setPluginList({ ...temp });
     };
     const loadServiceInstanceConfigMap = async () => {
-        const config = {};
-        for (const serviceInstanceKey of serviceInstanceList) {
+        // Runs only once the list has been read (the effect below checks), so it is not null.
+        const config: ServiceConfigMap = {};
+        for (const serviceInstanceKey of serviceInstanceList!) {
             config[serviceInstanceKey] = (await store.get(serviceInstanceKey)) ?? {};
         }
         setServiceInstanceConfigMap({ ...config });
@@ -102,6 +105,8 @@ export default function Recognize() {
         }
     }, [closeOnBlur]);
 
+    // The areas render only once serviceInstanceConfigMap is set, which happens after the list has been read, so
+    // ControlArea's serviceInstanceList is not null.
     return (
         pluginList &&
         serviceInstanceConfigMap !== null && (
@@ -148,7 +153,7 @@ export default function Recognize() {
                 </div>
                 <div className='h-[50px]'>
                     <ControlArea
-                        serviceInstanceList={serviceInstanceList}
+                        serviceInstanceList={serviceInstanceList!}
                         serviceInstanceConfigMap={serviceInstanceConfigMap}
                     />
                 </div>
