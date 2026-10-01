@@ -9,7 +9,8 @@
         "preview": "vite preview",
         "tauri": "tauri",
         "updater": "node updater/updater.mjs",
-        "updater:fixRuntime": "node updater/updater-for-fix-runtime.mjs"
+        "updater:fixRuntime": "node updater/updater-for-fix-runtime.mjs",
+        "check:docs": "tsx scripts/check-docs.ts"
     },
     "dependencies": {
         "@nextui-org/react": "^2.4.8",
@@ -53,6 +54,7 @@
         "postcss": "^8.4.47",
         "prettier": "3.3.2",
         "tailwindcss": "^3.4.14",
+        "tsx": "^4.23.15",
         "typescript": "^5.6.3",
         "vite": "^5.4.10"
     }
