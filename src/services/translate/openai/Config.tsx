@@ -14,6 +14,7 @@ import { useToastStyle } from '../../../hooks';
 import { translate } from './index';
 import { Language } from './index';
 import { INSTANCE_NAME_CONFIG_KEY } from '../../../utils/service_instance';
+import type { ServiceConfigProps } from '../../../types/service';
 
 export const defaultRequestArguments = JSON.stringify({
     temperature: 0.1,
@@ -22,7 +23,7 @@ export const defaultRequestArguments = JSON.stringify({
     presence_penalty: 0,
 });
 
-export function Config(props) {
+export function Config(props: ServiceConfigProps) {
     const { instanceKey, updateServiceList, onClose } = props;
     const { t } = useTranslation();
     const [openaiConfig, setOpenaiConfig] = useConfig(
@@ -135,7 +136,7 @@ export function Config(props) {
                             onAction={(key) => {
                                 setOpenaiConfig({
                                     ...openaiConfig,
-                                    service: key,
+                                    service: key as string,
                                 });
                             }}
                         >

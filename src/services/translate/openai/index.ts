@@ -1,8 +1,23 @@
 import { fetch, Body } from '@tauri-apps/api/http';
 import { Language } from './info';
 import { defaultRequestArguments } from './Config';
+import type { TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options) {
+interface Prompt {
+    role: string;
+    content: string;
+}
+
+interface OpenAIResponse {
+    choices?: { message: { content: string } }[];
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions
+): Promise<TranslateResult> {
     const { config, setResult, detect } = options;
 
     let { service, requestPath, model, apiKey, stream, promptList, requestArguments } = config;
@@ -31,18 +46,18 @@ export async function translate(text, from, to, options) {
         ];
     }
 
-    promptList = promptList.map((item) => {
+    promptList = promptList.map((item: Prompt) => {
         return {
             ...item,
             content: item.content
                 .replaceAll('$text', text)
                 .replaceAll('$from', from)
                 .replaceAll('$to', to)
-                .replaceAll('$detect', Language[detect]),
+                .replaceAll('$detect', Language[detect as keyof typeof Language]),
         };
     });
 
-    const headers =
+    const headers: Record<string, string> =
         service === 'openai'
             ? {
                   'Content-Type': 'application/json',
@@ -68,12 +83,13 @@ export async function translate(text, from, to, options) {
         });
         if (res.ok) {
             let target = '';
-            const reader = res.body.getReader();
+            const reader = res.body!.getReader();
             try {
                 let temp = '';
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) {
+                        // @ts-expect-error setResult may be undefined here: the call is unguarded when no content arrived
                         setResult(target.trim());
                         return target.trim();
                     }
@@ -115,10 +131,11 @@ export async function translate(text, from, to, options) {
                 reader.releaseLock();
             }
         } else {
+            // @ts-expect-error known bug (known-issues.md): a fetch Response has no data
             throw `Http Request Error\nHttp Status: ${res.status}\n${JSON.stringify(res.data)}`;
         }
     } else {
-        let res = await fetch(apiUrl.href, {
+        let res = await fetch<OpenAIResponse>(apiUrl.href, {
             method: 'POST',
             headers: headers,
             body: Body.json(body),
