@@ -30,6 +30,24 @@ describe('Translate window', () => {
         expect(fakeTauri.unhandled).toEqual([]);
     });
 
+    it('uses Google alone in test mode, whatever services are set', async () => {
+        fakeTauri.command('test_mode', () => true);
+        fakeTauri.store.set('translate_service_list', ['deepl', 'bing']);
+        fakeTauri.store.set('translate_detect_engine', 'local');
+
+        render(
+            <NextUIProvider>
+                <Translate />
+            </NextUIProvider>
+        );
+
+        expect(await screen.findByText('Google')).toBeInTheDocument();
+        expect(screen.queryByText('DeepL')).not.toBeInTheDocument();
+        expect(screen.queryByText('Bing')).not.toBeInTheDocument();
+        expect(fakeTauri.store.get('translate_service_list')).toEqual(['deepl', 'bing']);
+        expect(fakeTauri.unhandled).toEqual([]);
+    });
+
     it('shows text that arrives from Rust in the source box', async () => {
         fakeTauri.command('get_text', () => 'hello world');
         fakeTauri.command('lang_detect', () => 'en');
