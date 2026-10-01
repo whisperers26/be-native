@@ -106,8 +106,12 @@ describe('Translate window', () => {
         vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) {
             return this.tagName === 'TEXTAREA' ? 24 : 500;
         });
-        vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(window.innerHeight - 35);
+        vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function (this: HTMLElement) {
+            return this.className.includes('h-full overflow-y-auto') ? window.innerHeight - 35 : 0;
+        });
         vi.stubGlobal('screen', { availWidth: 1920, availHeight: 1080 });
+        // The least width, so that the window has no reason to change it.
+        vi.stubGlobal('innerWidth', 420);
         try {
             render(
                 <NextUIProvider>
@@ -121,7 +125,7 @@ describe('Translate window', () => {
 
             await vi.waitFor(() =>
                 expect(fakeTauri.calls.find((call) => call.cmd === 'fit_translate_window')?.args).toEqual({
-                    width: window.innerWidth,
+                    width: 420,
                     height: 535,
                 })
             );

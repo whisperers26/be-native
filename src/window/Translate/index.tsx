@@ -9,12 +9,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { BsPinFill } from 'react-icons/bs';
 import { invoke } from '@tauri-apps/api';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 import LanguageArea from './components/LanguageArea';
-import SourceArea, { sourceTextAtom } from './components/SourceArea';
+import SourceArea, { sourceHeightAtom, sourceTextAtom } from './components/SourceArea';
 import TargetArea from './components/TargetArea';
-import { fitSize, limitsFor, MIN_WIDTH } from './auto_size';
+import { fitSize, limitsFor } from './auto_size';
 import { osType } from '../../utils/env';
 import { useConfig } from '../../hooks';
 import { store } from '../../utils/store';
@@ -188,49 +188,83 @@ export default function Translate() {
     // The part of the window that scrolls, and all of what it shows.
     const scrollRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
+    const setSourceHeight = useSetAtom(sourceHeightAtom);
+    // Whether the next fit works the width out anew, which it does for new source text, and how to ask for a fit.
+    const fitAnew = useRef(true);
+    const requestFit = useRef<(() => void) | null>(null);
     // A size that is not remembered follows what the window shows.
     useEffect(() => {
         const scroll = scrollRef.current;
         const content = contentRef.current;
         if (rememberWindowSize !== false || scroll === null || content === null) return;
         let fitTimeout: ReturnType<typeof setTimeout> | null = null;
+        // The size last asked for. Rust takes a moment to get the window there, and what the window measures of
+        // itself on the way says nothing about where it should end up.
+        let asked: { width: number; height: number; at: number } | null = null;
         const fit = () => {
+            fitTimeout = null;
+            if (
+                asked !== null &&
+                performance.now() - asked.at < 500 &&
+                (window.innerWidth !== asked.width || Math.abs(window.innerHeight - asked.height) > 1)
+            ) {
+                fitTimeout = setTimeout(fit, 50);
+                return;
+            }
+            asked = null;
             const textAreas = Array.from(content.querySelectorAll('textarea'));
-            if (content.offsetHeight === 0 || textAreas.length === 0) return;
+            // The source text is the one that can be typed in; the box around it scrolls when its height is kept down.
+            const sourceBox = content.querySelector('textarea:not([readonly])')?.parentElement;
+            if (content.offsetHeight === 0 || !sourceBox) return;
             const size = fitSize(
                 {
                     width: window.innerWidth,
-                    // What surrounds the scrolling part, and all of what scrolls.
-                    height: window.innerHeight - scroll.clientHeight + content.offsetHeight,
+                    // What surrounds the scrolling part, and all of what scrolls, with all of the source text.
+                    height:
+                        window.innerHeight -
+                        scroll.clientHeight +
+                        content.offsetHeight -
+                        sourceBox.clientHeight +
+                        sourceBox.scrollHeight,
                     textHeights: textAreas.map((textArea) => textArea.offsetHeight),
                     lineHeight: parseFloat(getComputedStyle(textAreas[0]).lineHeight) || 24,
+                    sourceHeight: sourceBox.scrollHeight,
                 },
-                limitsFor(window.screen)
+                limitsFor(window.screen),
+                fitAnew.current
             );
+            fitAnew.current = false;
+            if (size.sourceHeight !== undefined) {
+                setSourceHeight(size.sourceHeight);
+            }
             if (size.width !== window.innerWidth || size.height !== window.innerHeight) {
-                void invoke('fit_translate_window', { ...size });
+                asked = { width: size.width, height: size.height, at: performance.now() };
+                void invoke('fit_translate_window', { width: size.width, height: size.height });
             }
         };
         // The result cards open with an animation, so the content changes height many times in a row.
-        const observer = new ResizeObserver(() => {
+        const request = () => {
             if (fitTimeout) {
                 clearTimeout(fitTimeout);
             }
             fitTimeout = setTimeout(fit, 30);
-        });
+        };
+        const observer = new ResizeObserver(request);
         observer.observe(content);
+        requestFit.current = request;
         return () => {
             observer.disconnect();
+            requestFit.current = null;
             if (fitTimeout) {
                 clearTimeout(fitTimeout);
             }
         };
     }, [rememberWindowSize, pluginList !== null]);
-    // fitSize only widens the window, so new text starts from the least width again.
+    // The width only grows while the text stays the same, so that the window does not go back and forth between
+    // two widths. New text gets a new width.
     useEffect(() => {
-        if (rememberWindowSize === false && window.innerWidth > MIN_WIDTH) {
-            void invoke('fit_translate_window', { width: MIN_WIDTH, height: window.innerHeight });
-        }
+        fitAnew.current = true;
+        requestFit.current?.();
     }, [sourceText]);
 
     const loadPluginList = async () => {
