@@ -465,6 +465,15 @@
                 "openai": {
                     "title": "OpenAI",
                     "description": "Any OpenAI-compatible chat API, with your own key: OpenAI, or another provider's or a local server's compatible endpoint."
+                },
+                "claude_code": {
+                    "title": "Claude Code"
+                },
+                "codex": {
+                    "title": "Codex"
+                },
+                "agent_cli": {
+                    "description": "Rewrites with the {{tool}} command-line tool installed and signed in on this computer, so rewrites use that account's subscription. Every rewrite runs in a session of its own; one is kept waiting in the background so answers arrive quickly."
                 }
             }
         },

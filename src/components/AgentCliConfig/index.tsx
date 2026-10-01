@@ -20,6 +20,7 @@ import {
     runAgentCli,
     translationPrompt,
 } from '../../utils/agent_cli';
+import { DEFAULT_WRITING_PROMPT, writingMessage } from '../../utils/writing_prompt';
 import { INSTANCE_NAME_CONFIG_KEY } from '../../utils/service_instance';
 import { useConfig } from '../../hooks/useConfig';
 import { useToastStyle } from '../../hooks';
@@ -43,6 +44,10 @@ const kinds = {
     translate: {
         systemPrompt: DEFAULT_SYSTEM_PROMPT,
         testPrompt: translationPrompt('hello', Language.auto, Language.zh_cn),
+    },
+    writing: {
+        systemPrompt: DEFAULT_WRITING_PROMPT,
+        testPrompt: writingMessage('hello'),
     },
 };
 

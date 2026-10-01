@@ -5,6 +5,8 @@ import { fakeTauri } from '../../test/fake-tauri';
 import { DEFAULT_SYSTEM_PROMPT } from '../../utils/agent_cli';
 import { Config as ClaudeCodeConfig } from '../../services/translate/claude_code';
 import { Config as CodexConfig } from '../../services/translate/codex';
+import { Config as WritingClaudeCodeConfig } from '../../services/writing/claude_code';
+import { DEFAULT_WRITING_PROMPT } from '../../utils/writing_prompt';
 import '../../i18n';
 
 function renderForm(Form: typeof ClaudeCodeConfig, instanceKey: string) {
@@ -90,5 +92,18 @@ describe('AgentCliConfig', () => {
         expect(await screen.findByText(/claude was not found/)).toBeInTheDocument();
         expect(updateServiceList).not.toHaveBeenCalled();
         expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('gives a writing service the writing instructions and tests it with a rewrite', async () => {
+        fakeTauri.command('agent_cli_run', () => 'Hello');
+        const { updateServiceList } = renderForm(WritingClaudeCodeConfig, 'claude_code@w');
+
+        expect(await screen.findByLabelText('Instructions')).toHaveValue(DEFAULT_WRITING_PROMPT);
+        expect(screen.getByText(/^Rewrites with the Claude Code command-line tool/)).toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+        await vi.waitFor(() => expect(updateServiceList).toHaveBeenCalledWith('claude_code@w'));
+        expect(runs()[0].prompt).toBe('\nhello');
+        expect(runs()[0].spec.systemPrompt).toBe(DEFAULT_WRITING_PROMPT);
     });
 });

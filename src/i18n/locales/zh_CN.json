@@ -465,6 +465,15 @@
                 "openai": {
                     "title": "OpenAI",
                     "description": "任何兼容 OpenAI 的对话接口，使用你自己的密钥：OpenAI，或其他服务商、本地服务的兼容接口。"
+                },
+                "claude_code": {
+                    "title": "Claude Code"
+                },
+                "codex": {
+                    "title": "Codex"
+                },
+                "agent_cli": {
+                    "description": "使用本机已安装并登录的 {{tool}} 命令行工具润色，使用该账号的订阅额度。每次润色都在独立的会话中进行；后台始终预先准备好一个会话，因此响应很快。"
                 }
             }
         },
