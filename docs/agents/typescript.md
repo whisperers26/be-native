@@ -1,13 +1,13 @@
 # TypeScript
 
-The frontend is being converted from JavaScript to strict TypeScript, one layer per PR, without changing what it does. Until the last layer lands, `tsconfig.json` allows JavaScript files next to TypeScript ones.
+The frontend was converted from JavaScript to strict TypeScript, one layer per PR, without changing what it does. `src/` holds no JavaScript any more, and `tsconfig.json` does not allow it.
 
 ## Configuration
 
 | File | Covers | Notes |
 | --- | --- | --- |
-| `tsconfig.json` | `src/` (app code and tests) | `strict`, `verbatimModuleSyntax`, `jsx: react-jsx`, `useDefineForClassFields: true`, `allowJs` while migrating; types from `vite/client` |
-| `tsconfig.node.json` | `scripts/`, `vitest.config.ts` | Node types; for the tooling scripts run with `tsx` |
+| `tsconfig.json` | `src/` (app code and tests) | `strict`, `verbatimModuleSyntax`, `jsx: react-jsx`, `useDefineForClassFields: true`; types from `vite/client` |
+| `tsconfig.node.json` | `scripts/`, `vitest.config.ts`, `vite.config.ts`, `tailwind.config.ts` | Node types; for the tooling scripts run with `tsx` and the build configs |
 
 `pnpm typecheck` checks both. CI runs it on every PR.
 
