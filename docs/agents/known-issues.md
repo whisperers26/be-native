@@ -27,6 +27,7 @@ Bugs in code inherited from upstream, not fixed yet. Each one was confirmed by r
 - **Lingva TTS fails silently.** On an HTTP error it returns `undefined` instead of throwing.
 - **Anki errors are ignored.** The `error` field of AnkiConnect's replies is never checked.
 - **QR code OCR can hang.** The image loader has no `onerror`, so an unreadable image never settles.
+- **Several default translate services fail today.** Checked on 2026-10-01: lingva (`lingva.pot-app.com` no longer resolves), ecdict (`pot-app.com/api/dict` answers 405), bing (its token endpoint answers 404, so "Get Token Failed"), and deepl's free endpoint (rate-limited with 429). Four of the six default translate services show errors out of the box.
 
 ## Rust
 
