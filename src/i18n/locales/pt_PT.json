@@ -350,6 +350,7 @@
                 "label": "Traduzir",
                 "auto_copy": "Copiar Automaticamente",
                 "dynamic_translate": "Tradução Dinâmica",
+                "smart": "Automático",
                 "mouse": "Seguir o rato",
                 "source_target": "Origem+Destino",
                 "source_language": "Idioma de Origem",

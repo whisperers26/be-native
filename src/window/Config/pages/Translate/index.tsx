@@ -25,7 +25,7 @@ export default function Translate() {
     const [deleteNewline, setDeleteNewline] = useConfig('translate_delete_newline', false);
     const [rememberLanguage, setRememberLanguage] = useConfig('translate_remember_language', false);
     // const [translateFontSize, setTranslateFontSize] = useConfig('translate_font_size', 16);
-    const [windowPosition, setWindowPosition] = useConfig('translate_window_position', 'mouse');
+    const [windowPosition, setWindowPosition] = useConfig('translate_window_position', 'smart');
     const [rememberWindowSize, setRememberWindowSize] = useConfig('translate_remember_window_size', false);
     const [hideSource, setHideSource] = useConfig('hide_source', false);
     const [hideLanguage, setHideLanguage] = useConfig('hide_language', false);
@@ -257,6 +257,7 @@ export default function Translate() {
                                         setWindowPosition(key as string);
                                     }}
                                 >
+                                    <DropdownItem key='smart'>{t('config.translate.smart')}</DropdownItem>
                                     <DropdownItem key='mouse'>{t('config.translate.mouse')}</DropdownItem>
                                     <DropdownItem key='pre_state'>{t('config.translate.pre_state')}</DropdownItem>
                                 </DropdownMenu>

@@ -163,6 +163,7 @@
                     "24": "최대 크기 (24px)"
                 },
                 "window_position": "창 팝업 위치",
+                "smart": "스마트",
                 "mouse": "마우스 위치 기준",
                 "pre_state": "창 위치 유지",
                 "remember_window_size": "창 크기 유지",

@@ -119,6 +119,7 @@
                     "24": "Very Very Large (24px)"
                 },
                 "window_position": "Window Position",
+                "smart": "Smart",
                 "mouse": "Follow the Mouse",
                 "pre_state": "Remember Position",
                 "remember_window_size": "Remember Window Size",

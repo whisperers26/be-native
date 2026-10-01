@@ -119,6 +119,7 @@
                     "24": "超大 (24px)"
                 },
                 "window_position": "窗口位置",
+                "smart": "智能",
                 "mouse": "跟随鼠标",
                 "pre_state": "记住位置",
                 "remember_window_size": "记住窗口大小",

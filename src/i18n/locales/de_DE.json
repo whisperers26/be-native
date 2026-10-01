@@ -117,6 +117,7 @@
                     "24": "Sehr groß (24px)"
                 },
                 "window_position": "Fensterposition",
+                "smart": "Automatisch",
                 "mouse": "Der Maus folgen",
                 "pre_state": "Position merken",
                 "remember_window_size": "Fenstergröße merken",
