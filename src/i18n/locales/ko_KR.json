@@ -223,26 +223,6 @@
                 "label": "기록",
                 "title": "기록"
             },
-            "backup": {
-                "label": "백업",
-                "title": "백업 설정",
-                "type": "서비스 유형",
-                "webdav": "WebDav",
-                "aliyun": "알리윤 드라이브(Aliyun Drive)",
-                "local": "로컬 저장",
-                "webdav_url": "WebDav 주소",
-                "username": "사용자명",
-                "password": "비밀번호",
-                "logout": "로그아웃",
-                "aliyun_login_first": "로그인하려면 우선 코드를 스캔하세요.",
-                "login_success": "로그인 성공",
-                "backup": "백업",
-                "restore": "복원",
-                "list": "백업 목록",
-                "load_success": "백업 불러오기에 성공하였습니다",
-                "backup_success": "백업 성공",
-                "empty": "백업한 이력이 없습니다"
-            },
             "about": {
                 "label": "정보",
                 "title": "애플리케이션 정보",

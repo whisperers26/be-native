@@ -72,14 +72,6 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `collection_service_list` | `[]` | Same |
 | `<instance key>` | `{}` | That instance's settings: `instanceName`, the service's own fields, and for translate `enable`. Rust reads `command`, `model`, `effort`, `systemPrompt` and `enable` of `claude_code` and `codex` instances |
 
-## Backup
-
-| Key | Default | Notes |
-| --- | --- | --- |
-| `backup_type` | `webdav` | `webdav`, `aliyun`, `local` |
-| `webdav_url`, `webdav_username`, `webdav_password` | `''` | |
-| `aliyun_access_token` | `''` | |
-
 ## Adding a setting
 
 Pick a `snake_case` key and read it with `useConfig('<key>', <default>)` wherever it is used; give the same default everywhere. If Rust needs it, read it with `get("<key>")` in `src-tauri/src/config.rs` and handle a missing or wrongly typed value without `unwrap()`. Add a row to this page.

@@ -362,26 +362,6 @@
                 },
                 "history_disable": "Désactiver l'historique"
             },
-            "backup": {
-                "local": "Local",
-                "empty": "Vous n'avez encore rien sauvegardé",
-                "restore": "Restaurer",
-                "title": "Paramètres de sauvegarde",
-                "webdav": "WebDav",
-                "load_success": "La sauvegarde a bien été chargée",
-                "list": "Liste de sauvegardes",
-                "backup": "Sauvegarde",
-                "password": "Mot de passe",
-                "webdav_url": "URL WebDav",
-                "username": "Nom d'utilisateur",
-                "backup_success": "Sauvegarde réussie",
-                "label": "Sauvegarde",
-                "type": "Type de service",
-                "logout": "Déconnexion",
-                "aliyun_login_first": "Veuillez d'abord scanner le code pour vous connecter.",
-                "login_success": "Connexion réussie",
-                "aliyun": "Aliyun Drive"
-            },
             "recognize": {
                 "delete_newline": "Suppression automatique des retours à la ligne",
                 "language": "Langue de reconnaissance",

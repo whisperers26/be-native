@@ -362,26 +362,6 @@
                 "incremental_translate": "Tradução Incremental",
                 "target_language": "Idioma de Destino"
             },
-            "backup": {
-                "local": "Local",
-                "empty": "Ainda não fez backup",
-                "restore": "Restaurar",
-                "title": "Configurações de Backup",
-                "webdav": "WebDav",
-                "load_success": "Carregar Backup com Sucesso",
-                "list": "Lista de Backup",
-                "backup": "Backup",
-                "password": "Palavra-passe",
-                "webdav_url": "URL do WebDav",
-                "username": "Nome de utilizador",
-                "backup_success": "Backup com Sucesso",
-                "label": "Backup",
-                "type": "Tipo de Serviço",
-                "logout": "Sair",
-                "login_success": "Sucesso de Login",
-                "aliyun": "Aliyun Drive",
-                "aliyun_login_first": "Por favor, leia o código para fazer login primeiro."
-            },
             "recognize": {
                 "delete_newline": "Apagar Nova Linha Automaticamente",
                 "language": "Idioma de Reconhecimento",

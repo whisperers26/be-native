@@ -17,7 +17,6 @@
 | `system_ocr` | OS OCR: Windows.Media.Ocr, a bundled macOS helper, or Linux `tesseract` |
 | `lang_detect` | Offline language detection (lingua) |
 | `agent_cli` | Claude Code and Codex sessions for the translate services of the same names ([services.md](services.md)) |
-| `backup` | WebDAV, local file and Aliyun Drive backup and restore |
 | `cmd` | Other commands: text state, store reload, image cut, base64 and copy, proxy, plugin install and run, fonts, devtools |
 | `updater` | Update check at launch |
 | `error` | The `Error` type commands return; sent to JavaScript as its message |
@@ -57,9 +56,6 @@
 | `register_shortcut_by_frontend` | `name`, `shortcut` | — | Registers one global shortcut; the Hotkey page unregisters the old one and saves the setting |
 | `update_tray` | `language`, `copyMode` | — | Rebuilds the tray menu; empty arguments are read from the settings |
 | `updater_window` | — | — | Opens the Updater window |
-| `webdav` | `operate`, `url`, `username`, `password`, `name` | string | `put`, `get`, `list` or `delete` backups under `<url>/pot-app/` |
-| `local` | `operate`, `path` | string | `put` writes a backup zip, `get` restores one |
-| `aliyun` | `operate`, `path`, `url` | string | Uploads to, or downloads from, a presigned Aliyun Drive URL |
 
 JavaScript passes argument names in camelCase (`copyMode`); Tauri maps them to Rust's snake_case. Commands that are not `async` run on the main thread and block the UI while they run.
 
@@ -116,10 +112,6 @@ Changing the port needs a restart. The API has no authentication.
 ## Plugins
 
 `install_plugin` accepts `.potext` zips whose names start with `plugin` and which contain `info.json` (with `plugin_type`) and `main.js`, and extracts them to `<app config dir>/plugins/<plugin_type>/<name>/`. At launch, directories under `plugins/<type>/` whose names do not start with `plugin` are deleted.
-
-## Backup
-
-A backup is an uncompressed zip of `config.json`, `history.db` if present, and everything under `plugins/`. Restoring extracts it over the app config directory; files not in the archive are kept. `src-tauri/src/backup.rs` hard-codes that directory as `<config dir>/com.pot-app.desktop`.
 
 ## Tauri plugins
 

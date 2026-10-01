@@ -180,26 +180,6 @@
                 "label": "History",
                 "title": "History"
             },
-            "backup": {
-                "label": "Backup",
-                "title": "Backup Settings",
-                "type": "Service Type",
-                "webdav": "WebDav",
-                "aliyun": "Aliyun Drive",
-                "local": "Local",
-                "webdav_url": "WebDav URL",
-                "username": "Username",
-                "password": "Password",
-                "logout": "Logout",
-                "aliyun_login_first": "Please scan the code to log in first.",
-                "login_success": "Login Success",
-                "backup": "Backup",
-                "restore": "Restore",
-                "list": "Backup List",
-                "load_success": "Load Backup Success",
-                "backup_success": "Backup Success",
-                "empty": "You have not backed up yet"
-            },
             "about": {
                 "label": "About",
                 "title": "About Application",

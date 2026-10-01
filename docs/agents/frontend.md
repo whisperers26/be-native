@@ -70,7 +70,6 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 | Hotkey | The five global shortcuts |
 | Service | Instances per kind (translate, OCR, TTS, collection), their settings, external plugins |
 | History | Browse, edit and clear the translation history; send entries to collections |
-| Backup | Back up settings and history to WebDAV, Aliyun Drive or a local file, and restore them |
 | About | Version, links, update check, the log and config folders |
 
 ## State

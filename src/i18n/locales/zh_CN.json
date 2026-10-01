@@ -180,26 +180,6 @@
                 "label": "历史记录",
                 "title": "历史记录"
             },
-            "backup": {
-                "label": "备份设置",
-                "title": "备份设置",
-                "type": "服务类型",
-                "webdav": "WebDav",
-                "local": "本地",
-                "aliyun": "阿里云盘",
-                "webdav_url": "WebDav地址",
-                "username": "用户名",
-                "password": "密码",
-                "logout": "退出登录",
-                "aliyun_login_first": "请先扫码登录",
-                "login_success": "登录成功",
-                "backup": "备份",
-                "restore": "恢复备份",
-                "list": "备份列表",
-                "load_success": "载入备份成功",
-                "backup_success": "备份成功",
-                "empty": "您还没有备份"
-            },
             "about": {
                 "label": "关于应用",
                 "title": "关于应用",

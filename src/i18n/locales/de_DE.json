@@ -176,26 +176,6 @@
                 "label": "Verlauf",
                 "title": "Verlauf"
             },
-            "backup": {
-                "label": "Backup",
-                "title": "Backup-Einstellungen",
-                "type": "Diensttyp",
-                "webdav": "WebDav",
-                "local": "Lokal",
-                "aliyun": "Aliyun Drive",
-                "webdav_url": "WebDav-URL",
-                "username": "Benutzername",
-                "password": "Passwort",
-                "logout": "Abmelden",
-                "aliyun_login_first": "Bitte zuerst per QR-Code anmelden",
-                "login_success": "Anmeldung erfolgreich",
-                "backup": "Sichern",
-                "restore": "Backup wiederherstellen",
-                "list": "Backup-Liste",
-                "load_success": "Backup erfolgreich geladen",
-                "backup_success": "Backup erfolgreich durchgeführt",
-                "empty": "Sie haben noch keine Backups"
-            },
             "about": {
                 "label": "Über die App",
                 "title": "Über die App",

@@ -177,26 +177,6 @@
                 "label": "История",
                 "title": "История"
             },
-            "backup": {
-                "label": "Бэкап",
-                "title": "Настройки бэкапа",
-                "type": "Тип сервиса",
-                "webdav": "WebDav",
-                "local": "Локально",
-                "webdav_url": "WebDav ссылка",
-                "username": "Имя пользователя",
-                "password": "Пароль",
-                "backup": "Бэкап",
-                "restore": "Восстановить",
-                "list": "Список бэкапов",
-                "load_success": "Успешная загрузка бэкапа",
-                "backup_success": "Бэкап выполнен",
-                "empty": "Вы ещё не создали бэкап",
-                "aliyun": "Aliyun Drive",
-                "logout": "Выйти",
-                "login_success": "Вход выполнен",
-                "aliyun_login_first": "Для входа отсканируйте код."
-            },
             "about": {
                 "label": "О программе",
                 "title": "О программе",

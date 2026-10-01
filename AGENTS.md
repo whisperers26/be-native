@@ -55,7 +55,7 @@ Before opening a PR, run `pnpm check:docs`, `pnpm typecheck`, `pnpm test` and
 | [setup-and-run.md](docs/agents/setup-and-run.md) | Installing tools, running or building the app, finding its files |
 | [architecture.md](docs/agents/architecture.md) | New here, or unsure whether Rust or React owns something |
 | [frontend.md](docs/agents/frontend.md) | Changing windows, pages, hooks, state, i18n or styling |
-| [backend.md](docs/agents/backend.md) | Changing Rust: commands, windows, tray, hotkeys, HTTP API, OCR, backup |
+| [backend.md](docs/agents/backend.md) | Changing Rust: commands, windows, tray, hotkeys, HTTP API, OCR |
 | [services.md](docs/agents/services.md) | Adding or changing a translate, OCR, TTS or collection service, or plugins |
 | [testing.md](docs/agents/testing.md) | Writing or running tests, or a test failed |
 | [typescript.md](docs/agents/typescript.md) | Writing or typing code in `src/`, or a type error blocks you |
