@@ -3,6 +3,7 @@ import { appConfigDir, join } from '@tauri-apps/api/path';
 import { watch } from 'tauri-plugin-fs-watch-api';
 import { invoke } from '@tauri-apps/api';
 
+// @ts-expect-error placeholder without a path: Store requires one, and initStore() replaces this instance
 export let store = new Store();
 
 export async function initStore() {
