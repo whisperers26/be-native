@@ -498,6 +498,14 @@
         "silent_recognize": {
             "failed": "Text recognition failed",
             "no_text": "No text found"
+        },
+        "writing": {
+            "tones": "Tones",
+            "custom_prompt": "Custom Prompt",
+            "custom_placeholder": "What should change? For example: make it shorter",
+            "enter": "Enter",
+            "replace": "Click to replace",
+            "no_service": "No writing service is switched on. Add one in the settings, under Service."
         }
     }
 }
