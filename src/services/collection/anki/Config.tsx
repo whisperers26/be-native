@@ -8,12 +8,19 @@ import React, { useState } from 'react';
 import { useConfig } from '../../../hooks';
 import { useToastStyle } from '../../../hooks';
 import { collection } from './index';
+import type { ServiceConfigProps } from '../../../types/service';
 
-export function Config(props) {
+interface AnkiConfig {
+    [INSTANCE_NAME_CONFIG_KEY]: string;
+    // The default is a number, but the input hands back a string once it has been edited.
+    port: number | string;
+}
+
+export function Config(props: ServiceConfigProps) {
     const [isLoading, setIsLoading] = useState(false);
     const { t } = useTranslation();
     const { instanceKey, updateServiceList, onClose } = props;
-    const [ankiConfig, setAnkiConfig] = useConfig(
+    const [ankiConfig, setAnkiConfig] = useConfig<AnkiConfig>(
         instanceKey,
         {
             [INSTANCE_NAME_CONFIG_KEY]: t('services.collection.anki.title'),
@@ -79,7 +86,7 @@ export function Config(props) {
                         <Input
                             label={t('services.collection.anki.port')}
                             labelPlacement='outside-left'
-                            value={ankiConfig['port']}
+                            value={ankiConfig['port'] as string}
                             type='number'
                             variant='bordered'
                             classNames={{

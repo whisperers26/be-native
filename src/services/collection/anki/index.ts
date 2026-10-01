@@ -1,24 +1,52 @@
 import { fetch, Body } from '@tauri-apps/api/http';
 import { store } from '../../../utils/store';
+import type { CollectionOptions, ServiceConfig } from '../../../types/service';
 
-export async function collection(source, target, options = {}) {
+interface AnkiPronunciation {
+    region?: string;
+    symbol: string;
+    voice?: string | number[];
+}
+
+// The part of a dictionary result that this service reads.
+interface AnkiEntry {
+    pronunciations?: AnkiPronunciation[];
+    explanations: { trait: string; explains: string[] }[];
+}
+
+interface AnkiAudio {
+    data: string;
+    filename: string;
+    fields: string[];
+}
+
+interface AnkiConnectResponse {
+    result: unknown;
+    error: string | null;
+}
+
+export async function collection(
+    source: string,
+    target: string | AnkiEntry,
+    options: CollectionOptions = {} as CollectionOptions
+): Promise<void> {
     const { config } = options;
 
-    let ankiConfig = (await store.get('anki')) ?? {};
+    let ankiConfig: ServiceConfig = (await store.get('anki')) ?? {};
     if (config !== undefined) {
         ankiConfig = config;
     }
     const port = ankiConfig['port'] ?? 8765;
 
-    async function ankiConnect(action, version, params = {}) {
-        let res = await fetch(`http://127.0.0.1:${port}`, {
+    async function ankiConnect(action: string, version: number, params: Record<string, unknown> = {}) {
+        let res = await fetch<AnkiConnectResponse>(`http://127.0.0.1:${port}`, {
             method: 'POST',
             body: Body.json({ action, version, params }),
         });
         return res.data;
     }
 
-    function ankiText(target) {
+    function ankiText(target: string | AnkiEntry) {
         let result = '';
         if (typeof target === 'object') {
             for (let explanation of target.explanations) {
@@ -40,8 +68,8 @@ export async function collection(source, target, options = {}) {
         return result;
     }
 
-    function ankiPronunciation(target) {
-        let results = [];
+    function ankiPronunciation(target: string | AnkiEntry) {
+        let results: { regionSymbol: string; audio?: AnkiAudio }[] = [];
         if (typeof target !== 'object' || target.pronunciations === undefined) {
             return results;
         }
@@ -60,6 +88,7 @@ export async function collection(source, target, options = {}) {
             if (pronunciation.voice) {
                 // step1: convert number array to Char String
                 // step2: convert Char String to base64
+                // @ts-expect-error known bug (known-issues.md): voice can be a URL string, which is not char codes
                 let voiceString = String.fromCharCode(...pronunciation.voice);
                 let voice = btoa(voiceString);
 
