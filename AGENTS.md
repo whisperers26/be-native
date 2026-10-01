@@ -16,8 +16,6 @@ frontend in `src/`.
 1. Never commit to `main`. Work on one branch per feature or fix, open a PR to
    the fork, and merge it yourself with a merge commit once the checks pass.
    Procedure: [git-workflow.md](docs/agents/git-workflow.md).
-| [setup-and-run.md](docs/agents/setup-and-run.md) | Installing tools, running or building the app, finding its files |
-| [architecture.md](docs/agents/architecture.md) | New here, or unsure whether Rust or React owns something |
 2. If the owner explicitly asks to review a PR, open it and stop. Do not merge.
 3. Never push to, open PRs against, or add a remote for upstream
    `pot-app/pot-desktop`. Every `gh pr` command takes
