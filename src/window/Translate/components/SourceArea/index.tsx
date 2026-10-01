@@ -50,7 +50,7 @@ export default function SourceArea(props: SourceAreaProps) {
     const [detectLanguage, setDetectLanguage] = useAtom(detectLanguageAtom);
     const [incrementalTranslate] = useConfig('incremental_translate', false);
     const [dynamicTranslate] = useConfig('dynamic_translate', false);
-    const [mergeWrappedLines] = useConfig('translate_merge_lines', false);
+    const [mergeWrappedLines] = useConfig('translate_merge_lines', true);
     const [recognizeLanguage] = useConfig('recognize_language', 'auto');
     const [recognizeServiceList] = useConfig('recognize_service_list', ['system', 'tesseract']);
     const [ttsServiceList] = useConfig('tts_service_list', ['lingva_tts']);

@@ -22,7 +22,7 @@ export default function Translate() {
     const [incrementalTranslate, setIncrementalTranslate] = useConfig('incremental_translate', false);
     const [historyDisable, setHistoryDisable] = useConfig('history_disable', false);
     const [dynamicTranslate, setDynamicTranslate] = useConfig('dynamic_translate', false);
-    const [mergeWrappedLines, setMergeWrappedLines] = useConfig('translate_merge_lines', false);
+    const [mergeWrappedLines, setMergeWrappedLines] = useConfig('translate_merge_lines', true);
     const [rememberLanguage, setRememberLanguage] = useConfig('translate_remember_language', false);
     // const [translateFontSize, setTranslateFontSize] = useConfig('translate_font_size', 16);
     const [windowPosition, setWindowPosition] = useConfig('translate_window_position', 'smart');
