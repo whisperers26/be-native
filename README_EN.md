@@ -21,6 +21,7 @@
 >
 > - The main branch is `main`; every change lands through a pull request.
 > - AI agents work from [AGENTS.md](./AGENTS.md) and the wiki in [docs/agents](./docs/agents/).
+> - CI checks every pull request (docs check and frontend build).
 
 <!-- fork:end -->
 

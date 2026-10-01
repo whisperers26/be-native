@@ -21,6 +21,7 @@
 >
 > - 主分支为 `main`，所有改动都通过 Pull Request 合并。
 > - AI 代理按照 [AGENTS.md](./AGENTS.md) 及 [docs/agents](./docs/agents/) 中的 wiki 工作。
+> - 每个 Pull Request 都会经过 CI 检查（文档检查和前端构建）。
 
 <!-- fork:end -->
 
