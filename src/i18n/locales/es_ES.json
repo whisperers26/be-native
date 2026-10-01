@@ -165,19 +165,6 @@
                 "title": "Historial",
                 "label": "Historial"
             },
-            "backup": {
-                "label": "Copia de seguridad",
-                "username": "Nombre de usuario",
-                "logout": "Cerrar sesión",
-                "backup": "Copia de seguridad",
-                "load_success": "Cargar copia de seguridad con éxito",
-                "restore": "Restaurar",
-                "title": "Ajustes de copia de seguridad",
-                "login_success": "Inicio de sesión con éxito",
-                "list": "Hacer copia de seguridad de lista",
-                "backup_success": "Copia de seguridad hecha con éxito",
-                "password": "Contraseña"
-            },
             "about": {
                 "label": "Acerca de",
                 "github": "GitHub",

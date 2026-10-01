@@ -177,26 +177,6 @@
                 "label": "Histórico",
                 "title": "Histórico"
             },
-            "backup": {
-                "label": "Backup",
-                "title": "Configurações de Backup",
-                "type": "Tipo de Serviço",
-                "webdav": "WebDav",
-                "local": "Local",
-                "webdav_url": "URL do WebDav",
-                "username": "Nome de usuário",
-                "password": "Senha",
-                "backup": "Backup",
-                "restore": "Restaurar",
-                "list": "Lista de Backup",
-                "load_success": "Carregar Backup com Sucesso",
-                "backup_success": "Backup com Sucesso",
-                "empty": "Você não fez backup ainda",
-                "logout": "Sair",
-                "login_success": "Entrou com sucesso",
-                "aliyun_login_first": "Por favor, leia o código para fazer login primeiro.",
-                "aliyun": "Aliyun Drive"
-            },
             "about": {
                 "label": "Sobre",
                 "title": "Sobre o Aplicativo",

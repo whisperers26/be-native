@@ -282,22 +282,6 @@
                 "incremental_translate": "Traduzione incrementale",
                 "target_language": "Lingua di destinazione"
             },
-            "backup": {
-                "local": "Locale",
-                "empty": "Non hai ancora eseguito il backup",
-                "restore": "Ripristina",
-                "title": "Impostazione di backup",
-                "webdav": "WebDav",
-                "load_success": "Caricamento backup riuscito",
-                "list": "Elenco di backup",
-                "backup": "Backup",
-                "password": "Password",
-                "webdav_url": "Url WebDav",
-                "username": "Nome Utente",
-                "backup_success": "Backup riuscito",
-                "label": "Backup",
-                "type": "Tipo di servizio"
-            },
             "general": {
                 "auto_start": "Avvio automatico",
                 "proxy": {

@@ -7,11 +7,6 @@
                 "delete_newline": "改行を削除",
                 "source_language": "ソース言語"
             },
-            "backup": {
-                "title": "バックアップ設定",
-                "label": "バックアップ",
-                "type": "サービスの種類"
-            },
             "about": {
                 "title": "アプリケーションに関する",
                 "label": "に関する"
