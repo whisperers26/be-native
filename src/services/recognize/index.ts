@@ -13,6 +13,7 @@ import * as _tencent_img_ocr from './tencent_img';
 import * as _volcengine_ocr from './volcengine';
 import * as _volcengine_multi_lang_ocr from './volcengine_multi_lang';
 import * as _qrcode from './qrcode';
+import * as _rapidocr from './rapidocr';
 import type { RecognizeService } from '../../types/service';
 
 // `satisfies` checks each module against the contract in src/types/service.ts and emits nothing.
@@ -31,3 +32,4 @@ export const tencent_img_ocr = _tencent_img_ocr satisfies RecognizeService;
 export const volcengine_ocr = _volcengine_ocr satisfies RecognizeService;
 export const volcengine_multi_lang_ocr = _volcengine_multi_lang_ocr satisfies RecognizeService;
 export const qrcode = _qrcode satisfies RecognizeService;
+export const rapidocr = _rapidocr satisfies RecognizeService;
