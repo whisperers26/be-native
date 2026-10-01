@@ -81,6 +81,10 @@ Results go to `test-results/smoke/<time>/` (gitignored): `report.json` and one P
 
 The baseline from the JavaScript code is kept at `test-results/smoke/baseline-js/` on the owner's machine. After a refactor, run the smoke test again and compare the screenshots with it: layout, labels and the shown image must match; live translation results may differ.
 
+Leave the computer alone while the smoke test runs. The Translate window closes itself when it loses focus (`translate_close_on_blur`, on by default), so a click elsewhere can fail the `translate` or `input` scenario with "window … has no area"; the app's log then shows `Blur` and `Confirm Blur`. Run it again.
+
+The `ocr` screenshot's text pane shows either nothing or the loading skeleton, depending on when the screenshot is taken: the window never finishes loading ([known-issues.md](known-issues.md)). Both match the baseline.
+
 ## Render tests
 
 Every window (`src/window/<Name>/index.test.tsx`), every settings page (`src/window/Config/pages/<Page>/index.test.tsx`) and `src/App.test.tsx` has a render test:
@@ -91,4 +95,4 @@ Every window (`src/window/<Name>/index.test.tsx`), every settings page (`src/win
 - Keep the network out: a window that detects a language when it opens (Translate) needs `fakeTauri.store.set('translate_detect_engine', 'local')`; an unqueued HTTP request fails the run as an unhandled rejection.
 - Wait for whatever happens after the settings load (`findBy…`, `vi.waitFor`), never for a fixed time.
 
-React prints development warnings from the app's own code during these tests (`defaultProps` in react-beautiful-dnd, a `className={false}` in the Translate window's source area). They are not failures.
+React prints development warnings from the app's own code during these tests (`defaultProps` in react-beautiful-dnd, a `className={false}` in the Translate window's source area), and react-beautiful-dnd prints development-only "Unable to find drag handle" setup messages in the Service settings page test. They are not failures.
