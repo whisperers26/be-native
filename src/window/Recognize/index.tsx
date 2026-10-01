@@ -15,8 +15,9 @@ import { useConfig } from '../../hooks';
 import ControlArea from './ControlArea';
 import ImageArea from './ImageArea';
 import TextArea from './TextArea';
+import type { PluginInfo } from '../../types/service';
 
-export const pluginListAtom = atom();
+export const pluginListAtom = atom<Record<string, PluginInfo>>();
 
 let blurTimeout = null;
 

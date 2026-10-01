@@ -20,9 +20,9 @@ import {
     getDisplayInstanceName,
 } from '../../../utils/service_instance';
 
-export const currentServiceInstanceKeyAtom = atom();
-export const languageAtom = atom();
-export const recognizeFlagAtom = atom();
+export const currentServiceInstanceKeyAtom = atom<string>();
+export const languageAtom = atom<string>();
+export const recognizeFlagAtom = atom<string>();
 
 export default function ControlArea(props) {
     const { serviceInstanceConfigMap, serviceInstanceList } = props;

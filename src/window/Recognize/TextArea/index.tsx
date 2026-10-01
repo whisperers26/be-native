@@ -17,7 +17,7 @@ import { useConfig } from '../../../hooks';
 import { base64Atom } from '../ImageArea';
 import { pluginListAtom } from '..';
 
-export const textAtom = atom();
+export const textAtom = atom<string>();
 let recognizeId = 0;
 
 export default function TextArea(props) {
