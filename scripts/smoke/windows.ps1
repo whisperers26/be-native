@@ -5,7 +5,8 @@
 .DESCRIPTION
     -Action list     JSON array of top-level windows owned by processes named "pot":
                      handle, title, visible, processPath.
-    -Action capture  Brings the window (-Handle) to the front and saves its on-screen pixels to -Path (PNG).
+    -Action capture  Saves the window's (-Handle) own pixels to -Path (PNG). The window draws itself, so
+                     other windows covering it do not show, and it is not brought to the front.
     -Action close    Posts WM_CLOSE to the window (-Handle).
     -Action text     JSON array of the text UI Automation exposes inside the window (-Handle):
                      values of edit boxes and documents, names of text elements.
@@ -39,7 +40,7 @@ public static class SmokeWin32 {
     [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
     [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
     [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
-    [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr hWnd, IntPtr hdc, uint flags);
     [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
     [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
     [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
@@ -47,7 +48,7 @@ public static class SmokeWin32 {
 }
 '@
 
-# Physical pixels everywhere, so window rectangles match what CopyFromScreen captures.
+# Physical pixels everywhere, so window rectangles match the pixels PrintWindow draws.
 [void][SmokeWin32]::SetProcessDPIAware()
 
 function Get-PotWindows {
@@ -78,22 +79,33 @@ function Get-PotWindows {
 
 function Save-WindowImage([IntPtr]$hWnd, [string]$file) {
     Add-Type -AssemblyName System.Drawing
-    [void][SmokeWin32]::SetForegroundWindow($hWnd)
     Start-Sleep -Milliseconds 400
-    $rect = New-Object SmokeWin32+RECT
+    $window = New-Object SmokeWin32+RECT
+    [void][SmokeWin32]::GetWindowRect($hWnd, [ref]$window)
+    $frame = New-Object SmokeWin32+RECT
     # DWMWA_EXTENDED_FRAME_BOUNDS (9) leaves out the invisible resize border.
-    if ([SmokeWin32]::DwmGetWindowAttribute($hWnd, 9, [ref]$rect, [Runtime.InteropServices.Marshal]::SizeOf($rect)) -ne 0) {
-        [void][SmokeWin32]::GetWindowRect($hWnd, [ref]$rect)
+    if ([SmokeWin32]::DwmGetWindowAttribute($hWnd, 9, [ref]$frame, [Runtime.InteropServices.Marshal]::SizeOf($frame)) -ne 0) {
+        $frame = $window
     }
-    $width = $rect.Right - $rect.Left
-    $height = $rect.Bottom - $rect.Top
+    $width = $frame.Right - $frame.Left
+    $height = $frame.Bottom - $frame.Top
     if ($width -le 0 -or $height -le 0) { throw "window $($hWnd.ToInt64()) has no area" }
-    $bitmap = New-Object System.Drawing.Bitmap $width, $height
-    $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-    $graphics.CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bitmap.Size)
-    $bitmap.Save($file, [System.Drawing.Imaging.ImageFormat]::Png)
+    $whole = New-Object System.Drawing.Bitmap ($window.Right - $window.Left), ($window.Bottom - $window.Top)
+    $graphics = [System.Drawing.Graphics]::FromImage($whole)
+    $hdc = $graphics.GetHdc()
+    # PW_RENDERFULLCONTENT (2) makes the window draw everything it shows, the web view included.
+    $printed = [SmokeWin32]::PrintWindow($hWnd, $hdc, 2)
+    $graphics.ReleaseHdc($hdc)
     $graphics.Dispose()
+    if (-not $printed) {
+        $whole.Dispose()
+        throw "window $($hWnd.ToInt64()) could not be drawn"
+    }
+    $area = New-Object System.Drawing.Rectangle ($frame.Left - $window.Left), ($frame.Top - $window.Top), $width, $height
+    $bitmap = $whole.Clone($area, $whole.PixelFormat)
+    $bitmap.Save($file, [System.Drawing.Imaging.ImageFormat]::Png)
     $bitmap.Dispose()
+    $whole.Dispose()
 }
 
 function Get-WindowText([IntPtr]$hWnd) {
