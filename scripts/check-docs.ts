@@ -98,6 +98,21 @@ function checkAgentsIndex(lines: string[], wikiPages: string[]): void {
             problems.push(`AGENTS.md: ${page} is not linked from the wiki index`);
         }
     }
+    // Wiki rows belong in the table under "## Wiki", once each.
+    const wikiHeading = lines.findIndex((line) => line.trim() === '## Wiki');
+    const seenRows = new Set<string>();
+    lines.forEach((line, index) => {
+        const row = line.match(/^\|\s*\[[^\]]*\]\((docs\/agents\/[^)\s]+)\)/);
+        if (!row) return;
+        if (wikiHeading === -1 || index < wikiHeading) {
+            problems.push(`AGENTS.md:${index + 1}: wiki row for ${row[1]} outside the "## Wiki" table`);
+            return;
+        }
+        if (seenRows.has(row[1])) {
+            problems.push(`AGENTS.md:${index + 1}: duplicate wiki row for ${row[1]}`);
+        }
+        seenRows.add(row[1]);
+    });
 }
 
 function checkForkSections(): void {
