@@ -127,11 +127,15 @@ fn build_window(label: &str, title: &str) -> (Window, bool) {
     let current_monitor = get_current_monitor(mouse_position.x, mouse_position.y);
     let position = current_monitor.position();
 
+    let test_mode = TEST_MODE.load(Ordering::Relaxed);
+
     let app_handle = APP.get().unwrap();
     match app_handle.get_window(label) {
         Some(v) => {
             info!("Window existence: {}", label);
-            v.set_focus().unwrap();
+            if !test_mode {
+                v.set_focus().unwrap();
+            }
             (v, true)
         }
         None => {
@@ -143,7 +147,7 @@ fn build_window(label: &str, title: &str) -> (Window, bool) {
             )
             .position(position.x.into(), position.y.into())
             .additional_browser_args("--disable-web-security")
-            .focused(true)
+            .focused(!test_mode)
             .title(title)
             .visible(false);
 
