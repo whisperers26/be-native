@@ -8,8 +8,9 @@ import React, { useState } from 'react';
 import { useConfig } from '../../../hooks';
 import { useToastStyle } from '../../../hooks';
 import { collection } from './index';
+import type { ServiceConfigProps } from '../../../types/service';
 
-export function Config(props) {
+export function Config(props: ServiceConfigProps) {
     const [isLoading, setIsLoading] = useState(false);
     const { instanceKey, updateServiceList, onClose } = props;
     const { t } = useTranslation();

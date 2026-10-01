@@ -1,6 +1,23 @@
 import { fetch, Body } from '@tauri-apps/api/http';
+import type { CollectionOptions, TranslateResult } from '../../../types/service';
 
-export async function collection(source, target, options = {}) {
+interface EudicCategoriesResponse {
+    data?: { id: string; name: string }[];
+}
+
+interface EudicCategoryResponse {
+    data?: { id: string };
+}
+
+interface EudicWordsResponse {
+    message: string;
+}
+
+export async function collection(
+    source: string,
+    target: TranslateResult,
+    options: CollectionOptions = {} as CollectionOptions
+): Promise<string> {
     const { config } = options;
     const name = config['name'] ?? 'pot';
     const token = config['token'] ?? '';
@@ -9,8 +26,8 @@ export async function collection(source, target, options = {}) {
     return await addWordToCategory(categoryId, source, token);
 }
 
-async function checkCategory(name, token) {
-    let res = await fetch('https://api.frdic.com/api/open/v1/studylist/category', {
+async function checkCategory(name: string, token: string) {
+    let res = await fetch<EudicCategoriesResponse>('https://api.frdic.com/api/open/v1/studylist/category', {
         method: 'GET',
         query: {
             language: 'en',
@@ -29,7 +46,7 @@ async function checkCategory(name, token) {
             }
         }
 
-        let res1 = await fetch('https://api.frdic.com/api/open/v1/studylist/category', {
+        let res1 = await fetch<EudicCategoryResponse>('https://api.frdic.com/api/open/v1/studylist/category', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -51,8 +68,8 @@ async function checkCategory(name, token) {
     }
 }
 
-async function addWordToCategory(id, word, token) {
-    let res = await fetch('https://api.frdic.com/api/open/v1/studylist/words', {
+async function addWordToCategory(id: string, word: string, token: string) {
+    let res = await fetch<EudicWordsResponse>('https://api.frdic.com/api/open/v1/studylist/words', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
