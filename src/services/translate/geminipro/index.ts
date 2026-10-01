@@ -1,7 +1,22 @@
 import { fetch, Body } from '@tauri-apps/api/http';
 import { Language } from './info';
+import type { TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+interface Content {
+    role: string;
+    parts: { text: string }[];
+}
+
+interface GeminiResponse {
+    candidates?: { content: { parts: { text: string }[] } }[];
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     const { config, setResult, detect } = options;
 
     let { apiKey, stream, promptList, requestPath } = config;
@@ -18,7 +33,7 @@ export async function translate(text, from, to, options = {}) {
         ? `${requestPath}:streamGenerateContent?key=${apiKey}`
         : `${requestPath}:generateContent?key=${apiKey}`;
 
-    promptList = promptList.map((item) => {
+    promptList = promptList.map((item: Content) => {
         return {
             ...item,
             parts: [
@@ -27,7 +42,7 @@ export async function translate(text, from, to, options = {}) {
                         .replaceAll('$text', text)
                         .replaceAll('$from', from)
                         .replaceAll('$to', to)
-                        .replaceAll('$detect', Language[detect]),
+                        .replaceAll('$detect', Language[detect as keyof typeof Language]),
                 },
             ],
         };
@@ -66,12 +81,13 @@ export async function translate(text, from, to, options = {}) {
         });
         if (res.ok) {
             let target = '';
-            const reader = res.body.getReader();
+            const reader = res.body!.getReader();
             try {
                 let temp = '';
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) {
+                        // @ts-expect-error known bug (known-issues.md): setResult is called unguarded and may be undefined
                         setResult(target.trim());
                         return target.trim();
                     }
@@ -98,10 +114,11 @@ export async function translate(text, from, to, options = {}) {
                 reader.releaseLock();
             }
         } else {
+            // @ts-expect-error known bug (known-issues.md): a fetch Response has no data
             throw `Http Request Error\nHttp Status: ${res.status}\n${JSON.stringify(res.data)}`;
         }
     } else {
-        let res = await fetch(requestPath, {
+        let res = await fetch<GeminiResponse>(requestPath, {
             method: 'POST',
             headers: headers,
             body: Body.json(body),
