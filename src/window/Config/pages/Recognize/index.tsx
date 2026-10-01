@@ -14,7 +14,7 @@ import { useConfig } from '../../../../hooks';
 
 export default function Recognize() {
     const [recognizeLanguage, setRecognizeLanguage] = useConfig('recognize_language', 'auto');
-    const [mergeWrappedLines, setMergeWrappedLines] = useConfig('recognize_merge_lines', false);
+    const [mergeWrappedLines, setMergeWrappedLines] = useConfig('recognize_merge_lines', true);
     const [autoCopy, setAutoCopy] = useConfig('recognize_auto_copy', false);
     const [hideWindow, setHideWindow] = useConfig('recognize_hide_window', false);
     const [closeOnBlur, setCloseOnBlur] = useConfig('recognize_close_on_blur', false);

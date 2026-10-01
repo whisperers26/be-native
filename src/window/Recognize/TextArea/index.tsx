@@ -33,7 +33,7 @@ interface TextAreaProps {
 export default function TextArea(props: TextAreaProps) {
     const { serviceInstanceConfigMap } = props;
     const [autoCopy] = useConfig('recognize_auto_copy', false);
-    const [mergeWrappedLines] = useConfig('recognize_merge_lines', false);
+    const [mergeWrappedLines] = useConfig('recognize_merge_lines', true);
     const [hideWindow] = useConfig('recognize_hide_window', false);
     const recognizeFlag = useAtomValue(recognizeFlagAtom);
     const currentServiceInstanceKey = useAtomValue(currentServiceInstanceKeyAtom);
