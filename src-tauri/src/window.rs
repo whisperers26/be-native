@@ -379,6 +379,21 @@ fn screenshot_window() -> Window {
     window
 }
 
+// The listener of the last capture. Tauri keeps a closed window's listeners, so one left behind by
+// a cancelled capture would run its action after the next capture.
+#[cfg(not(target_os = "macos"))]
+static REGION_LISTENER: std::sync::Mutex<Option<tauri::EventHandler>> = std::sync::Mutex::new(None);
+
+// Run `action` once the screenshot window reports that the region has been cut
+#[cfg(not(target_os = "macos"))]
+fn on_region_selected(window: &Window, action: fn()) {
+    let mut listener = REGION_LISTENER.lock().unwrap();
+    if let Some(id) = listener.take() {
+        window.unlisten(id);
+    }
+    *listener = Some(window.listen("success", move |_| action()));
+}
+
 pub fn ocr_recognize() {
     #[cfg(target_os = "macos")]
     {
@@ -404,12 +419,7 @@ pub fn ocr_recognize() {
     }
     #[cfg(not(target_os = "macos"))]
     {
-        let window = screenshot_window();
-        let window_ = window.clone();
-        window.listen("success", move |event| {
-            recognize_window();
-            window_.unlisten(event.id())
-        });
+        on_region_selected(&screenshot_window(), recognize_window);
     }
 }
 pub fn ocr_translate() {
@@ -438,12 +448,7 @@ pub fn ocr_translate() {
     }
     #[cfg(not(target_os = "macos"))]
     {
-        let window = screenshot_window();
-        let window_ = window.clone();
-        window.listen("success", move |event| {
-            image_translate();
-            window_.unlisten(event.id())
-        });
+        on_region_selected(&screenshot_window(), image_translate);
     }
 }
 
