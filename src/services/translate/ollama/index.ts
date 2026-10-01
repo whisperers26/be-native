@@ -1,7 +1,19 @@
 import { Language } from './info';
 import { Ollama } from 'ollama/browser';
+import type { ChatResponse } from 'ollama/browser';
+import type { TranslateOptions, TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to, options = {}) {
+interface Prompt {
+    role: string;
+    content: string;
+}
+
+export async function translate(
+    text: string,
+    from: string,
+    to: string,
+    options: TranslateOptions = {} as TranslateOptions
+): Promise<TranslateResult> {
     const { config, setResult, detect } = options;
 
     let { stream, promptList, requestPath, model } = config;
@@ -14,14 +26,14 @@ export async function translate(text, from, to, options = {}) {
     }
     const ollama = new Ollama({ host: requestPath });
 
-    promptList = promptList.map((item) => {
+    promptList = promptList.map((item: Prompt) => {
         return {
             ...item,
             content: item.content
                 .replaceAll('$text', text)
                 .replaceAll('$from', from)
                 .replaceAll('$to', to)
-                .replaceAll('$detect', Language[detect]),
+                .replaceAll('$detect', Language[detect as keyof typeof Language]),
         };
     });
 
@@ -38,10 +50,12 @@ export async function translate(text, from, to, options = {}) {
                 return '[STREAM]';
             }
         }
+        // @ts-expect-error setResult may be undefined here: the loop's guard is skipped when the stream yields nothing
         setResult(target.trim());
         return target.trim();
     } else {
-        return response.message.content;
+        // stream is any, so chat was typed with its streaming overload; without streaming it returns a ChatResponse
+        return (response as unknown as ChatResponse).message.content;
     }
 }
 

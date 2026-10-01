@@ -11,8 +11,10 @@ import { useConfig } from '../../../hooks/useConfig';
 import { useToastStyle } from '../../../hooks';
 import { translate } from './index';
 import { Language } from './index';
+import type { ListResponse } from 'ollama/browser';
+import type { ServiceConfigProps } from '../../../types/service';
 
-export function Config(props) {
+export function Config(props: ServiceConfigProps) {
     const { instanceKey, updateServiceList, onClose } = props;
     const { t } = useTranslation();
     const [serviceConfig, setServiceConfig] = useConfig(
@@ -37,13 +39,13 @@ export function Config(props) {
     const [isPulling, setIsPulling] = useState(false);
     const [progress, setProgress] = useState(0);
     const [pullingStatus, setPullingStatus] = useState('');
-    const [installedModels, setInstalledModels] = useState(null);
+    const [installedModels, setInstalledModels] = useState<ListResponse | null>(null);
 
     const toastStyle = useToastStyle();
 
     async function getModles() {
         try {
-            const ollama = new Ollama({ host: serviceConfig.requestPath });
+            const ollama = new Ollama({ host: serviceConfig!.requestPath });
             const list = await ollama.list();
             setInstalledModels(list);
         } catch {
@@ -53,8 +55,8 @@ export function Config(props) {
 
     async function pullModel() {
         setIsPulling(true);
-        const ollama = new Ollama({ host: serviceConfig.requestPath });
-        const stream = await ollama.pull({ model: serviceConfig.model, stream: true });
+        const ollama = new Ollama({ host: serviceConfig!.requestPath });
+        const stream = await ollama.pull({ model: serviceConfig!.model, stream: true });
         for await (const part of stream) {
             if (part.digest) {
                 let percent = 0;
