@@ -23,18 +23,18 @@ export default function Grow(props: GrowProps) {
     // The size as laid out, which is what the height is set to.
     const [ref, bounds] = useMeasure({ offsetSize: true });
 
-    if (!animated) {
-        return <div className={open ? undefined : 'hidden'}>{children}</div>;
-    }
+    // The same elements either way: switching the animation while the window is open must not make new boxes of
+    // the ones on show, which would ask for their rewrites again.
+    const style = animated
+        ? {
+              height: open ? bounds.height : 0,
+              opacity: open && bounds.height > 0 ? 1 : 0,
+              overflow: 'hidden',
+              transition: `height ${GROW_MS}ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity ${GROW_MS}ms ease-out`,
+          }
+        : { display: open ? undefined : 'none' };
     return (
-        <div
-            style={{
-                height: open ? bounds.height : 0,
-                opacity: open && bounds.height > 0 ? 1 : 0,
-                overflow: 'hidden',
-                transition: `height ${GROW_MS}ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity ${GROW_MS}ms ease-out`,
-            }}
-        >
+        <div style={style}>
             <div ref={ref}>{children}</div>
         </div>
     );
