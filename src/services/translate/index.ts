@@ -19,25 +19,34 @@ import * as _geminipro from './geminipro';
 import * as _ollama from './ollama';
 import * as _ecdict from './ecdict';
 import * as _lingva from './lingva';
+import type { ServiceConfigComponent, ServiceInfo, TranslateOptions, TranslateResult } from '../../types/service';
 
-export const deepl = _deepl;
-export const bing = _bing;
-export const yandex = _yandex;
-export const openai = _openai;
-export const google = _google;
-export const transmart = _transmart;
-export const alibaba = _alibaba;
-export const baidu = _baidu;
-export const baidu_field = _baidu_field;
-export const tencent = _tencent;
-export const volcengine = _volcengine;
-export const niutrans = _niutrans;
-export const youdao = _youdao;
-export const bing_dict = _bing_dict;
-export const cambridge_dict = _cambridge_dict;
-export const caiyun = _caiyun;
-export const chatglm = _chatglm;
-export const geminipro = _geminipro;
-export const ollama = _ollama;
-export const ecdict = _ecdict;
-export const lingva = _lingva;
+// What every module here provides (docs/agents/services.md). `satisfies` checks it and emits nothing.
+interface TranslateService {
+    info: ServiceInfo;
+    Language: Record<string, string>;
+    Config: ServiceConfigComponent;
+    translate: (text: string, from: string, to: string, options: TranslateOptions) => Promise<TranslateResult>;
+}
+
+export const deepl = _deepl satisfies TranslateService;
+export const bing = _bing satisfies TranslateService;
+export const yandex = _yandex satisfies TranslateService;
+export const openai = _openai satisfies TranslateService;
+export const google = _google satisfies TranslateService;
+export const transmart = _transmart satisfies TranslateService;
+export const alibaba = _alibaba satisfies TranslateService;
+export const baidu = _baidu satisfies TranslateService;
+export const baidu_field = _baidu_field satisfies TranslateService;
+export const tencent = _tencent satisfies TranslateService;
+export const volcengine = _volcengine satisfies TranslateService;
+export const niutrans = _niutrans satisfies TranslateService;
+export const youdao = _youdao satisfies TranslateService;
+export const bing_dict = _bing_dict satisfies TranslateService;
+export const cambridge_dict = _cambridge_dict satisfies TranslateService;
+export const caiyun = _caiyun satisfies TranslateService;
+export const chatglm = _chatglm satisfies TranslateService;
+export const geminipro = _geminipro satisfies TranslateService;
+export const ollama = _ollama satisfies TranslateService;
+export const ecdict = _ecdict satisfies TranslateService;
+export const lingva = _lingva satisfies TranslateService;
