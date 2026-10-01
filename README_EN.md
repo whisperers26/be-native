@@ -31,6 +31,7 @@
 > - Selecting a screen region shows a horizontal and a vertical line through the pointer instead of a small crosshair; the lines stay on one monitor and follow the pointer to another.
 > - Silent text recognition: its own hotkey (also in the tray menu and the HTTP API as `/ocr_copy`) selects a screen region and copies the recognized text to the clipboard without opening a window.
 > - Claude Code and Codex are translation services: they use the `claude` or `codex` command-line tool already installed and signed in on your computer, so translations run on your subscription with no API key. Each translation gets a fresh session, and one is kept ready in the background so answers come about as fast as from an API; model and reasoning level are set in the service settings.
+> - RapidOCR is a built-in OCR service: the PP-OCRv5 models run on your computer, fully offline, and read small text and tight selections that the system OCR misses (Simplified and Traditional Chinese, English and Japanese).
 
 <!-- fork:end -->
 

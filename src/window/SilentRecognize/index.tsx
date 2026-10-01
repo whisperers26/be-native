@@ -3,6 +3,7 @@ import { sendNotification } from '@tauri-apps/api/notification';
 import { writeText } from '@tauri-apps/api/clipboard';
 import { appWindow } from '@tauri-apps/api/window';
 import { listen } from '@tauri-apps/api/event';
+import { error as logError } from 'tauri-plugin-log-api';
 import { invoke } from '@tauri-apps/api';
 import { useEffect } from 'react';
 import { t } from 'i18next';
@@ -65,6 +66,7 @@ export default function SilentRecognize() {
                 // A newer capture replaces this one.
                 if (pending === 1) await writeText(text);
             } catch (e) {
+                void logError(`Silent recognition failed: ${String(e)}`);
                 sendNotification({ title: t('silent_recognize.failed'), body: String(e) });
             }
             pending -= 1;
