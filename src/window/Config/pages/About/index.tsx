@@ -37,7 +37,7 @@ export default function About() {
                         className='my-[5px]'
                         size='sm'
                         onPress={() => {
-                            open('https://github.com/pot-app/pot-desktop');
+                            open('https://github.com/whisperers26/be-native');
                         }}
                     >
                         {t('config.about.github')}
