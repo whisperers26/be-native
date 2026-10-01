@@ -12,7 +12,7 @@ const BRACKETS = ['()', '[]'];
 // A bullet. The characters that also appear inside text count only with a space after them.
 const BULLET = /^(?:[•‣⁃∙◦▪▫■□●○◆◇▶►➢➤✓✔☐☑★☆※]|[-–—*+·]\s)/;
 // A number or letter that only a list starts a line with: `1)`, `(a)`, `iv)`, `①`.
-const ORDINAL = /^(?:\(?(?:\d{1,3}|[A-Za-z]|[ivxIVX]{1,4})\)|[①-⒛⓪-⓿❶-➓])/;
+const ORDINAL = /^(?:\(?(?:\d{1,3}|[A-Za-z]|[ivxIVX]{1,4})\)|[\u2460-\u249b\u24ea-\u24ff\u2776-\u2793])/;
 // One that a wrapped line can start with as well, as in "on May\n3. The next day" or "J.\nF. Kennedy": `1.`, `1.2`,
 // `a.`, `iv.`. It marks a list only when the text has more than one.
 const LOOSE_ORDINAL = /^(?:\d{1,3}(?:\.\d{1,3})*\.|\d{1,3}(?:\.\d{1,3})+|[A-Za-z]\.|[ivxIVX]{1,4}\.)\s/;
@@ -60,7 +60,7 @@ function wrapped(line: string, next: string, widest: number, startsItem: (line: 
 }
 
 // A word broken at the end of a line: the last letter before the hyphen, then a hyphen or a soft hyphen.
-const BROKEN_WORD = /(\p{L})[-‐­]$/u;
+const BROKEN_WORD = /(\p{L})[-\u2010\u00ad]$/u;
 const STARTS_WORD = /^[\p{L}\p{N}]/u;
 
 function glue(head: string, tail: string): string {
@@ -68,7 +68,7 @@ function glue(head: string, tail: string): string {
     if (broken && STARTS_WORD.test(tail)) {
         // Between two small letters the hyphen was put in to break the word ("infor-" + "mation"). Otherwise it
         // belongs to the word ("Jean-" + "Paul", "COVID-" + "19"). A soft hyphen is never part of it.
-        const added = head.endsWith('­') || (startsLowercase(broken[1]) && startsLowercase(tail));
+        const added = head.endsWith('\u00ad') || (startsLowercase(broken[1]) && startsLowercase(tail));
         return head.slice(0, -1) + (added ? '' : '-') + tail;
     }
     return head + ' ' + tail;
@@ -102,7 +102,7 @@ function mergeBlock(lines: string[], startsItem: (line: string) => boolean): str
  * become one.
  */
 export function mergeLines(text: string): string {
-    const lines = text.split(/\r\n|\r|\n/).map((line) => line.replace(/[ \t ]+/g, ' ').trim());
+    const lines = text.split(/\r\n|\r|\n/).map((line) => line.replace(/[ \t\u00a0]+/g, ' ').trim());
     const numbered = lines.filter((line) => LOOSE_ORDINAL.test(line)).length > 1;
     const startsItem = (line: string) =>
         BULLET.test(line) || ORDINAL.test(line) || (numbered && LOOSE_ORDINAL.test(line));

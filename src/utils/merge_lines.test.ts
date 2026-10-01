@@ -211,7 +211,7 @@ describe('mergeLines', () => {
     describe('a word broken at the end of a line', () => {
         it('is put together again without the hyphen', () => {
             expect(mergeLines(lines('All the infor-', 'mation is here'))).toBe('All the information is here');
-            expect(mergeLines(lines('All the infor­', 'mation is here'))).toBe('All the information is here');
+            expect(mergeLines(lines('All the infor\u00ad', 'mation is here'))).toBe('All the information is here');
         });
 
         it('keeps a hyphen that belongs to it', () => {
