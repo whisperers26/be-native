@@ -1,9 +1,14 @@
 import { fetch } from '@tauri-apps/api/http';
+import type { TranslateResult } from '../../../types/service';
 
-export async function translate(text, from, to) {
+interface BingResponse {
+    translations?: { text: string }[];
+}
+
+export async function translate(text: string, from: string, to: string): Promise<TranslateResult> {
     const token_url = 'https://edge.microsoft.com/translate/auth';
 
-    let token = await fetch(token_url, {
+    let token = await fetch<string>(token_url, {
         method: 'GET',
         headers: {
             'User-Agent':
@@ -15,7 +20,7 @@ export async function translate(text, from, to) {
     if (token.ok) {
         const url = 'https://api-edge.cognitive.microsofttranslator.com/translate';
 
-        let res = await fetch(url, {
+        let res = await fetch<BingResponse[]>(url, {
             method: 'POST',
             headers: {
                 accept: '*/*',
