@@ -57,7 +57,7 @@ say why when the diff does not make it obvious.
 1. If `main` moved on, rebase the branch onto it before opening the PR.
 2. Run the local checks listed in the Commands table of `AGENTS.md`.
 3. Push and open the PR against the fork. The description says what changed,
-   why, and how it was verified, and lists any bug found but not fixed.
+   why, and how it was verified, and lists any bug found but not fixed; add those to [known-issues.md](known-issues.md) too.
 
    ```bash
    git push -u origin HEAD

@@ -27,7 +27,8 @@ frontend in `src/`.
    `README_EN.md`, `README_KR.md`) when something a reader sees changes, and
    the wiki pages your change makes wrong.
 6. A refactor does not change runtime behaviour. If you find a bug on the way,
-   note it in the PR description and fix it on its own branch.
+   add it to [known-issues.md](docs/agents/known-issues.md) and fix it on its
+   own branch.
 
 ## Commands
 
@@ -47,3 +48,4 @@ Before opening a PR, run `pnpm check:docs` and `pnpm build`.
 | [git-workflow.md](docs/agents/git-workflow.md) | Branching, committing, opening or merging a PR |
 | [setup-and-run.md](docs/agents/setup-and-run.md) | Installing tools, running or building the app, finding its files |
 | [config-keys.md](docs/agents/config-keys.md) | Reading, adding or changing a setting |
+| [known-issues.md](docs/agents/known-issues.md) | Seeing odd behaviour, or about to fix a bug |
