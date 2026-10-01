@@ -1,7 +1,7 @@
 import Tesseract from 'tesseract.js';
 import { Language } from './info';
 
-export async function recognize(base64, language) {
+export async function recognize(base64: string, language: string): Promise<string> {
     const {
         data: { text },
     } = await Tesseract.recognize('data:image/png;base64,' + base64, language, {
