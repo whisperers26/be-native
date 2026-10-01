@@ -37,6 +37,7 @@ frontend in `src/`.
 | `pnpm tauri dev` | Run the app: Vite on port 1420 plus a Rust debug build |
 | `pnpm build` | Build the frontend into `dist/` |
 | `pnpm test` | Run the unit and component tests (Vitest) |
+| `pnpm smoke` | Check the running app's windows (Windows; start the app first) |
 | `pnpm check:docs` | Check doc links, README fork sections, and this index |
 
 Before opening a PR, run `pnpm check:docs`, `pnpm test` and `pnpm build`; CI
