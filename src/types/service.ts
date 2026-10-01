@@ -79,3 +79,17 @@ export type TtsService = ServiceModule<{
 export type CollectionService = ServiceModule<{
     collection: (source: string, target: TranslateResult, options: CollectionOptions) => Promise<unknown>;
 }>;
+
+/** What the Translate window reads from a plugin's info.json (docs/agents/services.md). */
+export interface PluginInfo {
+    display: string;
+    icon?: string;
+    /** App language code to the plugin's own code. Collection plugins have none, and nothing reads it for them. */
+    language: Record<string, string>;
+}
+
+/** The installed plugins, by kind (`translate`, `tts`, `recognize`, `collection`) and then by plugin name. */
+export type PluginList = Record<string, Record<string, PluginInfo>>;
+
+/** The settings of each service instance in use, by instance key. */
+export type ServiceConfigMap = Record<string, ServiceConfig>;
