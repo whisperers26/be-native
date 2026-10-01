@@ -9,8 +9,14 @@ import { useConfig, deleteKey } from '../../../../../hooks';
 import ServiceItem from './ServiceItem';
 import SelectModal from './SelectModal';
 import ConfigModal from './ConfigModal';
+import type { DropResult } from 'react-beautiful-dnd';
+import type { PluginConfigInfo } from '../../../../../types/service';
 
-export default function Collection(props) {
+interface CollectionProps {
+    pluginList: Record<string, PluginConfigInfo>;
+}
+
+export default function Collection(props: CollectionProps) {
     const { pluginList } = props;
     const {
         isOpen: isSelectPluginOpen,
@@ -21,31 +27,34 @@ export default function Collection(props) {
     const { isOpen: isConfigOpen, onOpen: onConfigOpen, onOpenChange: onConfigOpenChange } = useDisclosure();
     const [currentConfigKey, setCurrentConfigKey] = useState('anki');
     // now it's service instance list
-    const [collectionServiceInstanceList, setCollectionServiceInstanceList] = useConfig('collection_service_list', []);
+    const [collectionServiceInstanceList, setCollectionServiceInstanceList] = useConfig<string[]>('collection_service_list', []);
 
     const { t } = useTranslation();
 
-    const reorder = (list, startIndex, endIndex) => {
+    const reorder = (list: string[], startIndex: number, endIndex: number) => {
         const result = Array.from(list);
         const [removed] = result.splice(startIndex, 1);
         result.splice(endIndex, 0, removed);
         return result;
     };
-    const onDragEnd = async (result) => {
+    // The list is null until the settings have been read. The three functions below run on a drag or a press on a
+    // card that is drawn from the list, or on a press in a dialog that opens after the page has loaded, so they take
+    // the list with `!`.
+    const onDragEnd = async (result: DropResult) => {
         if (!result.destination) return;
-        const items = reorder(collectionServiceInstanceList, result.source.index, result.destination.index);
+        const items = reorder(collectionServiceInstanceList!, result.source.index, result.destination.index);
         setCollectionServiceInstanceList(items);
     };
 
-    const deleteServiceInstance = (instanceKey) => {
-        setCollectionServiceInstanceList(collectionServiceInstanceList.filter((x) => x !== instanceKey));
+    const deleteServiceInstance = (instanceKey: string) => {
+        setCollectionServiceInstanceList(collectionServiceInstanceList!.filter((x) => x !== instanceKey));
         deleteKey(instanceKey);
     };
-    const updateServiceInstanceList = (instanceKey) => {
-        if (collectionServiceInstanceList.includes(instanceKey)) {
+    const updateServiceInstanceList = (instanceKey: string) => {
+        if (collectionServiceInstanceList!.includes(instanceKey)) {
             return;
         } else {
-            const newList = [...collectionServiceInstanceList, instanceKey];
+            const newList = [...collectionServiceInstanceList!, instanceKey];
             setCollectionServiceInstanceList(newList);
         }
     };
