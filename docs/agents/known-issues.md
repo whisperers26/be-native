@@ -31,6 +31,7 @@ Bugs in code inherited from upstream, not fixed yet. Each one was confirmed by r
 - **The Recognize window's cards ignore their radius.** `ImageArea` and `TextArea` pass `radius='10'` to NextUI's `Card`, which takes `none`, `sm`, `md` or `lg`, so both cards get the default, `lg`, and whatever 10 was meant to set never applies.
 - **The Screenshot window can fail to start.** `src/window/Screenshot/` reads `position` from `currentMonitor()` without a check, but Tauri returns `null` when it cannot detect the monitor (as for the Translate window's saved position and size). The `TypeError` is thrown before `invoke('screenshot')`, so no capture is made, and the window, which Rust creates hidden and which shows itself only when the capture has loaded, never appears.
 - **The updater's progress breaks when the download has no length.** Tauri sends `contentLength: null` in the download-progress event when the server's reply has no `Content-Length` header. `src/window/Updater/` stores it as the total, so the button says "Installing" from the first chunk (`downloaded > null` is true) and the bar sits at 100%.
+- **An update without release notes looks like it is still loading.** Tauri passes a release without notes to the page as an empty `body`, and `src/window/Updater/` uses an empty `body` to mean "still checking", so it shows the loading skeleton for good instead of the update.
 
 ## Services
 
