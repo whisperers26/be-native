@@ -2,13 +2,13 @@ use std::fs;
 
 use crate::config::get;
 use crate::config::set;
-use crate::placement::{beside, inside, Rect};
+use crate::placement::{beside, between, inside, Rect};
 use crate::StringWrapper;
 use crate::APP;
 use dirs::cache_dir;
 use log::{info, warn};
 use mouse_position::mouse_position::{Mouse, Position};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use tauri::Manager;
 use tauri::Monitor;
 use tauri::Window;
@@ -415,16 +415,58 @@ fn translate_window(region: Option<Rect>) -> Window {
     window
 }
 
+// How long the Translate window takes to get to a new size and place
+const FIT_DURATION: std::time::Duration = std::time::Duration::from_millis(160);
+// Counts the fits asked for: one that is under way stops when a newer one starts
+static FIT_COUNT: AtomicU64 = AtomicU64::new(0);
+static FIT_UNDER_WAY: AtomicBool = AtomicBool::new(false);
+
+// Move and resize a window in one step, in physical pixels, so that it is never seen with a new
+// place and its old size
+#[cfg(target_os = "windows")]
+fn set_rect(window: &Window, rect: Rect) {
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::UI::WindowsAndMessaging::{
+        SetWindowPos, SWP_NOACTIVATE, SWP_NOOWNERZORDER, SWP_NOZORDER,
+    };
+
+    let Ok(hwnd) = window.hwnd() else {
+        warn!("Window handle not found: {}", window.label());
+        return;
+    };
+    unsafe {
+        let _ = SetWindowPos(
+            HWND(hwnd.0 as _),
+            HWND::default(),
+            rect.x,
+            rect.y,
+            rect.width,
+            rect.height,
+            SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE,
+        );
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn set_rect(window: &Window, rect: Rect) {
+    window
+        .set_size(tauri::PhysicalSize::new(rect.width, rect.height))
+        .unwrap_or_default();
+    window
+        .set_position(tauri::PhysicalPosition::new(rect.x, rect.y))
+        .unwrap_or_default();
+}
+
 // Give the Translate window the size it asks for, in logical pixels, and keep it on its monitor. A
 // window still where the `smart` position put it is placed again for its new size, so that it does
-// not grow over what it was put beside.
+// not grow over what it was put beside. A window that is showing glides to its new size and place.
 #[tauri::command(async)]
 pub fn fit_translate_window(window: Window, width: f64, height: f64) {
     let Ok(Some(monitor)) = window.current_monitor() else {
         warn!("Monitor not found, the Translate window keeps its size");
         return;
     };
-    let Ok(current) = window.outer_position() else {
+    let (Ok(current), Ok(size)) = (window.outer_position(), window.inner_size()) else {
         return;
     };
     let scale = monitor.scale_factor();
@@ -433,27 +475,56 @@ pub fn fit_translate_window(window: Window, width: f64, height: f64) {
     let height = (height * scale).ceil() as i32;
     let area = usable_area(&monitor);
 
-    let mut placed = TRANSLATE_PLACED.lock().unwrap();
-    let (x, y) = match placed.as_mut() {
-        Some((anchor, corner)) if *corner == (current.x, current.y) => {
-            *corner = beside(
-                *anchor,
-                width,
-                height,
-                area,
-                (PLACEMENT_GAP * scale) as i32,
-            );
-            *corner
+    let fit = FIT_COUNT.fetch_add(1, Ordering::SeqCst) + 1;
+    // On its way to where it was placed, the window is not there yet, but it has not been moved
+    let on_its_way = FIT_UNDER_WAY.swap(true, Ordering::SeqCst);
+    let (x, y) = {
+        let mut placed = TRANSLATE_PLACED.lock().unwrap();
+        match placed.as_mut() {
+            Some((anchor, corner)) if on_its_way || *corner == (current.x, current.y) => {
+                *corner = beside(
+                    *anchor,
+                    width,
+                    height,
+                    area,
+                    (PLACEMENT_GAP * scale) as i32,
+                );
+                *corner
+            }
+            _ => inside(current.x, current.y, width, height, area),
         }
-        _ => inside(current.x, current.y, width, height, area),
     };
-    window
-        .set_size(tauri::PhysicalSize::new(width, height))
-        .unwrap_or_default();
-    if (x, y) != (current.x, current.y) {
-        window
-            .set_position(tauri::PhysicalPosition::new(x, y))
-            .unwrap_or_default();
+    let from = Rect {
+        x: current.x,
+        y: current.y,
+        width: size.width as i32,
+        height: size.height as i32,
+    };
+    let to = Rect {
+        x,
+        y,
+        width,
+        height,
+    };
+
+    if window.is_visible().unwrap_or(false) && from != to {
+        let start = std::time::Instant::now();
+        loop {
+            if FIT_COUNT.load(Ordering::SeqCst) != fit {
+                // A newer fit goes on from where this one got to
+                return;
+            }
+            let part = start.elapsed().as_secs_f64() / FIT_DURATION.as_secs_f64();
+            if part >= 1.0 {
+                break;
+            }
+            set_rect(&window, between(from, to, part));
+            std::thread::sleep(std::time::Duration::from_millis(8));
+        }
+    }
+    if FIT_COUNT.load(Ordering::SeqCst) == fit {
+        set_rect(&window, to);
+        FIT_UNDER_WAY.store(false, Ordering::SeqCst);
     }
 }
 
