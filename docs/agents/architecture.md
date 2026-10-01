@@ -40,7 +40,7 @@ Closing a window never quits the app; only Quit or Restart in the tray does. A s
 
 ## How the two sides talk
 
-- Frontend → Rust: `invoke('<command>', args)`, 20 commands.
+- Frontend → Rust: `invoke('<command>', args)`, 21 commands.
 - Rust → frontend: the events `new_text` and `new_image` to one window, and `translate_auto_copy_changed` to every window.
 - Frontend → Rust: the event `success` from the screenshot window.
 - Requests to outside services go through Tauri's HTTP client, which runs in Rust, so CORS does not apply.

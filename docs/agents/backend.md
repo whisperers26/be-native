@@ -35,6 +35,7 @@
 | `get_text` | — | string | The text waiting for the translate window |
 | `reload_store` | — | — | Reloads `config.json` into Rust's cache |
 | `screenshot` | `x`, `y` | — | Captures the monitor at that position to `pot_screenshot.png` |
+| `cursor_position` | — | `{ x, y, monitor: { x, y } }` | The cursor's physical position and the origin of the monitor under it; an error if either is unknown |
 | `cut_image` | `left`, `top`, `width`, `height` | — | Crops it to `pot_screenshot_cut.png` |
 | `get_base64` | — | string | `pot_screenshot_cut.png` as base64; `""` if missing |
 | `copy_img` | `width`, `height` | — | Copies the cut image to the clipboard |
