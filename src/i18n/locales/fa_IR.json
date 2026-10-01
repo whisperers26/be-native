@@ -100,6 +100,7 @@
                 "label": "ترجمه",
                 "auto_copy": "کپی خودکار",
                 "dynamic_translate": "ترجمه پویا",
+                "smart": "خودکار",
                 "mouse": "دنبال کردن موس",
                 "source_target": "منبع + مقصد",
                 "source_language": "زبان مبدأ",

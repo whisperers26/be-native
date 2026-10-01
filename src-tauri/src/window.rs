@@ -2,6 +2,7 @@ use std::fs;
 
 use crate::config::get;
 use crate::config::set;
+use crate::placement::{beside, Rect};
 use crate::StringWrapper;
 use crate::APP;
 use dirs::cache_dir;
@@ -151,6 +152,56 @@ pub fn focus_window(window: Window) {
     }
 }
 
+// The part of the monitor that windows may cover: on Windows the work area, which leaves out the
+// taskbar
+#[cfg(target_os = "windows")]
+fn usable_area(monitor: &Monitor) -> Rect {
+    use windows::Win32::Foundation::POINT;
+    use windows::Win32::Graphics::Gdi::{
+        GetMonitorInfoW, MonitorFromPoint, MONITORINFO, MONITOR_DEFAULTTONEAREST,
+    };
+
+    let centre = POINT {
+        x: monitor.position().x + (monitor.size().width / 2) as i32,
+        y: monitor.position().y + (monitor.size().height / 2) as i32,
+    };
+    let mut info = MONITORINFO {
+        cbSize: std::mem::size_of::<MONITORINFO>() as u32,
+        ..Default::default()
+    };
+    let found = unsafe {
+        GetMonitorInfoW(
+            MonitorFromPoint(centre, MONITOR_DEFAULTTONEAREST),
+            &mut info,
+        )
+    };
+    if !found.as_bool() {
+        warn!("Work area not found, using the whole monitor");
+        return whole_monitor(monitor);
+    }
+    let area = info.rcWork;
+    Rect {
+        x: area.left,
+        y: area.top,
+        width: area.right - area.left,
+        height: area.bottom - area.top,
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn usable_area(monitor: &Monitor) -> Rect {
+    whole_monitor(monitor)
+}
+
+fn whole_monitor(monitor: &Monitor) -> Rect {
+    Rect {
+        x: monitor.position().x,
+        y: monitor.position().y,
+        width: monitor.size().width as i32,
+        height: monitor.size().height as i32,
+    }
+}
+
 // The physical position that decides where a new window goes: the mouse, or in test mode the
 // centre of the secondary monitor, which keeps the windows off the screen the owner works on
 fn placement_point() -> Position {
@@ -227,7 +278,12 @@ pub fn config_window() {
     window.center().unwrap();
 }
 
-fn translate_window() -> Window {
+// The gap between a window and what it is placed beside, in logical pixels
+const PLACEMENT_GAP: f64 = 8.0;
+
+// `region` is what the text came from, if it came from a place on the screen. The `smart` position
+// puts the window beside it.
+fn translate_window(region: Option<Rect>) -> Window {
     // Mouse physical position
     let mut mouse_position = placement_point();
     let (window, exists) = build_window("translate", "Translate");
@@ -263,10 +319,29 @@ fn translate_window() -> Window {
 
     let position_type = match get("translate_window_position") {
         Some(v) => v.as_str().unwrap().to_string(),
-        None => "mouse".to_string(),
+        None => "smart".to_string(),
     };
 
     match position_type.as_str() {
+        "smart" => {
+            // Beside the region, or beside the cursor when there is no region
+            let anchor = region.unwrap_or(Rect {
+                x: mouse_position.x,
+                y: mouse_position.y,
+                width: 0,
+                height: 0,
+            });
+            let (x, y) = beside(
+                anchor,
+                (width as f64 * dpi) as i32,
+                (height as f64 * dpi) as i32,
+                usable_area(&monitor),
+                (PLACEMENT_GAP * dpi) as i32,
+            );
+            window
+                .set_position(tauri::PhysicalPosition::new(x, y))
+                .unwrap();
+        }
         "mouse" => {
             // Adjust window position
             let monitor_size = monitor.size();
@@ -332,7 +407,7 @@ pub fn selection_translate() {
         state.0.lock().unwrap().replace_range(.., &text);
     }
 
-    let window = translate_window();
+    let window = translate_window(None);
     window.emit("new_text", text).unwrap();
 }
 
@@ -345,12 +420,12 @@ pub fn input_translate() {
         .lock()
         .unwrap()
         .replace_range(.., "[INPUT_TRANSLATE]");
-    let window = translate_window();
+    let window = translate_window(None);
     let position_type = match get("translate_window_position") {
         Some(v) => v.as_str().unwrap().to_string(),
-        None => "mouse".to_string(),
+        None => "smart".to_string(),
     };
-    if position_type == "mouse" {
+    if position_type == "smart" || position_type == "mouse" {
         window.center().unwrap();
     }
 
@@ -362,7 +437,7 @@ pub fn text_translate(text: String) {
     // Clear State
     let state: tauri::State<StringWrapper> = app_handle.state();
     state.0.lock().unwrap().replace_range(.., &text);
-    let window = translate_window();
+    let window = translate_window(None);
     window.emit("new_text", text).unwrap();
 }
 
@@ -374,7 +449,9 @@ pub fn image_translate() {
         .lock()
         .unwrap()
         .replace_range(.., "[IMAGE_TRANSLATE]");
-    let window = translate_window();
+    // In test mode the window stays on the secondary monitor, wherever the region was
+    let region = crate::screenshot::take_region().filter(|_| !TEST_MODE.load(Ordering::Relaxed));
+    let window = translate_window(region);
     window.emit("new_text", "[IMAGE_TRANSLATE]").unwrap();
 }
 

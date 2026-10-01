@@ -72,7 +72,7 @@ const TEST_MODE_SERVICE_LIST = ['google'];
 export default function Translate() {
     const [closeOnBlur] = useConfig('translate_close_on_blur', true);
     const [alwaysOnTop] = useConfig('translate_always_on_top', false);
-    const [windowPosition] = useConfig('translate_window_position', 'mouse');
+    const [windowPosition] = useConfig('translate_window_position', 'smart');
     const [rememberWindowSize] = useConfig('translate_remember_window_size', false);
     const [configuredServiceInstanceList, setTranslateServiceInstanceList] = useConfig('translate_service_list', [
         'deepl',

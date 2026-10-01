@@ -10,7 +10,7 @@
 
 CI runs `pnpm test` on every PR.
 
-Rust has unit tests only for `agent_cli` (the arguments it starts the tools with, and how it reads their output). Run them from `src-tauri/` with `cargo test agent_cli`; CI does not. `cargo test agent_cli -- --ignored --nocapture` also runs two tests against the real Claude Code with the signed-in account, each a one-line translation.
+Rust has unit tests only for `agent_cli` (the arguments it starts the tools with, and how it reads their output) and `placement` (where a window goes beside an anchor). Run them from `src-tauri/` with `cargo test agent_cli` and `cargo test placement`; CI does not. `cargo test agent_cli -- --ignored --nocapture` also runs two tests against the real Claude Code with the signed-in account, each a one-line translation.
 
 ## Layout
 

@@ -271,6 +271,7 @@
                 "label": "Traduci",
                 "auto_copy": "Copia automaticamente",
                 "dynamic_translate": "Traduzione dinamica",
+                "smart": "Automatico",
                 "mouse": "Segui il mouse",
                 "source_language": "Lingua di partenza",
                 "pre_state": "Ricorda la posizione",

@@ -9,6 +9,7 @@ mod config;
 mod error;
 mod hotkey;
 mod lang_detect;
+mod placement;
 mod screenshot;
 mod server;
 mod system_ocr;
