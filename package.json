@@ -15,7 +15,8 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "smoke": "tsx scripts/smoke.ts",
-        "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json"
+        "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json",
+        "check:transpile": "tsx scripts/check-transpile.ts"
     },
     "dependencies": {
         "@nextui-org/react": "^2.4.8",
