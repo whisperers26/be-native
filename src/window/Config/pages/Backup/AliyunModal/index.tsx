@@ -7,11 +7,19 @@ import { useTranslation } from 'react-i18next';
 import { useToastStyle } from '../../../../../hooks';
 import * as aliyun from '../utils/aliyun';
 
-export default function AliyunModal(props) {
+interface AliyunModalProps {
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    accessToken: string;
+    // The page does not pass it, and the dialog does not use it.
+    refreshToken?: string;
+}
+
+export default function AliyunModal(props: AliyunModalProps) {
     const { isOpen, onOpenChange, accessToken, refreshToken } = props;
-    const [fileList, setFileList] = useState([]);
+    const [fileList, setFileList] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
-    const [downloading, setDownloading] = useState([]);
+    const [downloading, setDownloading] = useState<boolean[]>([]);
 
     const { t } = useTranslation();
     const toastStyle = useToastStyle();
@@ -37,7 +45,7 @@ export default function AliyunModal(props) {
         }
     }, [isOpen]);
 
-    const getBackup = async (name, onClose) => {
+    const getBackup = async (name: string, onClose: () => void) => {
         aliyun.get(accessToken, name).then(
             () => {
                 setDownloading(
