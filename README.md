@@ -21,7 +21,7 @@
 >
 > - 主分支为 `main`，所有改动都通过 Pull Request 合并。
 > - AI 代理按照 [AGENTS.md](./AGENTS.md) 及 [docs/agents](./docs/agents/) 中的 wiki 工作。
-> - 每个 Pull Request 都会经过 CI 检查（文档检查和前端构建）。
+> - 每个 Pull Request 都会经过 CI 检查（文档、类型、测试和前端构建）。
 > - 前端行为由自动化测试（Vitest）固定，命令为 `pnpm test`。
 > - 真实应用冒烟测试（`pnpm smoke`，Windows）通过本地 HTTP 接口检查应用的各个窗口。
 > - 前端代码是严格模式（strict）的 TypeScript，CI 会拒绝 `src/` 下的 JavaScript 文件。

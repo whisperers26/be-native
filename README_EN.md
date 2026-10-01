@@ -21,7 +21,7 @@
 >
 > - The main branch is `main`; every change lands through a pull request.
 > - AI agents work from [AGENTS.md](./AGENTS.md) and the wiki in [docs/agents](./docs/agents/).
-> - CI checks every pull request (docs check and frontend build).
+> - CI checks every pull request (docs, types, tests and the frontend build).
 > - Automated tests (Vitest) pin the frontend's behaviour: `pnpm test`.
 > - A real-app smoke test (`pnpm smoke`, Windows) checks the app's windows through its local HTTP API.
 > - The frontend is strict TypeScript; CI rejects JavaScript files under `src/`.
