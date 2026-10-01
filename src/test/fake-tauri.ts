@@ -48,9 +48,6 @@ const DEFAULT_COMMANDS: Record<string, Handler> = {
     register_shortcut_by_frontend: () => null,
     update_tray: () => null,
     updater_window: () => null,
-    webdav: () => '[]',
-    local: () => '',
-    aliyun: () => '',
 };
 
 function dirName(directory: unknown): string {
