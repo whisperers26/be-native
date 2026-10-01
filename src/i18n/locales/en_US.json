@@ -247,6 +247,31 @@
                 "lingva": {
                     "title": "Lingva"
                 },
+                "claude_code": {
+                    "title": "Claude Code"
+                },
+                "codex": {
+                    "title": "Codex"
+                },
+                "agent_cli": {
+                    "description": "Translates with the {{tool}} command-line tool installed and signed in on this computer, so translations use that account's subscription. Every translation runs in a session of its own; one is kept waiting in the background so answers arrive quickly.",
+                    "command": "Executable",
+                    "command_placeholder": "Found automatically when empty",
+                    "model": "Model",
+                    "model_placeholder": "The tool's default",
+                    "effort": "Reasoning Level",
+                    "instructions": "Instructions",
+                    "efforts": {
+                        "off": "Off",
+                        "default": "Tool default",
+                        "minimal": "Minimal",
+                        "low": "Low",
+                        "medium": "Medium",
+                        "high": "High",
+                        "xhigh": "Extra high",
+                        "max": "Max"
+                    }
+                },
                 "bing": {
                     "title": "Bing"
                 },
