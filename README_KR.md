@@ -12,6 +12,18 @@
 ![MacOS](https://img.shields.io/badge/-macOS-black?&logo=apple&logoColor=white)
 ![Linux](https://img.shields.io/badge/-Linux-yellow?logo=linux&logoColor=white)
 
+<!-- fork:start -->
+
+> [!NOTE]
+> **Be Native**는 Pot의 개인 포크입니다. 업스트림 저장소 [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop)은 보관(archived)되었으며, 개발은 [whisperers26/be-native](https://github.com/whisperers26/be-native)에서 계속됩니다. 이 포크는 릴리스를 배포하지 않으므로, 아래 설치 안내는 업스트림 Pot을 설치합니다.
+>
+> 이 포크의 변경 사항:
+>
+> - 기본 브랜치는 `main`이며, 모든 변경은 풀 리퀘스트로 병합됩니다.
+> - AI 에이전트는 [AGENTS.md](./AGENTS.md)와 [docs/agents](./docs/agents/)의 위키를 따라 작업합니다.
+
+<!-- fork:end -->
+
 <br/>
 <hr/>
 <div align="center">

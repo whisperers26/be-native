@@ -12,6 +12,18 @@
 ![MacOS](https://img.shields.io/badge/-macOS-black?&logo=apple&logoColor=white)
 ![Linux](https://img.shields.io/badge/-Linux-yellow?logo=linux&logoColor=white)
 
+<!-- fork:start -->
+
+> [!NOTE]
+> **Be Native** 是 Pot 的个人分支（fork）。上游仓库 [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) 已归档，开发在 [whisperers26/be-native](https://github.com/whisperers26/be-native) 继续进行。本分支不发布安装包，下文的安装说明安装的是上游的 Pot。
+>
+> 本分支的改动：
+>
+> - 主分支为 `main`，所有改动都通过 Pull Request 合并。
+> - AI 代理按照 [AGENTS.md](./AGENTS.md) 及 [docs/agents](./docs/agents/) 中的 wiki 工作。
+
+<!-- fork:end -->
+
 <br/>
 <hr/>
 <div align="center">

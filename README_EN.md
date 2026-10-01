@@ -12,6 +12,18 @@
 ![MacOS](https://img.shields.io/badge/-macOS-black?&logo=apple&logoColor=white)
 ![Linux](https://img.shields.io/badge/-Linux-yellow?logo=linux&logoColor=white)
 
+<!-- fork:start -->
+
+> [!NOTE]
+> **Be Native** is a personal fork of Pot. Upstream [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) has been archived; development continues in [whisperers26/be-native](https://github.com/whisperers26/be-native). This fork publishes no releases, so the install instructions below install upstream Pot.
+>
+> Changes in this fork:
+>
+> - The main branch is `main`; every change lands through a pull request.
+> - AI agents work from [AGENTS.md](./AGENTS.md) and the wiki in [docs/agents](./docs/agents/).
+
+<!-- fork:end -->
+
 <br/>
 <hr/>
 <div align="center">
