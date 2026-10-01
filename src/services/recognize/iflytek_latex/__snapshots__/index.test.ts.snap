@@ -1,0 +1,39 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`iflytek_latex OCR > exports its info and language table 1`] = `
+{
+  "Language": {
+    "auto": "zh_cn",
+    "en": "en",
+    "zh_cn": "zh_cn",
+    "zh_tw": "zh_tw",
+  },
+  "info": {
+    "icon": "logo/iflytek.png",
+    "name": "iflytek_latex_ocr",
+  },
+}
+`;
+
+exports[`iflytek_latex OCR > posts the image as JSON with signed Date, Digest and Authorization headers and returns the text 1`] = `
+[
+  {
+    "options": {
+      "body": {
+        "payload": "{"common":{"app_id":"test-appid"},"business":{"ent":"teach-photo-print","aue":"raw"},"data":{"image":"aW1hZ2U="}}",
+        "type": "Text",
+      },
+      "headers": {
+        "Accept": "application/json,version=1.0",
+        "Authorization": "api_key="test-apikey", algorithm="hmac-sha256", headers="host date request-line digest", signature="QLu5EwaSXoglKDDlsD0aJrlP54oGyE85nNC46woMkPY="",
+        "Content-Type": "application/json",
+        "Date": "Fri, 02 Jan 2026 03:04:05 GMT",
+        "Digest": "SHA-256=VPm21A+m9p44H0XMQqGErWXGWubYb8Vkt/GyAww73c8=",
+        "Host": "rest-api.xfyun.cn",
+      },
+      "method": "POST",
+    },
+    "url": "https://rest-api.xfyun.cn/v2/itr",
+  },
+]
+`;
