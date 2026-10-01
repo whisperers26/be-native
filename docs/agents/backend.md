@@ -38,7 +38,7 @@
 | `screenshot` | `x`, `y` | — | Captures the monitor at that position to `pot_screenshot.png` |
 | `cursor_position` | — | `{ x, y, monitor: { x, y } }` | The cursor's physical position and the origin of the monitor under it; an error if either is unknown |
 | `show_window`, `focus_window` | — | — | Show or focus the calling window; in test mode, show it without activating it and do not focus it |
-| `fit_translate_window` | `width`, `height` | — | Resize the calling (Translate) window, in logical pixels, and keep it inside its monitor's work area; a window still where the `smart` position put it is placed beside its anchor again for the new size |
+| `fit_translate_window` | `width`, `height` | — | Resize the calling (Translate) window, in logical pixels, and keep it inside its monitor's work area; a window still where the `smart` position put it is placed beside its anchor again for the new size. A showing window glides there in 160 ms (`placement::between`), moved and resized in one step per frame; a newer call takes over from one under way |
 | `test_mode` | — | boolean | Whether test mode is on |
 | `cut_image` | `left`, `top`, `width`, `height` | — | Crops it to `pot_screenshot_cut.png` |
 | `get_base64` | — | string | `pot_screenshot_cut.png` as base64; `""` if missing |
