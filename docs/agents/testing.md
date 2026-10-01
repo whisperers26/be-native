@@ -6,7 +6,7 @@
 | --- | --- |
 | `pnpm test` | Runs every `*.test.ts(x)` under `src/` once (Vitest, jsdom) |
 | `pnpm test:watch` | The same, re-running on change |
-| `pnpm test -- src/services/translate/deepl` | Only the tests under one path |
+| `pnpm test src/services/translate/deepl` | Only the tests under one path (no `--`: with it, pnpm passes the path in a way Vitest ignores and the whole suite runs) |
 
 CI runs `pnpm test` on every PR.
 
