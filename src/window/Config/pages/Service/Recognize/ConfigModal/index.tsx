@@ -12,8 +12,20 @@ import {
 import * as builtinServices from '../../../../../../services/recognize';
 import { osType } from '../../../../../../utils/env';
 import { PluginConfig } from '../../PluginConfig';
+import type { PluginConfigInfo, RecognizeService } from '../../../../../../types/service';
 
-export default function ConfigModal(props) {
+// The registry is looked up by a name known only at run time.
+type RecognizeServices = Record<string, RecognizeService>;
+
+interface ConfigModalProps {
+    serviceInstanceKey: string;
+    pluginList: Record<string, PluginConfigInfo>;
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    updateServiceInstanceList: (instanceKey: string) => void;
+}
+
+export default function ConfigModal(props: ConfigModalProps) {
     const { serviceInstanceKey, pluginList, isOpen, onOpenChange, updateServiceInstanceList } = props;
 
     const serviceSourceType = getServiceSouceType(serviceInstanceKey);
@@ -21,7 +33,7 @@ export default function ConfigModal(props) {
     const serviceName = getServiceName(serviceInstanceKey);
 
     const { t } = useTranslation();
-    const ConfigComponent = pluginServiceFlag ? PluginConfig : builtinServices[serviceName].Config;
+    const ConfigComponent = pluginServiceFlag ? PluginConfig : (builtinServices as RecognizeServices)[serviceName].Config;
 
     return pluginServiceFlag && !(serviceName in pluginList) ? (
         <></>
@@ -41,7 +53,7 @@ export default function ConfigModal(props) {
                                         src={
                                             serviceName === 'system'
                                                 ? `logo/${osType}.svg`
-                                                : builtinServices[serviceName].info.icon
+                                                : (builtinServices as RecognizeServices)[serviceName].info.icon
                                         }
                                         className='h-[24px] w-[24px] my-auto'
                                         draggable={false}
