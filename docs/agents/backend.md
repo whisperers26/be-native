@@ -37,6 +37,7 @@
 | `reload_store` | — | — | Reloads `config.json` into Rust's cache, then matches the waiting Claude Code and Codex sessions to it |
 | `screenshot` | `x`, `y` | — | Captures the monitor at that position to `pot_screenshot.png` |
 | `cursor_position` | — | `{ x, y, monitor: { x, y } }` | The cursor's physical position and the origin of the monitor under it; an error if either is unknown |
+| `show_window`, `focus_window` | — | — | Show or focus the calling window; in test mode, show it without activating it and do not focus it |
 | `cut_image` | `left`, `top`, `width`, `height` | — | Crops it to `pot_screenshot_cut.png` |
 | `get_base64` | — | string | `pot_screenshot_cut.png` as base64; `""` if missing |
 | `copy_img` | `width`, `height` | — | Copies the cut image to the clipboard |
@@ -61,7 +62,7 @@ To add a command, write a `#[tauri::command]` function in the module it belongs 
 
 ## Windows
 
-`build_window(label, title)` creates a hidden, frameless, transparent window (on macOS, with an overlay title bar) that loads `index.html` on the monitor under the mouse, or focuses the window if it already exists. The frontend shows the window when it is ready. Sizes: Config 800×600; Translate from `translate_window_width` and `translate_window_height` (350×420), at the cursor or at a saved position; Recognize from `recognize_window_width` and `recognize_window_height` (800×400); Silent Recognize is never shown; Updater 600×400; Screenshot full screen.
+`build_window(label, title)` creates a hidden, frameless, transparent window (on macOS, with an overlay title bar) that loads `index.html` on the monitor under the mouse, or focuses the window if it already exists. The frontend shows the window when it is ready, through `show_window` and `focus_window`. In test mode ([testing.md](testing.md#test-mode)) the window goes to the centre of the secondary monitor instead, and is neither focused nor activated. Sizes: Config 800×600; Translate from `translate_window_width` and `translate_window_height` (350×420), at the cursor or at a saved position; Recognize from `recognize_window_width` and `recognize_window_height` (800×400); Silent Recognize is never shown; Updater 600×400; Screenshot full screen.
 
 On Windows the Screenshot window is subclassed (`suppress_title_bar`) so that the system never paints its non-client area. Without that, activating the window paints an old-style title bar across the top of the screen, which shows whenever the WebView has not drawn over it yet.
 
@@ -95,6 +96,7 @@ A server on `127.0.0.1:<server_port>` (default 60828) handles one request at a t
 | `/ocr_copy` | Screenshot, then OCR copied to the clipboard without a window |
 | `/ocr_recognize?screenshot=false`, `/ocr_translate?screenshot=false`, `/ocr_copy?screenshot=false` | The same, with an existing `pot_screenshot_cut.png` |
 | `/config` | Opens the Config window |
+| `/test_mode?on=true`, `/test_mode?on=false` | Debug builds only: turns test mode on or off ([testing.md](testing.md#test-mode)) |
 
 Changing the port needs a restart. The API has no authentication.
 

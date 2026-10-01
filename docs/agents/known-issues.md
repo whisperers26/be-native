@@ -70,3 +70,7 @@ Bugs in code inherited from upstream, not fixed yet. Each one was confirmed by r
 - **Deleted settings can come back.** The frontend and Rust each cache `config.json`, and a reload merges into the cache instead of replacing it, so a key deleted by one side is written back by the other side's next save.
 - **Two unused imports.** `src-tauri/src/window.rs` imports `std::fs` and `dirs::cache_dir` without using them, which causes two compiler warnings.
 - **The single-instance plugin dereferences a null pointer.** Its Windows window procedure reads its user-data pointer before setting it. Debug builds made with newer Rust check for null dereferences and abort at launch, so `src-tauri/Cargo.toml` turns debug assertions off for `tauri-plugin-single-instance` in the dev profile (release builds never had them). The real fix belongs in the plugin.
+
+## Tooling
+
+- **The smoke test reads the wrong log.** `scripts/smoke.ts` checks `pot.log` for errors, but a debug build is named "Be Native (Debug)" and logs to `Be Native (Debug).log` in the same folder (seen on 2026-10-01). Errors the dev build logs during a run are therefore not reported, and [setup-and-run.md](setup-and-run.md#data-on-disk) names the old file too.

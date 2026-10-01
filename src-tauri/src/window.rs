@@ -6,12 +6,23 @@ use crate::StringWrapper;
 use crate::APP;
 use dirs::cache_dir;
 use log::{info, warn};
+use mouse_position::mouse_position::{Mouse, Position};
+use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::Manager;
 use tauri::Monitor;
 use tauri::Window;
 use tauri::WindowBuilder;
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 use window_shadows::set_shadow;
+
+// Test mode lets the app be tested in the background: windows open on the secondary monitor and
+// never take the focus. The HTTP API switches it, in debug builds only.
+static TEST_MODE: AtomicBool = AtomicBool::new(false);
+
+pub fn set_test_mode(on: bool) {
+    info!("Test mode: {}", on);
+    TEST_MODE.store(on, Ordering::Relaxed);
+}
 
 // Get daemon window instance
 fn get_daemon_window() -> Window {
@@ -72,8 +83,6 @@ fn get_current_monitor(x: i32, y: i32) -> Monitor {
 // this to follow the cursor to another monitor, which it cannot see through its own mouse events.
 #[tauri::command(async)]
 pub fn cursor_position() -> Result<serde_json::Value, String> {
-    use mouse_position::mouse_position::Mouse;
-
     let Mouse::Position { x, y } = Mouse::get_mouse_position() else {
         return Err("Mouse position not found".to_string());
     };
@@ -82,25 +91,90 @@ pub fn cursor_position() -> Result<serde_json::Value, String> {
     Ok(serde_json::json!({ "x": x, "y": y, "monitor": { "x": origin.x, "y": origin.y } }))
 }
 
-// Creating a window on the mouse monitor
-fn build_window(label: &str, title: &str) -> (Window, bool) {
-    use mouse_position::mouse_position::{Mouse, Position};
+// The centre of the first monitor that is not the primary one, or of the primary one if it is alone
+fn secondary_monitor_centre() -> Position {
+    let daemon = get_daemon_window();
+    let primary = daemon.primary_monitor().unwrap().unwrap();
+    let monitors = daemon.available_monitors().unwrap();
+    let monitor = monitors
+        .iter()
+        .find(|m| m.position() != primary.position())
+        .unwrap_or(&primary);
+    Position {
+        x: monitor.position().x + (monitor.size().width / 2) as i32,
+        y: monitor.position().y + (monitor.size().height / 2) as i32,
+    }
+}
 
-    let mouse_position = match Mouse::get_mouse_position() {
+// Show a window without making it the active one
+#[cfg(target_os = "windows")]
+fn show_inactive(window: &Window) {
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::UI::WindowsAndMessaging::{ShowWindow, SW_SHOWNOACTIVATE};
+
+    let Ok(hwnd) = window.hwnd() else {
+        warn!("Window handle not found: {}", window.label());
+        return;
+    };
+    unsafe {
+        let _ = ShowWindow(HWND(hwnd.0 as _), SW_SHOWNOACTIVATE);
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn show_inactive(window: &Window) {
+    window.show().unwrap_or_default();
+}
+
+// The frontend shows and focuses its window through these two, so that test mode can keep the
+// window from taking the focus. A window that never had the focus cannot lose it either, so the
+// ones that close on blur stay open.
+#[tauri::command]
+pub fn show_window(window: Window) {
+    if TEST_MODE.load(Ordering::Relaxed) {
+        show_inactive(&window);
+    } else {
+        window.show().unwrap_or_default();
+    }
+}
+
+#[tauri::command]
+pub fn focus_window(window: Window) {
+    if !TEST_MODE.load(Ordering::Relaxed) {
+        window.set_focus().unwrap_or_default();
+    }
+}
+
+// The physical position that decides where a new window goes: the mouse, or in test mode the
+// centre of the secondary monitor, which keeps the windows off the screen the owner works on
+fn placement_point() -> Position {
+    if TEST_MODE.load(Ordering::Relaxed) {
+        return secondary_monitor_centre();
+    }
+    match Mouse::get_mouse_position() {
         Mouse::Position { x, y } => Position { x, y },
         Mouse::Error => {
             warn!("Mouse position not found, using (0, 0) as default");
             Position { x: 0, y: 0 }
         }
-    };
+    }
+}
+
+// Creating a window on the mouse monitor
+fn build_window(label: &str, title: &str) -> (Window, bool) {
+    let mouse_position = placement_point();
     let current_monitor = get_current_monitor(mouse_position.x, mouse_position.y);
     let position = current_monitor.position();
+
+    let test_mode = TEST_MODE.load(Ordering::Relaxed);
 
     let app_handle = APP.get().unwrap();
     match app_handle.get_window(label) {
         Some(v) => {
             info!("Window existence: {}", label);
-            v.set_focus().unwrap();
+            if !test_mode {
+                v.set_focus().unwrap();
+            }
             (v, true)
         }
         None => {
@@ -112,7 +186,7 @@ fn build_window(label: &str, title: &str) -> (Window, bool) {
             )
             .position(position.x.into(), position.y.into())
             .additional_browser_args("--disable-web-security")
-            .focused(true)
+            .focused(!test_mode)
             .title(title)
             .visible(false);
 
@@ -148,15 +222,8 @@ pub fn config_window() {
 }
 
 fn translate_window() -> Window {
-    use mouse_position::mouse_position::{Mouse, Position};
     // Mouse physical position
-    let mut mouse_position = match Mouse::get_mouse_position() {
-        Mouse::Position { x, y } => Position { x, y },
-        Mouse::Error => {
-            warn!("Mouse position not found, using (0, 0) as default");
-            Position { x: 0, y: 0 }
-        }
-    };
+    let mut mouse_position = placement_point();
     let (window, exists) = build_window("translate", "Translate");
     if exists {
         return window;

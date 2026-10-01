@@ -2,8 +2,9 @@
  * Real-app smoke test (Windows). Start the app first, with the "Tauri dev" run configuration
  * or `pnpm tauri dev`, then run `pnpm smoke [--out <dir>]`.
  *
- * It drives the running app through its local HTTP API, waits for each window to appear,
- * reads the window's text through UI Automation, saves a screenshot, and closes the window.
+ * It puts the app in test mode, drives it through its local HTTP API, waits for each window to appear,
+ * reads the window's text through UI Automation, saves a screenshot, and closes the window. It does not
+ * touch the mouse, the keyboard or the focus, so it can run while the computer is in use.
  * Afterwards it fails on any error or panic the app logged during the run.
  * Results: <out>/report.json and one PNG per scenario (default out: test-results/smoke/<time>).
  */
@@ -82,6 +83,14 @@ async function isListening(api: string): Promise<boolean> {
     }
 }
 
+async function setTestMode(api: string, on: boolean): Promise<boolean> {
+    try {
+        return (await fetch(`${api}/test_mode?on=${on}`, { signal: AbortSignal.timeout(2000) })).ok;
+    } catch {
+        return false;
+    }
+}
+
 async function waitFor<T>(what: string, check: () => T | undefined, timeoutMs = 15000): Promise<T> {
     const deadline = Date.now() + timeoutMs;
     for (;;) {
@@ -129,8 +138,6 @@ async function run(scenario: Scenario, api: string, outDir: string): Promise<Res
     const result: Result = { name: scenario.name, ok: false, title: scenario.title };
     try {
         scenario.prepare?.();
-        // Windows open on the monitor under the cursor; keep them on the secondary one every run.
-        helper('-Action', 'park');
         await scenario.request(api);
         const window = await waitFor(`a visible "${scenario.title}" window`, () =>
             visibleAppWindows().find((candidate) => candidate.title === scenario.title)
@@ -182,16 +189,25 @@ async function main(): Promise<number> {
         return 1;
     }
 
+    // In test mode the app opens its windows on the secondary monitor and leaves the focus where it is.
+    if (!(await setTestMode(api, true))) {
+        console.error('the app has no test mode: it was built before this branch — restart it');
+        return 1;
+    }
+
     const outDir = outputDir();
     mkdirSync(outDir, { recursive: true });
     const logStart = existsSync(LOG_FILE) ? statSync(LOG_FILE).size : 0;
-    await closeAll();
-
     const results: Result[] = [];
-    for (const scenario of scenarios) {
-        const result = await run(scenario, api, outDir);
-        results.push(result);
-        console.log(`${result.ok ? 'PASS' : 'FAIL'}  ${scenario.name}${result.error ? `  ${result.error}` : ''}`);
+    try {
+        await closeAll();
+        for (const scenario of scenarios) {
+            const result = await run(scenario, api, outDir);
+            results.push(result);
+            console.log(`${result.ok ? 'PASS' : 'FAIL'}  ${scenario.name}${result.error ? `  ${result.error}` : ''}`);
+        }
+    } finally {
+        await setTestMode(api, false);
     }
     const { appErrors, serviceErrors } = newLogErrors(logStart);
     for (const line of appErrors) console.log(`ERROR ${line}`);

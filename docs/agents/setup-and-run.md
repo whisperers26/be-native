@@ -32,7 +32,7 @@ This starts Vite on http://localhost:1420 (`pnpm dev`; the port is fixed and mus
 What to expect:
 
 - A debug build calls itself "Be Native (Debug)" (About page, tray tooltip); `src-tauri/src/main.rs` adds the suffix. `tauri dev` names the executable after the product: `src-tauri\target\debug\Be Native.exe`.
-- Windows open on the monitor under the mouse cursor. When you test, keep them on the secondary monitor, not the owner's primary one ([testing.md](testing.md#real-app-smoke-test) has the command that parks the cursor there).
+- Windows open on the monitor under the mouse cursor. When you test, keep them on the secondary monitor, not the owner's primary one (turn on [test mode](testing.md#test-mode) first: the app then opens them there itself and leaves the focus alone).
 - On first run (no settings file yet) the Config window opens. Otherwise the app starts with only a tray icon.
 - Closing a window does not quit. Quit or restart from the tray menu.
 - Restart `pnpm tauri dev` after switching branches. Vite keeps serving the modules it transformed before the switch, and those can still import files the new branch renamed or deleted (such as a `.jsx` that became `.tsx`). New windows then fail to load and stay hidden.

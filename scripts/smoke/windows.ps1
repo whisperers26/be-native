@@ -11,13 +11,10 @@
     -Action text     JSON array of the text UI Automation exposes inside the window (-Handle):
                      values of edit boxes and documents, names of text elements.
     -Action fixture  Writes a PNG to -Path with -Text drawn in black on white (an OCR input).
-    -Action park     Moves the mouse cursor to the centre of the secondary monitor (the primary one when
-                     it is the only monitor). The app opens its windows on the monitor under the cursor,
-                     so this keeps them off the screen the owner works on and keeps screenshots comparable.
 #>
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('list', 'capture', 'close', 'text', 'fixture', 'park')]
+    [ValidateSet('list', 'capture', 'close', 'text', 'fixture')]
     [string]$Action,
     [long]$Handle = 0,
     [string]$Path = '',
@@ -44,7 +41,6 @@ public static class SmokeWin32 {
     [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr hWnd, IntPtr hdc, uint flags);
     [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
     [DllImport("user32.dll")] public static extern bool SetProcessDpiAwarenessContext(IntPtr context);
-    [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
     [DllImport("dwmapi.dll")] public static extern int DwmGetWindowAttribute(IntPtr hWnd, int attribute, out RECT rect, int size);
 }
 '@
@@ -156,12 +152,4 @@ switch ($Action) {
     'close' { [void][SmokeWin32]::PostMessage([IntPtr]$Handle, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero); '{"ok":true}' }
     'text' { ConvertTo-Json -InputObject @(Get-WindowText ([IntPtr]$Handle)) -Compress }
     'fixture' { Write-TextImage $Path $Text; '{"ok":true}' }
-    'park' {
-        Add-Type -AssemblyName System.Windows.Forms
-        $screen = [System.Windows.Forms.Screen]::AllScreens | Where-Object { -not $_.Primary } | Select-Object -First 1
-        if (-not $screen) { $screen = [System.Windows.Forms.Screen]::PrimaryScreen }
-        $bounds = $screen.Bounds
-        [void][SmokeWin32]::SetCursorPos($bounds.X + [int]($bounds.Width / 2), $bounds.Y + [int]($bounds.Height / 2))
-        '{"ok":true}'
-    }
 }

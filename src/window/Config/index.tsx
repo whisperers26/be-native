@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import WindowControl from '../../components/WindowControl';
 import SideBar from './components/SideBar';
 import { osType } from '../../utils/env';
+import { showWindow } from '../../utils/window';
 import { useConfig } from '../../hooks';
 import routes from './routes';
 import './style.css';
@@ -19,7 +20,7 @@ export default function Config() {
 
     useEffect(() => {
         if (appWindow.label === 'config') {
-            appWindow.show();
+            showWindow();
         }
     }, []);
 

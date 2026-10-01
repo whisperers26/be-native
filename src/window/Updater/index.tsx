@@ -10,6 +10,7 @@ import ReactMarkdown from 'react-markdown';
 
 import { useConfig, useToastStyle } from '../../hooks';
 import { osType } from '../../utils/env';
+import { showWindow } from '../../utils/window';
 import type { UnlistenFn } from '@tauri-apps/api/event';
 
 // 0 until the download-progress listener has been registered.
@@ -32,7 +33,7 @@ export default function Updater() {
 
     useEffect(() => {
         if (appWindow.label === 'updater') {
-            appWindow.show();
+            showWindow();
         }
         checkUpdate().then(
             (update) => {
