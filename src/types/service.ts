@@ -91,5 +91,25 @@ export interface PluginInfo {
 /** The installed plugins, by kind (`translate`, `tts`, `recognize`, `collection`) and then by plugin name. */
 export type PluginList = Record<string, Record<string, PluginInfo>>;
 
+/**
+ * One setting that a plugin's info.json asks for (`needs`). The plugin settings form shows an input for no `type` or
+ * `input`, and a dropdown over `options` for `select`.
+ */
+export type PluginNeed =
+    | { key: string; display: string; type?: 'input' }
+    | { key: string; display: string; type: 'select'; options: Record<string, string> };
+
+/**
+ * What the Service settings page reads from a plugin's info.json on top of PluginInfo: the homepage and the settings
+ * its form asks for.
+ */
+export interface PluginConfigInfo extends PluginInfo {
+    homepage: string;
+    needs: PluginNeed[];
+}
+
+/** The installed plugins as the Service settings page loads them, by kind and then by plugin name. */
+export type PluginConfigList = Record<string, Record<string, PluginConfigInfo>>;
+
 /** The settings of each service instance in use, by instance key. */
 export type ServiceConfigMap = Record<string, ServiceConfig>;
