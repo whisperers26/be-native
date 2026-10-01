@@ -22,11 +22,13 @@ Bugs in code inherited from upstream, not fixed yet. Each one was confirmed by r
 ## Services
 
 - **System OCR has no Portuguese.** The `system` OCR `Language` maps `pt_pt`, but its per-OS language tables use the key `pt`, so Portuguese becomes `undefined`.
-- **Some error paths throw `TypeError`s.** caiyun and lingva (translate) call `.trim()` on the response object while building their error message; volcengine OCR (both variants) calls `.trim()` on `undefined` when the response has no `data`. The user sees a `TypeError` instead of the provider's error.
+- **Some error paths throw `TypeError`s.** caiyun and lingva (translate) call `.trim()` on the response object while building their error message; volcengine OCR (both variants) calls `.trim()` on `undefined` when the response has no `data`; iflytek_latex reads `result.data['region']` without checking `data`; tencent_img reads `Response.ImageRecord.Value` without checking `ImageRecord`. The user sees a `TypeError` instead of the provider's error.
 - **The DeepL API check uses a comma operator.** `(result.translations, result.translations[0])` only tests its second operand.
 - **Lingva TTS fails silently.** On an HTTP error it returns `undefined` instead of throwing.
 - **Anki errors are ignored.** The `error` field of AnkiConnect's replies is never checked.
-- **QR code OCR can hang.** The image loader has no `onerror`, so an unreadable image never settles.
+- **QR code OCR can hang.** The image loader has no `onerror`, so an unreadable image never settles; an image with zero width or height never settles either.
+- **iflytek sends its authorization unencoded.** The iflytek and iflytek_intsig OCR services put the base64 `authorization` (which can contain `+`, `/` and `=`) into the query string as it is; only `date` is URL-encoded.
+- **baidu_img's settings check misses an absent key.** It tests `appid === ''`, so a config without `appid` at all passes the check and the request is signed with `undefined`.
 - **Several default translate services fail today.** Checked on 2026-10-01: lingva (`lingva.pot-app.com` no longer resolves), ecdict (`pot-app.com/api/dict` answers 405), bing (its token endpoint answers 404, so "Get Token Failed"), and deepl's free endpoint (rate-limited with 429). Four of the six default translate services show errors out of the box.
 
 ## Rust
