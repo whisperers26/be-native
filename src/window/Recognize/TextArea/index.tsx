@@ -12,6 +12,7 @@ import { nanoid } from 'nanoid';
 import { getServiceName, getServiceSouceType, ServiceSourceType } from '../../../utils/service_instance';
 import { currentServiceInstanceKeyAtom, languageAtom, recognizeFlagAtom } from '../ControlArea';
 import { invoke_plugin } from '../../../utils/invoke_plugin';
+import { mergeLines } from '../../../utils/merge_lines';
 import * as builtinServices from '../../../services/recognize';
 import { useConfig } from '../../../hooks';
 import { base64Atom } from '../ImageArea';
@@ -74,7 +75,7 @@ export default function TextArea(props: TextAreaProps) {
                                 if (recognizeId !== id) return;
                                 v = v.trim();
                                 if (deleteNewline) {
-                                    v = v.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+                                    v = mergeLines(v);
                                 }
                                 setText(v);
                                 setLoading(false);
@@ -122,7 +123,7 @@ export default function TextArea(props: TextAreaProps) {
                                 // not run on.
                                 v = v!.trim();
                                 if (deleteNewline) {
-                                    v = v.replace(/\-\s+/g, '').replace(/\s+/g, ' ');
+                                    v = mergeLines(v);
                                 }
                                 setText(v);
                                 setLoading(false);
@@ -216,7 +217,7 @@ export default function TextArea(props: TextAreaProps) {
                             variant='light'
                             size='sm'
                             onPress={() => {
-                                setText(text!.replace(/\-\s+/g, '').replace(/\s+/g, ' '));
+                                setText(mergeLines(text!));
                             }}
                         >
                             <MdSmartButton className='text-[16px]' />
