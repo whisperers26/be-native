@@ -91,8 +91,27 @@ pub fn cursor_position() -> Result<serde_json::Value, String> {
     Ok(serde_json::json!({ "x": x, "y": y, "monitor": { "x": origin.x, "y": origin.y } }))
 }
 
-// The physical position that decides where a new window goes: the mouse
+// The centre of the first monitor that is not the primary one, or of the primary one if it is alone
+fn secondary_monitor_centre() -> Position {
+    let daemon = get_daemon_window();
+    let primary = daemon.primary_monitor().unwrap().unwrap();
+    let monitors = daemon.available_monitors().unwrap();
+    let monitor = monitors
+        .iter()
+        .find(|m| m.position() != primary.position())
+        .unwrap_or(&primary);
+    Position {
+        x: monitor.position().x + (monitor.size().width / 2) as i32,
+        y: monitor.position().y + (monitor.size().height / 2) as i32,
+    }
+}
+
+// The physical position that decides where a new window goes: the mouse, or in test mode the
+// centre of the secondary monitor, which keeps the windows off the screen the owner works on
 fn placement_point() -> Position {
+    if TEST_MODE.load(Ordering::Relaxed) {
+        return secondary_monitor_centre();
+    }
     match Mouse::get_mouse_position() {
         Mouse::Position { x, y } => Position { x, y },
         Mouse::Error => {
