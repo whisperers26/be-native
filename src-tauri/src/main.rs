@@ -5,6 +5,7 @@ mod agent_cli;
 mod clipboard;
 mod cmd;
 mod config;
+mod drag_guard;
 mod error;
 mod hotkey;
 mod lang_detect;
