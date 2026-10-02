@@ -21,8 +21,8 @@ mod imp {
     use windows::Win32::UI::HiDpi::GetDpiForWindow;
     use windows::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass};
     use windows::Win32::UI::WindowsAndMessaging::{
-        GetClientRect, GetWindowRect, SendMessageW, SetWindowPos, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOZORDER,
-        WM_DPICHANGED, WM_ENTERSIZEMOVE, WM_EXITSIZEMOVE, WM_NCDESTROY, WM_SYSCOMMAND,
+        GetClientRect, GetWindowRect, SendMessageW, SetWindowPos, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, WINDOWPOS,
+        WM_DPICHANGED, WM_ENTERSIZEMOVE, WM_EXITSIZEMOVE, WM_NCDESTROY, WM_SYSCOMMAND, WM_WINDOWPOSCHANGING,
     };
 
     // The command that starts moving a window, in the low bits of the `WM_SYSCOMMAND` parameter
@@ -41,6 +41,8 @@ mod imp {
         moving: Cell<bool>,
         // The size the window had when the drag began, in logical pixels, while it is dragged
         logical: Cell<Option<(f64, f64)>>,
+        // tao is being told the new scale, and may not move or resize the window meanwhile
+        syncing: Cell<bool>,
         // The scale at which the drag began
         start_dpi: Cell<u32>,
     }
@@ -107,6 +109,11 @@ mod imp {
                 }
                 DefSubclassProc(hwnd, msg, wparam, lparam)
             }
+            WM_WINDOWPOSCHANGING if guard.syncing.get() => {
+                let position = &mut *(lparam.0 as *mut WINDOWPOS);
+                position.flags |= SWP_NOSIZE | SWP_NOMOVE;
+                LRESULT(0)
+            }
             // Left to the end of the drag: tao is not told yet
             WM_DPICHANGED if guard.logical.get().is_some() => LRESULT(0),
             WM_EXITSIZEMOVE => {
@@ -117,11 +124,16 @@ mod imp {
                 if let Some(logical) = guard.logical.take() {
                     let dpi = GetDpiForWindow(hwnd);
                     if dpi != guard.start_dpi.get() {
+                        // Windows has resized the window to the new scale already, and tao, which
+                        // goes by the scale it knew, would scale it once more, to a size that
+                        // shows for a moment. It is only told the scale: its resizing is cancelled.
+                        guard.syncing.set(true);
                         let mut rect = RECT::default();
                         if GetWindowRect(hwnd, &mut rect).is_ok() {
                             let scale = WPARAM((dpi | dpi << 16) as usize);
                             SendMessageW(hwnd, WM_DPICHANGED, scale, LPARAM(&rect as *const RECT as isize));
                         }
+                        guard.syncing.set(false);
                     }
                     resize(hwnd, logical, dpi);
                 }
@@ -148,6 +160,7 @@ mod imp {
                 let guard = Box::into_raw(Box::new(Guard {
                     moving: Cell::new(false),
                     logical: Cell::new(None),
+                    syncing: Cell::new(false),
                     start_dpi: Cell::new(0),
                 }));
                 if !SetWindowSubclass(HWND(hwnd as _), Some(guard_proc), SUBCLASS_ID, guard as usize)
