@@ -262,6 +262,7 @@ pub(crate) fn build_window(label: &str, title: &str) -> (Window, bool) {
             if label != "screenshot" {
                 #[cfg(not(target_os = "linux"))]
                 set_shadow(&window, true).unwrap_or_default();
+                crate::drag_guard::install(&window);
             }
             let _ = window.current_monitor();
             (window, false)
