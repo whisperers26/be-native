@@ -44,8 +44,10 @@ jobs:
                   cache: pnpm
 
             - name: Set up Rust
-              uses: dtolnay/rust-toolchain@stable
+              uses: dtolnay/rust-toolchain@master
               with:
+                  # wry 0.24 (Tauri 1) does not compile on Linux with Rust 1.95 or newer
+                  toolchain: ${{ matrix.platform == 'ubuntu-22.04' && '1.90' || 'stable' }}
                   targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
             - name: Install Linux dependencies
