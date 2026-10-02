@@ -32,6 +32,36 @@ describe('mergeLines', () => {
         );
     });
 
+    it('joins lines that fall short of the widest one all through the block', () => {
+        expect(
+            mergeLines(
+                lines(
+                    'Wrapped text rarely fills every line to exactly the same edge of the page,',
+                    'because a long word that does not fit is moved down to',
+                    'whatever line comes next, and that leaves a gap behind',
+                    'the line it left. Such gaps are common in wrapped text,',
+                    'which is why a fixed margin cannot tell them from ends.'
+                )
+            )
+        ).toBe(
+            'Wrapped text rarely fills every line to exactly the same edge of the page, because a long word that does not fit is moved down to whatever line comes next, and that leaves a gap behind the line it left. Such gaps are common in wrapped text, which is why a fixed margin cannot tell them from ends.'
+        );
+    });
+
+    it('measures a line by its letters, not by how many there are', () => {
+        expect(
+            mergeLines(
+                lines(
+                    'Little pilots still fill a little hill with all if it is still lit, it is a',
+                    'Women wear warm woolen mittens whenever winds move many',
+                    'snowmen. Nobody remembers who started it.'
+                )
+            )
+        ).toBe(
+            'Little pilots still fill a little hill with all if it is still lit, it is a Women wear warm woolen mittens whenever winds move many snowmen. Nobody remembers who started it.'
+        );
+    });
+
     it('keeps the break after a line that ends short', () => {
         expect(
             mergeLines(
