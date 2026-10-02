@@ -79,10 +79,10 @@ To start as on first run, quit the app and move `config.json` away.
 
 A release is a `v*` tag on `main`; `release.yml` does the rest.
 
-1. Set the same version in `package.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock` (the `pot` package) and `src-tauri/tauri.conf.json`, and merge that through a PR.
+1. Set the same version in `package.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock` (the `pot` package) and `src-tauri/tauri.conf.json`, and write the release description to `docs/releases/v<version>.md` (rules below). Merge both through a PR.
 2. `git switch main && git pull --ff-only && git tag v<version> && git push origin v<version>`.
 3. Watch it: `gh run watch --repo whisperers26/be-native`. The release appears at `https://github.com/whisperers26/be-native/releases` with the installers and `latest.json`.
-4. Replace the release's placeholder description ("See the assets below...") with the real one, as in the rule below.
+4. Check that `latest.json` carries the description (`gh release download v<version> --repo whisperers26/be-native -p latest.json -O -`).
 
 ### Release description
 
@@ -90,7 +90,7 @@ Every release describes its major changes in three languages, English first, the
 
 - Cover what a user sees or does differently since the previous release: new features, changed or removed settings, and notable fixes. Leave out refactors, tests, docs and CI.
 - One short bullet per change, written for a user, not as a commit message. Group them as New, Changed, Removed and Fixed where there is more than one kind.
-- Set it with `gh release edit v<version> --repo whisperers26/be-native --notes-file <file>` once `release.yml` has published the release. Do not touch the assets or `latest.json`.
+- `release.yml` reads `docs/releases/<tag>.md` and fails without it. It becomes the release body and the `notes` in `latest.json`, which is what the in-app Updater window shows. Do not edit the release body afterwards: that changes the release page but not `latest.json`, so the Updater keeps the old text. Do not touch the assets or `latest.json` either.
 
 The update bundles are signed with a minisign key. Its public half is `pubkey` in `tauri.conf.json`; the private half lives only in the repository secrets `TAURI_PRIVATE_KEY` and `TAURI_KEY_PASSWORD` and in the owner's backup. Losing it means installed copies can never update again, because they only accept bundles signed by that key.
 
