@@ -59,6 +59,22 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
+            # The updater window shows latest.json's notes, which tauri-action fills
+            # from releaseBody when it publishes. Editing the release afterwards
+            # does not reach latest.json, so the notes must exist before the tag.
+            - name: Read the release notes
+              id: notes
+              shell: bash
+              run: |
+                  file="docs/releases/${GITHUB_REF_NAME}.md"
+                  test -f "$file" || { echo "::error::Missing $file: write the release notes before tagging"; exit 1; }
+                  {
+                      echo 'body<<NOTES_EOF'
+                      cat "$file"
+                      echo
+                      echo 'NOTES_EOF'
+                  } >> "$GITHUB_OUTPUT"
+
             - name: Build and publish
               uses: tauri-apps/tauri-action@v0
               env:
@@ -68,7 +84,7 @@ jobs:
               with:
                   tagName: ${{ github.ref_name }}
                   releaseName: Be Native ${{ github.ref_name }}
-                  releaseBody: See the assets below to download and install.
+                  releaseBody: ${{ steps.notes.outputs.body }}
                   releaseDraft: false
                   prerelease: false
                   includeUpdaterJson: true
