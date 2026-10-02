@@ -2,8 +2,12 @@
 // and short lists look the same as wrapped text there.
 const NARROW = 24;
 // Lines of wrapped text do not all hold the same number of characters, so a line counts as full from this share of
-// the widest one.
+// the widest one, until the block shows how far its own lines fall short: that share is kept between these bounds.
 const FULL = 0.88;
+const FULL_MIN = 0.7;
+const FULL_MAX = 0.95;
+// Fewest lines before the end of a block that show how far its lines fall short.
+const SAMPLE = 3;
 
 // Characters written without spaces between words: Chinese characters, kana, and their punctuation.
 const UNSPACED = '\u2e80-\u2fdf\u3000-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef';
@@ -53,9 +57,22 @@ function gap(head: string, tail: string): string {
     return ENDS_UNSPACED.test(head) || STARTS_UNSPACED.test(tail) ? '' : ' ';
 }
 
+// The width from which a line of the block counts as full. Where lines fall short of the widest one only because a long
+// word moved down, or the characters are not all as wide, the block holds many of them, so it is the shortest of the
+// longer half of its lines (the last one ends its paragraph, and says nothing). A block too short to tell uses `FULL`.
+function fullWidth(lines: string[], widest: number): number {
+    const ends = lines
+        .slice(0, -1)
+        .map(width)
+        .sort((a, b) => b - a);
+    if (ends.length < SAMPLE) return widest * FULL;
+    const longer = ends[Math.ceil(ends.length / 2) - 1];
+    return widest * Math.min(FULL_MAX, Math.max(FULL_MIN, longer / widest));
+}
+
 // Whether the first word of `next` had room at the end of `line`. If it had, wrapping did not break the line there.
-function hasRoom(line: string, next: string, widest: number): boolean {
-    return width(line + gap(line, next) + firstWord(next)) <= widest * FULL;
+function hasRoom(line: string, next: string, full: number): boolean {
+    return width(line + gap(line, next) + firstWord(next)) <= full;
 }
 
 function startsLowercase(line: string): boolean {
@@ -75,10 +92,16 @@ function unfinished(line: string): boolean {
 
 // Whether the break between `line` and `next` is there only because the text wrapped. `startsItem` tells whether a
 // line starts a list item.
-function wrapped(line: string, next: string, widest: number, startsItem: (line: string) => boolean): boolean {
+function wrapped(
+    line: string,
+    next: string,
+    widest: number,
+    full: number,
+    startsItem: (line: string) => boolean
+): boolean {
     if (startsItem(next)) return false;
     if (unfinished(line) || (BROKEN_WORD.test(line) && STARTS_WORD.test(next))) return true;
-    if (hasRoom(line, next, widest)) return false;
+    if (hasRoom(line, next, full)) return false;
     if (widest < NARROW) {
         return startsLowercase(next) && !ENDS_SENTENCE.test(line) && line.includes(' ');
     }
@@ -109,9 +132,10 @@ function looksLikeList(lines: string[]): boolean {
 function mergeBlock(lines: string[], startsItem: (line: string) => boolean): string {
     if (looksLikeList(lines)) return lines.join('\n');
     const widest = Math.max(...lines.map(width));
+    const full = fullWidth(lines, widest);
     let merged = lines[0];
     for (let i = 1; i < lines.length; i++) {
-        merged = wrapped(lines[i - 1], lines[i], widest, startsItem)
+        merged = wrapped(lines[i - 1], lines[i], widest, full, startsItem)
             ? glue(merged, lines[i])
             : merged + '\n' + lines[i];
     }

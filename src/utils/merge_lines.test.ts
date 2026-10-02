@@ -32,6 +32,22 @@ describe('mergeLines', () => {
         );
     });
 
+    it('joins lines that fall short of the widest one all through the block', () => {
+        expect(
+            mergeLines(
+                lines(
+                    'Wrapped text rarely fills every line to exactly the same edge of the page,',
+                    'because a long word that does not fit is moved down to',
+                    'whatever line comes next, and that leaves a gap behind',
+                    'the line it left. Such gaps are common in wrapped text,',
+                    'which is why a fixed margin cannot tell them from ends.'
+                )
+            )
+        ).toBe(
+            'Wrapped text rarely fills every line to exactly the same edge of the page, because a long word that does not fit is moved down to whatever line comes next, and that leaves a gap behind the line it left. Such gaps are common in wrapped text, which is why a fixed margin cannot tell them from ends.'
+        );
+    });
+
     it('keeps the break after a line that ends short', () => {
         expect(
             mergeLines(
