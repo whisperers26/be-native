@@ -552,6 +552,11 @@ pub fn translate_window_origin(window: Window, width: f64, height: f64) -> (f64,
 // then draws the change itself.
 #[tauri::command(async)]
 pub fn fit_translate_window(window: Window, width: f64, height: f64, glide: Option<bool>) {
+    // A window being dragged between monitors measures in another scale than it has, and a fit then
+    // snaps it back into its monitor. The window asks again, and this time the drag is over.
+    if crate::drag_guard::dragging() {
+        return;
+    }
     TRANSLATE_WAITING.store(false, Ordering::SeqCst);
     let fit = FIT_COUNT.fetch_add(1, Ordering::SeqCst) + 1;
     // On its way to where it was placed, the window is not there yet, but it has not been moved
