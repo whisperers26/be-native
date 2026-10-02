@@ -15,7 +15,11 @@ const STARTS_UNSPACED = new RegExp(`^[${UNSPACED}]`);
 const ENDS_UNSPACED = new RegExp(`[${UNSPACED}]$`);
 const FIRST_WORD = new RegExp(`^[^\\s${UNSPACED}]*`);
 // Characters twice as wide as a Latin letter: the ones above, and Korean.
-const WIDE = new RegExp(`[${UNSPACED}\u1100-\u11ff\uac00-\ud7af]`, 'g');
+const WIDE = new RegExp(`[${UNSPACED}\u1100-\u11ff\uac00-\ud7af]`);
+// Latin characters well narrower or wider than the average letter in the fonts text is set in.
+const SLIM = /[ijlI.,:;'!|()[\]\s]/;
+const BROAD = /[mwMW@%]/;
+const CAPITAL = /\p{Lu}/u;
 
 const ENDS_SENTENCE = /[.!?…:。！？：]["')\]”’）」』】]*$/;
 const ENDS_COMMA = /[,，、]$/;
@@ -43,8 +47,17 @@ const LOOSE_ORDINAL = /^(?:\d{1,3}(?:\.\d{1,3})*\.|\d{1,3}(?:\.\d{1,3})+|[A-Za-z
 const BROKEN_WORD = /(\p{L})[-\u2010\u00ad]$/u;
 const STARTS_WORD = /^[\p{L}\p{N}]/u;
 
+// How far `line` reaches across a column, in the width of an average Latin letter. Characters are not all as wide, and
+// counting them as if they were moves the end of a line by several letters where it has many of one kind.
 function width(line: string): number {
-    return [...line].length + (line.match(WIDE)?.length ?? 0);
+    let total = 0;
+    for (const char of line) {
+        if (WIDE.test(char)) total += 2;
+        else if (SLIM.test(char)) total += 0.5;
+        else if (BROAD.test(char)) total += 1.5;
+        else total += CAPITAL.test(char) ? 1.2 : 1;
+    }
+    return total;
 }
 
 // The first word of `line`, or its first character where words are not spaced.
