@@ -73,7 +73,7 @@ The `smart` position puts the Translate window beside what the text came from: t
 
 On Windows the Screenshot window is subclassed (`suppress_title_bar`) so that the system never paints its non-client area. Without that, activating the window paints an old-style title bar across the top of the screen, which shows whenever the WebView has not drawn over it yet.
 
-On Windows every window except Screenshot is subclassed by `drag_guard.rs` for the drag between monitors of different scale. While a drag lasts, `WM_DPICHANGED` is held back from tao, which would resize the window under the cursor until it jumped between two sizes and came out far larger, and `fit_translate_window` does nothing (`dragging()`). When the drag ends, tao is sent the new scale and the window is set to the logical size it had when the drag began.
+On Windows every window except Screenshot is subclassed by `drag_guard.rs` for the drag between monitors of different scale. While a drag lasts, `WM_DPICHANGED` is held back from tao, which would resize the window under the cursor until it jumped between two sizes and came out far larger, and `fit_translate_window` does nothing (`dragging()`). Windows resizes the window to the new scale itself during the drag. When the drag ends, tao is sent the new scale with its own resizing cancelled (otherwise the window flashes at a size scaled twice), and the window is set to the logical size it had when the drag began.
 
 ## Events
 
