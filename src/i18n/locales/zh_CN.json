@@ -498,6 +498,7 @@
             "speak": "朗读",
             "copy": "复制",
             "retry": "重试",
+            "detect_failed": "检测失败（{{language}}）",
             "delete_newline": "合并换行",
             "translate_back": "翻译回原文"
         },

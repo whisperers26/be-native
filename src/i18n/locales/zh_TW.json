@@ -458,6 +458,7 @@
             "speak": "朗讀",
             "copy": "複製",
             "retry": "重試",
+            "detect_failed": "偵測失敗（{{language}}）",
             "delete_newline": "合併換行",
             "translate_back": "翻譯回原文"
         },
