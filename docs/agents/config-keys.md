@@ -59,7 +59,7 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `recognize_merge_lines` | `true` | The same, for the Recognize window and silent recognition |
 | `recognize_auto_copy` | `false` | |
 | `recognize_hide_window` | `false` | |
-| `recognize_close_on_blur` | `false` | |
+| `recognize_close_on_blur` | `true` | |
 | `recognize_window_width`, `recognize_window_height` | `800`, `400` | Rust |
 
 ## Hotkeys
