@@ -241,7 +241,6 @@ pub(crate) fn build_window(label: &str, title: &str) -> (Window, bool) {
                 label,
                 tauri::WindowUrl::App("index.html".into()),
             )
-            .position(position.x.into(), position.y.into())
             .additional_browser_args("--disable-web-security")
             .focused(!test_mode)
             .title(title)
@@ -258,6 +257,11 @@ pub(crate) fn build_window(label: &str, title: &str) -> (Window, bool) {
                 builder = builder.transparent(true).decorations(false);
             }
             let window = builder.build().unwrap();
+            // The builder reads a position as logical pixels, which on a scaled monitor lands the
+            // window on the wrong screen, so the monitor's physical origin is set afterwards
+            window
+                .set_position(tauri::PhysicalPosition::new(position.x, position.y))
+                .unwrap();
 
             if label != "screenshot" {
                 #[cfg(not(target_os = "linux"))]
