@@ -156,6 +156,22 @@ fn executable(spec: &Spec) -> Result<PathBuf, String> {
     ))
 }
 
+// A tool about to be started, with no console window of its own
+fn tool_command(program: &Path, args: Vec<String>) -> Command {
+    let mut command = Command::new(program);
+    command
+        .args(args)
+        // Away from any project, so the tool finds no project files to read
+        .current_dir(std::env::temp_dir());
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        // CREATE_NO_WINDOW
+        command.creation_flags(0x08000000);
+    }
+    command
+}
+
 // A running tool. Dropping it ends the session.
 struct Session {
     child: Child,
@@ -173,21 +189,12 @@ impl Session {
             CODEX => codex_args(spec),
             other => return Err(format!("Unknown provider: {other}")),
         };
-        let mut command = Command::new(&program);
+        let mut command = tool_command(&program, args);
         command
-            .args(args)
             .envs(envs(spec))
-            // Away from any project, so the tool finds no project files to read
-            .current_dir(std::env::temp_dir())
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
-        #[cfg(target_os = "windows")]
-        {
-            use std::os::windows::process::CommandExt;
-            // CREATE_NO_WINDOW
-            command.creation_flags(0x08000000);
-        }
         let mut child = command
             .spawn()
             .map_err(|e| format!("Failed to start {}: {e}", display(&program)))?;
@@ -509,6 +516,140 @@ pub fn agent_cli_run(
     result
 }
 
+// A model a tool offers: `label` is its name for a person, `value` what the tool is started with
+#[derive(Clone, Debug, PartialEq, serde::Serialize)]
+pub struct Model {
+    pub label: String,
+    pub value: String,
+}
+
+// The catalog that `codex debug models` prints. A model not marked for listing is internal or
+// retired.
+fn parse_codex_models(output: &str) -> Option<Vec<Model>> {
+    let value = serde_json::from_str::<Value>(output).ok()?;
+    let models = value["models"]
+        .as_array()?
+        .iter()
+        .filter(|model| model["visibility"] == "list")
+        .filter_map(|model| {
+            let slug = model["slug"].as_str()?;
+            Some(Model {
+                label: model["display_name"].as_str().unwrap_or(slug).to_string(),
+                value: slug.to_string(),
+            })
+        })
+        .collect();
+    Some(models)
+}
+
+// The models in Claude Code's answer to `initialize`; None for any other line. An alias (opus,
+// sonnet) is listed as the exact model it stands for now, so the same model is listed once and
+// stays the same model; `default` stays, as the tool's own choice.
+fn parse_claude_models_line(line: &str) -> Option<Vec<Model>> {
+    let value = serde_json::from_str::<Value>(line).ok()?;
+    if value["type"] != "control_response" {
+        return None;
+    }
+    let mut models: Vec<Model> = vec![];
+    for model in value["response"]["response"]["models"].as_array().into_iter().flatten() {
+        let Some(alias) = model["value"].as_str() else {
+            continue;
+        };
+        let id = if alias == "default" {
+            alias
+        } else {
+            model["resolvedModel"].as_str().unwrap_or(alias)
+        };
+        if models.iter().any(|listed| listed.value == id) {
+            continue;
+        }
+        models.push(Model {
+            label: model["displayName"].as_str().unwrap_or(id).to_string(),
+            value: id.to_string(),
+        });
+    }
+    Some(models)
+}
+
+// What Claude Code is asked on stdin to describe itself. It makes no request to a model.
+const CLAUDE_INITIALIZE: &str = concat!(
+    r#"{"type":"control_request","request_id":"models","request":{"subtype":"initialize"}}"#,
+    "\n"
+);
+
+// How long a tool gets to list its models. One that does not know the question never answers.
+const MODELS_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(20);
+
+// Start a tool, send it `input`, and stop it once `read` has the models in its output or the time
+// is up
+fn ask_models(
+    mut command: Command,
+    input: &str,
+    read: fn(BufReader<ChildStdout>) -> Option<Vec<Model>>,
+) -> Result<Vec<Model>, String> {
+    let mut child = command
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .map_err(|e| format!("Failed to start {}: {e}", display(Path::new(command.get_program()))))?;
+    // Stays open until the answer is read: Claude Code ends when its input does
+    let mut stdin = child.stdin.take();
+    if let Some(stdin) = stdin.as_mut() {
+        let _ = stdin.write_all(input.as_bytes()).and_then(|_| stdin.flush());
+    }
+    let stdout = BufReader::new(child.stdout.take().unwrap());
+    let (sender, receiver) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let _ = sender.send(read(stdout));
+    });
+    let models = receiver.recv_timeout(MODELS_TIMEOUT).ok().flatten();
+    drop(stdin);
+    let _ = child.kill();
+    let _ = child.wait();
+    models.filter(|models| !models.is_empty()).ok_or(
+        "The command-line tool did not list its models. Update it, or type the name of the model."
+            .to_string(),
+    )
+}
+
+// The models a tool offers the signed-in account, asked from the tool itself. No prompt is sent,
+// so it costs no usage.
+#[tauri::command(async)]
+pub fn agent_cli_models(provider: String, command: String) -> Result<Vec<Model>, String> {
+    let spec = Spec {
+        provider,
+        command,
+        model: String::new(),
+        effort: String::new(),
+        // Never used: the session gets no prompt
+        system_prompt: "-".to_string(),
+    };
+    let program = executable(&spec)?;
+    match spec.provider.as_str() {
+        CLAUDE_CODE => ask_models(
+            tool_command(&program, claude_args(&spec)),
+            CLAUDE_INITIALIZE,
+            |stdout| {
+                stdout
+                    .lines()
+                    .map_while(Result::ok)
+                    .find_map(|line| parse_claude_models_line(&line))
+            },
+        ),
+        CODEX => ask_models(
+            tool_command(&program, vec!["debug".to_string(), "models".to_string()]),
+            "",
+            |mut stdout| {
+                let mut output = String::new();
+                stdout.read_to_string(&mut output).ok()?;
+                parse_codex_models(&output)
+            },
+        ),
+        other => Err(format!("Unknown provider: {other}")),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -684,6 +825,72 @@ mod tests {
             Event::Warning("stream error".to_string())
         );
         assert_eq!(parse_codex_line(r#"{"type":"thread.started","thread_id":"x"}"#), Event::Other);
+    }
+
+    fn model(label: &str, value: &str) -> Model {
+        Model { label: label.to_string(), value: value.to_string() }
+    }
+
+    #[test]
+    fn codex_models_are_the_ones_marked_for_listing() {
+        let catalog = r#"{"fetched_at":"x","models":[
+            {"slug":"gpt-6-luna","display_name":"GPT-6-Luna","visibility":"list"},
+            {"slug":"gpt-reserve","display_name":"GPT-Reserve","visibility":"hide"},
+            {"slug":"gpt-5.6-terra","visibility":"list"}]}"#;
+        assert_eq!(
+            parse_codex_models(catalog),
+            Some(vec![model("GPT-6-Luna", "gpt-6-luna"), model("gpt-5.6-terra", "gpt-5.6-terra")])
+        );
+        assert_eq!(parse_codex_models("error: unrecognized subcommand 'debug'"), None);
+        assert_eq!(parse_codex_models(r#"{"models":"none"}"#), None);
+    }
+
+    #[test]
+    fn claude_models_are_listed_once_by_their_exact_names() {
+        let answer = concat!(
+            r#"{"type":"control_response","response":{"subtype":"success","request_id":"models","response":{"models":["#,
+            r#"{"value":"default","resolvedModel":"claude-opus-5-5","displayName":"Default (recommended)"},"#,
+            r#"{"value":"opus","resolvedModel":"claude-opus-5-5","displayName":"Opus 5.5"},"#,
+            r#"{"value":"claude-opus-5-5","resolvedModel":"claude-opus-5-5","displayName":"Opus 5.5 again"},"#,
+            r#"{"value":"haiku","resolvedModel":"claude-haiku-4-5-20251001","displayName":"Haiku 4.5"},"#,
+            r#"{"value":"claude-old"},"#,
+            r#"{"displayName":"Nameless"}]}}}"#
+        );
+        assert_eq!(
+            parse_claude_models_line(answer),
+            Some(vec![
+                model("Default (recommended)", "default"),
+                model("Opus 5.5", "claude-opus-5-5"),
+                model("Haiku 4.5", "claude-haiku-4-5-20251001"),
+                model("claude-old", "claude-old"),
+            ])
+        );
+    }
+
+    #[test]
+    fn only_the_answer_to_initialize_holds_claude_models() {
+        assert_eq!(parse_claude_models_line(r#"{"type":"system","subtype":"init","model":"x"}"#), None);
+        assert_eq!(parse_claude_models_line("not json"), None);
+        let refused = r#"{"type":"control_response","response":{"subtype":"error","error":"no"}}"#;
+        assert_eq!(parse_claude_models_line(refused), Some(vec![]));
+    }
+
+    // These two ask the real tools. That sends no prompt and uses nothing, but needs them installed:
+    // cargo test lists_its_models -- --ignored --nocapture
+    #[test]
+    #[ignore]
+    fn real_claude_lists_its_models() {
+        let models = agent_cli_models(CLAUDE_CODE.to_string(), String::new()).unwrap();
+        println!("{models:?}");
+        assert!(models.iter().any(|model| model.value == "default"));
+    }
+
+    #[test]
+    #[ignore]
+    fn real_codex_lists_its_models() {
+        let models = agent_cli_models(CODEX.to_string(), String::new()).unwrap();
+        println!("{models:?}");
+        assert!(!models.is_empty());
     }
 
     // Talks to the real Claude Code with the signed-in account, so it runs only on request:

@@ -18,7 +18,7 @@ mod updater;
 mod window;
 mod writing;
 
-use agent_cli::agent_cli_run;
+use agent_cli::{agent_cli_models, agent_cli_run};
 use clipboard::*;
 use cmd::*;
 use config::*;
@@ -172,6 +172,7 @@ fn main() {
             test_mode,
             lang_detect,
             agent_cli_run,
+            agent_cli_models,
             get_writing_text,
             fit_writing_window,
             writing_replace,

@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { fakeTauri } from '../test/fake-tauri';
-import { agentCliSpec, DEFAULT_SYSTEM_PROMPT, Language, runAgentCli, translationPrompt } from './agent_cli';
+import {
+    agentCliSpec,
+    DEFAULT_SYSTEM_PROMPT,
+    Language,
+    listAgentCliModels,
+    runAgentCli,
+    translationPrompt,
+} from './agent_cli';
 
 const spec = { provider: 'claude_code', command: '', model: 'haiku', effort: 'off', systemPrompt: 'Translate.' } as const;
 
@@ -100,5 +107,26 @@ describe('runAgentCli', () => {
         await expect(runAgentCli(spec, 'hello')).rejects.toBe(
             'claude was not found. Install it, or set its path in the service settings.'
         );
+    });
+});
+
+describe('listAgentCliModels', () => {
+    it('asks the tool at the given path for its models', async () => {
+        const models = [{ label: 'GPT-6-Luna', value: 'gpt-6-luna' }];
+        fakeTauri.command('agent_cli_models', () => models);
+
+        await expect(listAgentCliModels('codex', 'C:/bin/codex.cmd')).resolves.toEqual(models);
+        expect(fakeTauri.calls.find((call) => call.cmd === 'agent_cli_models')?.args).toEqual({
+            provider: 'codex',
+            command: 'C:/bin/codex.cmd',
+        });
+    });
+
+    it('rejects with why the tool listed none', async () => {
+        fakeTauri.command('agent_cli_models', () => {
+            throw 'codex was not found. Install it, or set its path in the service settings.';
+        });
+
+        await expect(listAgentCliModels('codex', '')).rejects.toMatch(/codex was not found/);
     });
 });

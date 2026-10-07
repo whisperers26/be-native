@@ -232,6 +232,7 @@
                     "command_placeholder": "留空則自動尋找",
                     "model": "模型",
                     "model_placeholder": "工具的預設模型",
+                    "list_models": "查詢工具提供的模型",
                     "effort": "推理等級",
                     "instructions": "指令",
                     "efforts": {
