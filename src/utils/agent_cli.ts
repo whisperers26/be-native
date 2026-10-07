@@ -105,7 +105,15 @@ export interface AgentCliModel {
     value: string;
 }
 
-/** The models of Claude Code, by their exact names. The field still takes any other name. */
+/**
+ * The models the installed tool offers the signed-in account, asked from the tool itself. No prompt is sent, so it
+ * uses nothing. `command` is the executable; empty to find it on PATH.
+ */
+export async function listAgentCliModels(provider: AgentCliProvider, command: string): Promise<AgentCliModel[]> {
+    return invoke<AgentCliModel[]>('agent_cli_models', { provider, command });
+}
+
+/** The models of Claude Code suggested before the tool has been asked, by their exact names. The field still takes any other name. */
 export const CLAUDE_CODE_MODELS: AgentCliModel[] = [
     { label: 'Haiku 4.5', value: 'claude-haiku-4-5-20251001' },
     { label: 'Sonnet 5.5', value: 'claude-sonnet-5-5' },
