@@ -20,7 +20,7 @@ describe('Recognize window', () => {
 
         expect(await screen.findByRole('button', { name: /Recognize/ })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /Translate/ })).toBeInTheDocument();
-        expect(await screen.findByText('System OCR')).toBeInTheDocument();
+        expect(await screen.findByText('RapidOCR')).toBeInTheDocument();
         await vi.waitFor(() => expect(fakeTauri.calls.some((call) => call.cmd === 'get_base64')).toBe(true));
         expect(fakeTauri.unhandled).toEqual([]);
     });

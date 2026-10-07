@@ -30,6 +30,7 @@ beforeEach(async () => {
     // System OCR picks its language codes by OS, and detects the language of what it read.
     await initEnv();
     fakeTauri.store.set('translate_detect_engine', 'local');
+    fakeTauri.store.set('recognize_service_list', ['system', 'tesseract']);
     sent = [];
     vi.stubGlobal(
         'Notification',
