@@ -15,9 +15,12 @@ import type { UnlistenFn } from '@tauri-apps/api/event';
 import type { PluginConfigList } from '../../../../types/service';
 
 let unlisten: Promise<UnlistenFn> | null = null;
+// The plugins found the last time the page was open: reading them takes several calls to Rust, and the page
+// would be empty until they answer.
+let lastPluginList: PluginConfigList | null = null;
 
 export default function Service() {
-    const [pluginList, setPluginList] = useState<PluginConfigList | null>(null);
+    const [pluginList, setPluginList] = useState<PluginConfigList | null>(lastPluginList);
     const { t } = useTranslation();
 
     const loadPluginList = async () => {
@@ -45,7 +48,8 @@ export default function Service() {
                 }
             }
         }
-        setPluginList({ ...temp });
+        lastPluginList = { ...temp };
+        setPluginList(lastPluginList);
     };
 
     useEffect(() => {
