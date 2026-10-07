@@ -27,7 +27,7 @@
 1. macOS: accessory activation policy and the accessibility permission prompt.
 2. Load the settings and prune unknown services from the four service lists.
 3. First run (settings empty): open the Config window.
-4. Build the tray menu, start the HTTP server, register the global shortcuts (a failure shows a notification), apply the proxy if enabled, check for updates, warm up offline language detection if it is the selected engine, start the clipboard monitor if enabled, start the waiting Claude Code and Codex sessions.
+4. Build the tray menu, start the HTTP server, register the global shortcuts (a failure shows a notification), apply the proxy if enabled, check for updates, warm up offline language detection if it is the selected engine or none has been chosen (it is the default), start the clipboard monitor if enabled, start the waiting Claude Code and Codex sessions.
 
 ## Commands
 

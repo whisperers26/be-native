@@ -127,10 +127,9 @@ fn main() {
             }
             // Check Update
             check_update(app.handle());
-            if let Some(engine) = get("translate_detect_engine") {
-                if engine.as_str().unwrap() == "local" {
-                    init_lang_detect();
-                }
+            // Local detection is the default, so it is warmed up when no engine has been chosen too
+            if get("translate_detect_engine").map_or(true, |engine| engine.as_str().unwrap() == "local") {
+                init_lang_detect();
             }
             let clipboard_monitor = match get("clipboard_monitor") {
                 Some(v) => v.as_bool().unwrap(),

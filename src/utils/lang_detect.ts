@@ -329,7 +329,7 @@ function textToDetect(text: string) {
 
 export default async function detect(text: string) {
     text = textToDetect(text);
-    let langDetectEngine = (await store.get('translate_detect_engine')) ?? 'baidu';
+    let langDetectEngine = (await store.get('translate_detect_engine')) ?? 'local';
 
     switch (langDetectEngine) {
         case 'baidu':

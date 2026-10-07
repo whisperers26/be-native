@@ -27,7 +27,7 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `translate_source_language` | `auto` | |
 | `translate_target_language` | `zh_cn` | |
 | `translate_second_language` | `en` | Used as the target when the detected source language equals the target |
-| `translate_detect_engine` | `baidu` | `baidu`, `google`, `tencent`, `niutrans`, `yandex`, `bing`, `local` (offline, Rust) |
+| `translate_detect_engine` | `local` | `local` (offline, Rust), `baidu`, `google`, `tencent`, `niutrans`, `yandex`, `bing` |
 | `translate_auto_copy` | `disable` | `source`, `target`, `source_target`, `disable`; also set from the tray. Rust |
 | `translate_merge_lines` | `true` | Join lines that only wrapped and keep paragraphs and list items (`mergeLines`, [frontend.md](frontend.md#translate-window)) |
 | `incremental_translate` | `false` | Append new text to the previous text |
