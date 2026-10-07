@@ -1,5 +1,7 @@
-import { Code, Card, CardBody, Button, Progress, Skeleton } from '@nextui-org/react';
+import { Code, Card, CardBody, Button, Link, Progress, Skeleton } from '@nextui-org/react';
 import { checkUpdate, installUpdate } from '@tauri-apps/api/updater';
+import { getVersion } from '@tauri-apps/api/app';
+import { open } from '@tauri-apps/api/shell';
 import React, { useEffect, useState } from 'react';
 import { appWindow } from '@tauri-apps/api/window';
 import { relaunch } from '@tauri-apps/api/process';
@@ -12,6 +14,15 @@ import { useToastStyle } from '../../hooks';
 import { osType } from '../../utils/env';
 import { showWindow } from '../../utils/window';
 import type { UnlistenFn } from '@tauri-apps/api/event';
+
+const REPO_URL = 'https://github.com/whisperers26/be-native';
+const RELEASES_URL = `${REPO_URL}/releases/latest`;
+
+// Versions up to 1.1.5 cannot update themselves to a new release; they are reinstalled by hand.
+function needsReinstall(version: string): boolean {
+    const [major = 0, minor = 0, patch = 0] = version.split('.').map((n) => parseInt(n, 10) || 0);
+    return major !== 1 ? major < 1 : minor !== 1 ? minor < 1 : patch <= 5;
+}
 
 // 0 until the download-progress listener has been registered.
 let unlisten: Promise<UnlistenFn> | 0 = 0;
@@ -27,6 +38,7 @@ export default function Updater() {
     const [downloaded, setDownloaded] = useState(0);
     const [total, setTotal] = useState(0);
     const [body, setBody] = useState('');
+    const [reinstall, setReinstall] = useState(false);
     const { t } = useTranslation();
     const toastStyle = useToastStyle();
 
@@ -39,6 +51,7 @@ export default function Updater() {
                 if (update.shouldUpdate) {
                     // checkUpdate sets the manifest whenever shouldUpdate is true.
                     setBody(update.manifest!.body);
+                    getVersion().then((version) => setReinstall(needsReinstall(version)));
                 } else {
                     setBody(t('updater.latest'));
                 }
@@ -84,6 +97,19 @@ export default function Updater() {
                     <h2>{t('updater.title')}</h2>
                 </div>
             </div>
+            {reinstall && (
+                <div className='mx-[80px] mt-[10px] p-[10px] rounded-lg bg-warning-100 text-warning-800 text-[14px]'>
+                    <b>{t('updater.reinstall_title')}</b>
+                    <p>{t('updater.reinstall')}</p>
+                    <Link
+                        className='cursor-pointer'
+                        size='sm'
+                        onPress={() => open(REPO_URL)}
+                    >
+                        {t('updater.repo')}: {REPO_URL}
+                    </Link>
+                </div>
+            )}
             <Card className='mx-[80px] mt-[10px] overscroll-auto h-[calc(100vh-150px)]'>
                 <CardBody>
                     {body === '' ? (
@@ -166,6 +192,10 @@ export default function Updater() {
                     isDisabled={downloaded !== 0}
                     color='primary'
                     onPress={() => {
+                        if (reinstall) {
+                            open(RELEASES_URL);
+                            return;
+                        }
                         installUpdate().then(
                             () => {
                                 toast.success(t('updater.installed'), { style: toastStyle, duration: 10000 });
@@ -181,7 +211,9 @@ export default function Updater() {
                         ? downloaded > total
                             ? t('updater.installing')
                             : t('updater.downloading')
-                        : t('updater.update')}
+                        : reinstall
+                          ? t('updater.download')
+                          : t('updater.update')}
                 </Button>
                 <Button
                     variant='flat'
