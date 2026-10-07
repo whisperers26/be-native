@@ -1,8 +1,12 @@
-<img width="200px" src="public/icon.svg" align="left"/>
+<div align="center">
+
+<h3><a href='./README.md'>中文</a> | English | <a href='./README_KR.md'> 한글 </a></h3>
+
+<img width="160" src="public/icon.svg" alt="Be Native"/>
 
 # Be Native
 
-> 🌈 Read and write like a native speaker: a cross-platform translation and OCR app
+🌈 Read and write like a native speaker: a cross-platform translation and OCR app
 
 ![License](https://img.shields.io/github/license/whisperers26/be-native.svg)
 ![Tauri](https://img.shields.io/badge/Tauri-1.6.8-blue?logo=tauri)
@@ -11,6 +15,8 @@
 ![Windows](https://img.shields.io/badge/-Windows-blue?logo=windows&logoColor=white)
 ![MacOS](https://img.shields.io/badge/-macOS-black?&logo=apple&logoColor=white)
 ![Linux](https://img.shields.io/badge/-Linux-yellow?logo=linux&logoColor=white)
+
+</div>
 
 <!-- fork:start -->
 
@@ -50,11 +56,7 @@
 
 <!-- fork:end -->
 
-<br/>
-<hr/>
 <div align="center">
-
-<h3><a href='./README.md'>中文</a> | English | <a href='./README_KR.md'> 한글 </a></h3>
 
 <table>
 <tr>
