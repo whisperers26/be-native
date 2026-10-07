@@ -6,7 +6,7 @@
 
 # Be Native
 
-🌈 像母语者一样阅读和写作：跨平台的划词翻译与文字识别软件
+🌈 像母语者一样阅读和写作：跨平台的划词翻译、文字识别与写作润色软件
 
 ![License](https://img.shields.io/github/license/whisperers26/be-native.svg)
 ![Tauri](https://img.shields.io/badge/Tauri-1.6.8-blue?logo=tauri)

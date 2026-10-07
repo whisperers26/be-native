@@ -6,7 +6,7 @@
 
 # Be Native
 
-🌈 원어민처럼 읽고 쓰기: 크로스 플랫폼 번역 및 OCR 앱
+🌈 원어민처럼 읽고 쓰기: 크로스 플랫폼 번역·OCR·글쓰기 개선 앱
 
 ![License](https://img.shields.io/github/license/whisperers26/be-native.svg)
 ![Tauri](https://img.shields.io/badge/Tauri-1.6.8-blue?logo=tauri)
