@@ -45,6 +45,7 @@
 > - The Recognize window closes when it loses focus by default, like the Translate window.
 > - Menus in the Config window open without the scale-and-fade animation: the page behind a menu no longer flickers in front of it.
 > - With screens stacked one above the other, windows now open on the screen you are working on instead of the one below it.
+> - On a screen whose scaling differs from the main screen's, selecting a screen region covers the whole screen again instead of showing a small copy of it in the top-left corner.
 > - Versions 1.1.5 and older cannot update themselves: the updater window tells them to download the latest release from GitHub and, during installation, to uninstall the old version and clean the app data, with a link to this repository.
 
 <!-- fork:end -->
