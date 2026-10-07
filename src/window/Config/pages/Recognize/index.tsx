@@ -17,7 +17,7 @@ export default function Recognize() {
     const [mergeWrappedLines, setMergeWrappedLines] = useConfig('recognize_merge_lines', true);
     const [autoCopy, setAutoCopy] = useConfig('recognize_auto_copy', false);
     const [hideWindow, setHideWindow] = useConfig('recognize_hide_window', false);
-    const [closeOnBlur, setCloseOnBlur] = useConfig('recognize_close_on_blur', false);
+    const [closeOnBlur, setCloseOnBlur] = useConfig('recognize_close_on_blur', true);
     const { t } = useTranslation();
     return (
         <Card className='mb-[10px]'>

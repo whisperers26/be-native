@@ -53,7 +53,7 @@ void listen('tauri://focus', () => {
 
 export default function Recognize() {
     const [pluginList, setPluginList] = useAtom(pluginListAtom);
-    const [closeOnBlur] = useConfig('recognize_close_on_blur', false);
+    const [closeOnBlur] = useConfig('recognize_close_on_blur', true);
     const [pined, setPined] = useState(false);
     const [serviceInstanceList] = useConfig('recognize_service_list', ['rapidocr', 'system', 'tesseract']);
     const [serviceInstanceConfigMap, setServiceInstanceConfigMap] = useState<ServiceConfigMap | null>(null);

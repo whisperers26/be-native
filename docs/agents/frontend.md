@@ -7,7 +7,7 @@ Stack: React 18; Vite 5 (dev server on port 1420); NextUI 2.4 on Tailwind 3.4, w
 ## Boot
 
 1. `index.html` loads `src/main`. The `daemon` window loads `daemon.html`, which has no script.
-2. `src/main` blocks the context menu in production builds, runs `initStore()` (`src/utils/store`) and `initEnv()` (`src/utils/env`, which sets `osType`, `arch`, `osVersion`, `appVersion`), then renders `App` inside `NextUIProvider` and `NextThemesProvider`.
+2. `src/main` blocks the context menu in production builds, runs `initStore()` (`src/utils/store`) and `initEnv()` (`src/utils/env`, which sets `osType`, `arch`, `osVersion`, `appVersion`), then renders `App` inside `NextUIProvider` (with `disableAnimation` in the Config window: its menus flickered while they scaled in on the transparent window) and `NextThemesProvider`.
 3. `src/App` renders the component for the window's label:
 
 | Label | Component | Opened by |
