@@ -280,14 +280,35 @@ fn parse_claude_line(line: &str) -> Event {
         }
         Some("result") => {
             let result = value["result"].as_str().unwrap_or_default().to_string();
-            if value["is_error"].as_bool().unwrap_or(false) {
+            if !value["is_error"].as_bool().unwrap_or(false) {
+                Event::Done(Some(result))
+            } else if !result.trim().is_empty() {
                 Event::Failed(result)
             } else {
-                Event::Done(Some(result))
+                Event::Failed(claude_failure(&value))
             }
         }
         _ => Event::Other,
     }
+}
+
+// What to report for a turn that failed without a `result`, as one that is refused or breaks off
+// does: the reasons are in `errors` then
+fn claude_failure(value: &Value) -> String {
+    let mut reason = value["subtype"].as_str().unwrap_or("error").to_string();
+    if let Some(stop_reason) = value["stop_reason"].as_str() {
+        reason.push_str(&format!(", stop reason: {stop_reason}"));
+    }
+    let mut lines = vec![format!("Claude Code ended without an answer ({reason})")];
+    lines.extend(
+        value["errors"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .map(str::to_string),
+    );
+    lines.join("\n")
 }
 
 fn parse_codex_line(line: &str) -> Event {
@@ -321,6 +342,23 @@ fn parse_codex_line(line: &str) -> Event {
         ),
         _ => Event::Other,
     }
+}
+
+// The answer of a turn that has ended: what its closing line carries, or else the text that
+// arrived before it. A turn can end without either (the model wrote nothing, or only thought), and
+// that is a failure: an empty answer would show as nothing at all.
+fn answer_of(
+    answer: Option<String>,
+    text: &str,
+    warning: Option<String>,
+    name: &str,
+) -> Result<String, String> {
+    let answer = answer.filter(|answer| !answer.trim().is_empty());
+    let answer = answer.unwrap_or_else(|| text.to_string());
+    if answer.trim().is_empty() {
+        return Err(warning.unwrap_or(format!("{name} ended its turn without an answer. Try again.")));
+    }
+    Ok(answer)
 }
 
 // Send the one prompt of this session and read the answer. `on_text` gets the text so far each
@@ -379,7 +417,10 @@ fn converse(
                 text = whole;
                 on_text(&text);
             }
-            Event::Done(answer) => return Ok(answer.unwrap_or(text)),
+            Event::Done(answer) => {
+                let name = if is_codex { "Codex" } else { "Claude Code" };
+                return answer_of(answer, &text, warning, name);
+            }
             Event::Failed(message) => return Err(message),
             Event::Warning(message) => warning = Some(message),
             Event::Other => {}
@@ -513,6 +554,9 @@ pub fn agent_cli_run(
     });
     // The session is over: dropping it kills the process
     drop(session);
+    if let Err(e) = &result {
+        warn!("Agent CLI session failed: {} {}: {}", spec.provider, spec.model, e);
+    }
     result
 }
 
@@ -802,6 +846,46 @@ mod tests {
         );
         assert_eq!(parse_claude_line(r#"{"type":"system","subtype":"init"}"#), Event::Other);
         assert_eq!(parse_claude_line("not json"), Event::Other);
+    }
+
+    // A turn that fails without an answer has no `result`: what went wrong is in `errors`
+    #[test]
+    fn claude_failures_without_a_result_say_why() {
+        let refused = r#"{"type":"result","subtype":"error_during_execution","is_error":true,"stop_reason":"refusal","errors":["[ede_diagnostic] result_type=assistant last_content_type=none stop_reason=refusal","Connection error."]}"#;
+        assert_eq!(
+            parse_claude_line(refused),
+            Event::Failed(
+                "Claude Code ended without an answer (error_during_execution, stop reason: refusal)\n[ede_diagnostic] result_type=assistant last_content_type=none stop_reason=refusal\nConnection error."
+                    .to_string()
+            )
+        );
+        let bare = r#"{"type":"result","subtype":"error_max_turns","is_error":true,"stop_reason":null}"#;
+        assert_eq!(
+            parse_claude_line(bare),
+            Event::Failed("Claude Code ended without an answer (error_max_turns)".to_string())
+        );
+        let blank = r#"{"type":"result","subtype":"success","is_error":true,"result":"  "}"#;
+        assert_eq!(
+            parse_claude_line(blank),
+            Event::Failed("Claude Code ended without an answer (success)".to_string())
+        );
+    }
+
+    #[test]
+    fn an_answer_is_never_empty() {
+        let name = "Codex";
+        assert_eq!(answer_of(Some("你好".to_string()), "你", None, name), Ok("你好".to_string()));
+        assert_eq!(answer_of(None, "你好", None, name), Ok("你好".to_string()));
+        // The closing line has no text, but the text arrived before it
+        assert_eq!(answer_of(Some(String::new()), "你好", None, name), Ok("你好".to_string()));
+        assert_eq!(
+            answer_of(Some(" \n".to_string()), "", None, name),
+            Err("Codex ended its turn without an answer. Try again.".to_string())
+        );
+        assert_eq!(
+            answer_of(None, "", Some("stream error".to_string()), name),
+            Err("stream error".to_string())
+        );
     }
 
     #[test]
