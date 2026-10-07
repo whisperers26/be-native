@@ -68,6 +68,7 @@ class FakeTauri {
     os = { osType: 'Windows_NT', arch: 'x86_64', version: '10.0.26200', platform: 'win32', locale: 'en-US' };
     /** The current window: its size in physical pixels and the scale of the monitor it is on. */
     window = { size: { width: 800, height: 600 }, scaleFactor: 1 };
+    appVersion = '3.0.7';
     sqlRows: unknown[] = [];
     update: null | Record<string, unknown> = null;
     calls: { cmd: string; args: Args }[] = [];
@@ -84,6 +85,7 @@ class FakeTauri {
         this.os = { osType: 'Windows_NT', arch: 'x86_64', version: '10.0.26200', platform: 'win32', locale: 'en-US' };
         this.window = { size: { width: 800, height: 600 }, scaleFactor: 1 };
         this.sqlRows = [];
+        this.appVersion = '3.0.7';
         this.update = null;
         this.calls = [];
         this.emitted = [];
@@ -135,7 +137,7 @@ class FakeTauri {
                 if (cmd === 'tempdir') return `${FAKE_ROOT}/Temp`;
                 break;
             case 'App':
-                if (cmd === 'getAppVersion') return '3.0.7';
+                if (cmd === 'getAppVersion') return this.appVersion;
                 if (cmd === 'getAppName') return 'Be Native';
                 if (cmd === 'getTauriVersion') return '1.8.1';
                 if (cmd === 'show' || cmd === 'hide') return null;

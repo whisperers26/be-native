@@ -25,6 +25,36 @@ describe('Updater window', () => {
         expect(fakeTauri.unhandled).toEqual([]);
     });
 
+    it.each(['1.1.5', '1.0.9', '0.9.0'])('recommends a reinstall from GitHub on version %s', async (version) => {
+        fakeTauri.appVersion = version;
+        fakeTauri.update = { version: '1.1.7', body: 'Release notes here', date: '2026-01-01' };
+
+        render(
+            <NextUIProvider>
+                <Updater />
+            </NextUIProvider>
+        );
+
+        expect(await screen.findByText('Old version: please reinstall')).toBeInTheDocument();
+        expect(screen.getByText(/github.com\/whisperers26\/be-native/)).toBeInTheDocument();
+        expect(screen.getByText('Download from GitHub')).toBeInTheDocument();
+    });
+
+    it('updates in place from version 1.1.6', async () => {
+        fakeTauri.appVersion = '1.1.6';
+        fakeTauri.update = { version: '1.1.7', body: 'Release notes here', date: '2026-01-01' };
+
+        render(
+            <NextUIProvider>
+                <Updater />
+            </NextUIProvider>
+        );
+
+        expect(await screen.findByText('Release notes here')).toBeInTheDocument();
+        expect(screen.queryByText('Old version: please reinstall')).not.toBeInTheDocument();
+        expect(screen.getByText('Update')).toBeInTheDocument();
+    });
+
     it('says the latest version is installed when there is no update', async () => {
         render(
             <NextUIProvider>

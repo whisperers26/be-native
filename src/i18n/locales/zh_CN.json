@@ -211,7 +211,11 @@
             "downloading": "下载中…",
             "installing": "安装中…",
             "cancel": "取消",
-            "installed": "安装完成，重启应用生效"
+            "installed": "安装完成，重启应用生效",
+            "reinstall_title": "旧版本：请重新安装",
+            "reinstall": "当前版本无法再自动更新。请从 GitHub 下载最新版本，运行安装程序，并在提示时选择卸载旧版本并清理应用数据，然后安装新版本。",
+            "download": "前往 GitHub 下载",
+            "repo": "GitHub 仓库"
         },
         "services": {
             "help": "配置指南",
