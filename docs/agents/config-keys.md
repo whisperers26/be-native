@@ -74,7 +74,7 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | --- | --- | --- |
 | `translate_service_list` | `['deepl', 'bing', 'lingva', 'yandex', 'google', 'ecdict']` | Instance keys in display order. Rust prunes unknown entries at launch |
 | `writing_service_list` | `['llm7']` | Same; no plugins |
-| `recognize_service_list` | `['system', 'tesseract']` | Same |
+| `recognize_service_list` | `['rapidocr', 'system', 'tesseract']` | Same |
 | `tts_service_list` | `['lingva_tts']` | Same; only the first entry is used |
 | `collection_service_list` | `[]` | Same |
 | `<instance key>` | `{}` | That instance's settings: `instanceName`, the service's own fields, and for translate `enable`. Rust reads `command`, `model`, `effort`, `systemPrompt` and `enable` of `claude_code` and `codex` instances, of both the translate and the writing list |
