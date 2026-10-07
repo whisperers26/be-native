@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { fakeTauri } from '../test/fake-tauri';
+import { initStore } from '../utils/store';
 import { deleteKey, useConfig } from './useConfig';
 
 async function loaded<T>(key: string, defaultValue: T, options?: { sync?: boolean }) {
@@ -16,6 +17,24 @@ describe('useConfig', () => {
 
         await waitFor(() => expect(result.current[0]).toBe('system'));
         expect(fakeTauri.store.get('app_theme')).toBe('system');
+    });
+
+    it('starts from what the store held at launch, without waiting for it', async () => {
+        fakeTauri.store.set('app_theme', 'dark');
+        await initStore();
+
+        const { result } = renderHook(() => useConfig('app_theme', 'system'));
+
+        expect(result.current[0]).toBe('dark');
+    });
+
+    it('starts from the value it had the last time it was used', async () => {
+        const first = await loaded('app_theme', 'system');
+        first.unmount();
+
+        const { result } = renderHook(() => useConfig('app_theme', 'system'));
+
+        expect(result.current[0]).toBe('system');
     });
 
     it('prefers the stored value and leaves it alone', async () => {

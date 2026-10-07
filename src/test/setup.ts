@@ -100,10 +100,13 @@ if (!('innerText' in HTMLElement.prototype)) {
     });
 }
 
-beforeEach(() => {
+beforeEach(async () => {
     vi.stubGlobal('Date', FrozenDate);
     vi.spyOn(Math, 'random').mockReturnValue(0.123456789);
     fakeTauri.reset();
+    // Imported here, not at the top: the store module pulls in `@tauri-apps/api/window`, which reads the window
+    // label when it is first imported, and a test file sets its label after this file has loaded.
+    (await import('../utils/store')).clearCache();
     httpMock.reset();
 });
 

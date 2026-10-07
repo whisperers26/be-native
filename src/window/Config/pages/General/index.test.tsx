@@ -29,6 +29,25 @@ describe('General settings page', () => {
         expect(fakeTauri.unhandled).toEqual([]);
     });
 
+    it('is drawn with its controls at once when it is opened again', async () => {
+        const page = (
+            <NextUIProvider>
+                <MemoryRouter>
+                    <Page />
+                </MemoryRouter>
+            </NextUIProvider>
+        );
+        const first = render(page);
+        // Auto Startup is the one switch that does not wait for a setting
+        await vi.waitFor(() => expect(screen.getAllByRole('switch').length).toBe(5));
+        first.unmount();
+
+        render(page);
+
+        // No waiting: the first frame has every switch
+        expect(screen.getAllByRole('switch').length).toBe(5);
+    });
+
     it('turns the window animations off for every window', async () => {
         render(
             <NextUIProvider>
