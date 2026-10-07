@@ -117,7 +117,7 @@ Every window (`src/window/<Name>/index.test.tsx`; SilentRecognize's tests check 
 - Set the window label in a `vi.hoisted` block before importing the component (see above).
 - Import `src/i18n` so labels are the English text from `en_US.json`; render inside `NextUIProvider`, plus `MemoryRouter` for the Config window and its pages.
 - Assert the labels the user sees, and end with `expect(fakeTauri.unhandled).toEqual([])`.
-- Keep the network out: a window that detects a language when it opens (Translate) needs `fakeTauri.store.set('translate_detect_engine', 'local')`; an unqueued HTTP request fails the run as an unhandled rejection.
+- Keep the network out: an unqueued HTTP request fails the run as an unhandled rejection. Language detection is local by default, so a window that detects a language when it opens (Translate) makes no request for it; the older tests still set `translate_detect_engine` to `local` themselves.
 - Wait for whatever happens after the settings load (`findBy…`, `vi.waitFor`), never for a fixed time.
 
 React prints development warnings from the app's own code during these tests (`defaultProps` in react-beautiful-dnd, a `className={false}` in the Translate window's source area), and react-beautiful-dnd prints development-only "Unable to find drag handle" setup messages in the Service settings page test. They are not failures.
