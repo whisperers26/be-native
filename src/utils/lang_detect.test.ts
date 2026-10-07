@@ -8,11 +8,11 @@ function useEngine(engine: string): void {
 }
 
 describe('language detection', () => {
-    it('uses baidu when no engine is set', async () => {
-        httpMock.queue({ data: { lan: 'zh' } });
+    it('detects locally when no engine is set', async () => {
+        fakeTauri.command('lang_detect', () => 'zh_cn');
 
         await expect(detect('你好')).resolves.toBe('zh_cn');
-        expect(httpMock.calls[0].url).toBe('https://fanyi.baidu.com/langdetect');
+        expect(httpMock.calls).toEqual([]);
     });
 
     it('baidu: posts the text as a form and maps its code', async () => {
