@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { Provider } from 'jotai';
 import { describe, expect, it, vi } from 'vitest';
 import { fakeTauri } from '../../test/fake-tauri';
+import { httpMock } from '../../test/http';
 import '../../i18n';
 
 vi.hoisted(() => {
@@ -215,5 +216,37 @@ describe('Translate window', () => {
         );
 
         expect(await screen.findByDisplayValue('hello world')).toBeInTheDocument();
+    });
+
+    it('says so beside the language when the web detection engine fails', async () => {
+        fakeTauri.command('get_text', () => 'hello world');
+        fakeTauri.command('test_mode', () => true);
+        fakeTauri.store.set('translate_detect_engine', 'baidu');
+        // The detection fails; then Google, the one card of test mode, translates
+        httpMock.queue({ status: 500, data: {} }, { data: [[['你好世界', 'hello world']], null, 'en'] });
+
+        render(
+            <NextUIProvider>
+                <Translate />
+            </NextUIProvider>
+        );
+
+        expect(await screen.findByText('Detection failed (English)')).toBeInTheDocument();
+    });
+
+    it('shows a detected language as it is', async () => {
+        fakeTauri.command('get_text', () => 'hello world');
+        fakeTauri.command('test_mode', () => true);
+        fakeTauri.store.set('translate_detect_engine', 'baidu');
+        httpMock.queue({ data: { lan: 'en' } }, { data: [[['你好世界', 'hello world']], null, 'en'] });
+
+        render(
+            <NextUIProvider>
+                <Translate />
+            </NextUIProvider>
+        );
+
+        expect(await screen.findByText('English')).toBeInTheDocument();
+        expect(screen.queryByText(/Detection failed/)).not.toBeInTheDocument();
     });
 });

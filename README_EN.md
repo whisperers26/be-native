@@ -36,6 +36,7 @@
 > - While a text is being recognized and translated, a small round progress indicator with the icon of the service at work is shown instead of an empty window; the window pours out of it, like liquid, once the translations are there. Click the indicator to open the window right away. "Window Animations" in the General settings turns the animations off, for the writing window too.
 > - Text that mixes languages is detected by its larger part, so mostly English text with some Chinese in it is translated instead of being taken for Chinese.
 > - The language of a text is detected on your computer by default, without sending it to a web service; the other engines can still be chosen in the Translate settings.
+> - When a web detection engine fails, the language label says "Detection failed (English)", so you know English is only the fallback.
 > - Recognized and selected text has its wrapped lines merged by default: lines that were broken only because the text wrapped are joined, while paragraphs, headings and list items (bulleted, numbered or unmarked) keep their own lines. Words broken by a hyphen are put back together, and Chinese and Japanese are joined without spaces. It replaces Pot's "Delete Newline", which made everything one line and was off by default.
 > - The About page links to this fork: GitHub opens this repository and Feedback opens its issues. Upstream's website, e-mail and community links are gone.
 > - Backup (WebDAV, Aliyun Drive, local file) is removed: the settings no longer have a Backup page.

@@ -19,7 +19,7 @@ import { invoke_plugin } from '../../../../utils/invoke_plugin';
 import * as recognizeServices from '../../../../services/recognize';
 import * as builtinTtsServices from '../../../../services/tts';
 import { mergeLines } from '../../../../utils/merge_lines';
-import detect from '../../../../utils/lang_detect';
+import { detectLanguage as detect } from '../../../../utils/lang_detect';
 import { store } from '../../../../utils/store';
 import { focusWindow, showWindow } from '../../../../utils/window';
 import { sourceBusyAtom, windowShowingAtom } from '../../progress';
@@ -51,6 +51,8 @@ export default function SourceArea(props: SourceAreaProps) {
     const [appFontSize] = useConfig('app_font_size', 16);
     const [sourceText, setSourceText, syncSourceText] = useSyncAtom(sourceTextAtom);
     const [detectLanguage, setDetectLanguage] = useAtom(detectLanguageAtom);
+    // The web detection engine failed, and the detected language is the fallback
+    const [detectFailed, setDetectFailed] = useState(false);
     const sourceHeight = useAtomValue(sourceHeightAtom);
     const setSourceBusy = useSetAtom(sourceBusyAtom);
     const setWindowShowing = useSetAtom(windowShowingAtom);
@@ -228,7 +230,9 @@ export default function SourceArea(props: SourceAreaProps) {
         const instanceKey = ttsServiceList![0];
         let detected = detectLanguage;
         if (detected === '') {
-            detected = await detect(sourceText);
+            const detection = await detect(sourceText);
+            detected = detection.language;
+            setDetectFailed(detection.failed);
             setDetectLanguage(detected);
         }
         if (getServiceSouceType(instanceKey) === ServiceSourceType.PLUGIN) {
@@ -317,7 +321,9 @@ export default function SourceArea(props: SourceAreaProps) {
     }, [sourceText]);
 
     const detect_language = async (text: string) => {
-        setDetectLanguage(await detect(text));
+        const detection = await detect(text);
+        setDetectFailed(detection.failed);
+        setDetectLanguage(detection.language);
     };
 
     let sourceTextChangeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -513,11 +519,13 @@ export default function SourceArea(props: SourceAreaProps) {
                         {detectLanguage !== '' && (
                             <Chip
                                 size='sm'
-                                color='secondary'
+                                color={detectFailed ? 'warning' : 'secondary'}
                                 variant='dot'
                                 className='my-auto'
                             >
-                                {t(`languages.${detectLanguage}`)}
+                                {detectFailed
+                                    ? t('translate.detect_failed', { language: t(`languages.${detectLanguage}`) })
+                                    : t(`languages.${detectLanguage}`)}
                             </Chip>
                         )}
                     </div>

@@ -44,7 +44,7 @@ async function baidu_detect(text: string) {
             return lang_map[result.lan];
         }
     }
-    return 'en';
+    return null;
 }
 // 腾讯只支持这么多语言
 // https://cloud.tencent.com/document/product/551/15619
@@ -84,7 +84,7 @@ async function tencent_detect(text: string) {
             return lang_map[result.translate.source];
         }
     }
-    return 'en';
+    return null;
 }
 // https://cloud.google.com/translate/docs/languages?hl=zh-cn
 async function google_detect(text: string) {
@@ -139,7 +139,7 @@ async function google_detect(text: string) {
             return lang_map[result[2]];
         }
     }
-    return 'en';
+    return null;
 }
 // https://niutrans.com/documents/contents/trans_text#languageList
 async function niutrans_detect(text: string) {
@@ -185,7 +185,7 @@ async function niutrans_detect(text: string) {
             return lang_map[result['language']];
         }
     }
-    return 'en';
+    return null;
 }
 // https://yandex.com/dev/translate/doc/en/concepts/api-overview
 async function yandex_detect(text: string) {
@@ -226,7 +226,7 @@ async function yandex_detect(text: string) {
             return lang_map[result['lang']];
         }
     }
-    return 'en';
+    return null;
 }
 // https://learn.microsoft.com/en-us/azure/ai-services/translator/language-support
 async function bing_detect(text: string) {
@@ -303,7 +303,7 @@ async function bing_detect(text: string) {
             }
         }
     }
-    return 'en';
+    return null;
 }
 
 async function local_detect(text: string) {
@@ -327,26 +327,47 @@ function textToDetect(text: string) {
     return text;
 }
 
-export default async function detect(text: string) {
+/** A detected language, as an app code. */
+export interface Detection {
+    language: string;
+    /** The web engine could not be asked, or gave no language the app knows; `language` is then `en`. */
+    failed: boolean;
+}
+
+// The language a web engine found, or null when it found none the app knows
+function webDetect(engine: unknown, text: string): Promise<string | null> | null {
+    switch (engine) {
+        case 'baidu':
+            return baidu_detect(text);
+        case 'google':
+            return google_detect(text);
+        case 'tencent':
+            return tencent_detect(text);
+        case 'niutrans':
+            return niutrans_detect(text);
+        case 'yandex':
+            return yandex_detect(text);
+        case 'bing':
+            return bing_detect(text);
+        default:
+            return null;
+    }
+}
+
+/** Detect the language of a text, and say whether the web engine failed and `en` stands in for its answer. */
+export async function detectLanguage(text: string): Promise<Detection> {
     text = textToDetect(text);
     let langDetectEngine = (await store.get('translate_detect_engine')) ?? 'local';
 
-    switch (langDetectEngine) {
-        case 'baidu':
-            return await baidu_detect(text);
-        case 'google':
-            return await google_detect(text);
-        case 'local':
-            return await local_detect(text);
-        case 'tencent':
-            return await tencent_detect(text);
-        case 'niutrans':
-            return await niutrans_detect(text);
-        case 'yandex':
-            return await yandex_detect(text);
-        case 'bing':
-            return await bing_detect(text);
-        default:
-            return await local_detect(text);
+    const web = webDetect(langDetectEngine, text);
+    if (web === null) {
+        return { language: await local_detect(text), failed: false };
     }
+    // A request that cannot be made (no network) is a failure like any other
+    const language = await web.catch(() => null);
+    return { language: language ?? 'en', failed: language === null };
+}
+
+export default async function detect(text: string) {
+    return (await detectLanguage(text)).language;
 }

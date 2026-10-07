@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { fakeTauri } from '../test/fake-tauri';
 import { httpMock } from '../test/http';
-import detect from './lang_detect';
+import detect, { detectLanguage } from './lang_detect';
 
 function useEngine(engine: string): void {
     fakeTauri.store.set('translate_detect_engine', engine);
@@ -120,5 +120,31 @@ describe('language detection', () => {
         httpMock.queue({ data: { lan: 'xx' } });
 
         await expect(detect('???')).resolves.toBe('en');
+    });
+
+    it('says that a web engine failed, and falls back to en', async () => {
+        useEngine('baidu');
+        httpMock.queue({ status: 500, data: {} });
+        await expect(detectLanguage('你好')).resolves.toEqual({ language: 'en', failed: true });
+
+        httpMock.queue({ data: { lan: 'xx' } });
+        await expect(detectLanguage('???')).resolves.toEqual({ language: 'en', failed: true });
+    });
+
+    it('takes a request that cannot be made for a failure', async () => {
+        useEngine('google');
+        // Nothing queued: the request rejects, as it does without a network
+
+        await expect(detectLanguage('你好')).resolves.toEqual({ language: 'en', failed: true });
+    });
+
+    it('does not call a detected language a failure, English included', async () => {
+        useEngine('baidu');
+        httpMock.queue({ data: { lan: 'en' } });
+        await expect(detectLanguage('hello')).resolves.toEqual({ language: 'en', failed: false });
+
+        useEngine('local');
+        fakeTauri.command('lang_detect', () => 'en');
+        await expect(detectLanguage('hello')).resolves.toEqual({ language: 'en', failed: false });
     });
 });

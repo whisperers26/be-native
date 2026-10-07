@@ -498,6 +498,7 @@
             "speak": "Speak",
             "copy": "Copy",
             "retry": "Try again",
+            "detect_failed": "Detection failed ({{language}})",
             "delete_newline": "Merge Wrapped Lines",
             "translate_back": "Translation back to the original"
         },
