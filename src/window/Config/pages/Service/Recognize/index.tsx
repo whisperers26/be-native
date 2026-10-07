@@ -30,6 +30,7 @@ export default function Recognize(props: RecognizeProps) {
     const [currentConfigKey, setCurrentConfigKey] = useState('system');
     // now it's service instance list
     const [recognizeServiceInstanceList, setRecognizeServiceInstanceList] = useConfig('recognize_service_list', [
+        'rapidocr',
         'system',
         'tesseract',
     ]);

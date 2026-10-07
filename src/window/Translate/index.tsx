@@ -111,7 +111,7 @@ export default function Translate() {
         'google',
         'ecdict',
     ]);
-    const [recognizeServiceInstanceList] = useConfig('recognize_service_list', ['system', 'tesseract']);
+    const [recognizeServiceInstanceList] = useConfig('recognize_service_list', ['rapidocr', 'system', 'tesseract']);
     const [ttsServiceInstanceList] = useConfig('tts_service_list', ['lingva_tts']);
     const [collectionServiceInstanceList] = useConfig<string[]>('collection_service_list', []);
     const [hideLanguage] = useConfig('hide_language', false);

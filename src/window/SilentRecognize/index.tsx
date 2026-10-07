@@ -22,7 +22,7 @@ type RecognizeServices = Record<string, RecognizeService>;
 // default recognition language.
 async function recognize(): Promise<string> {
     const base64 = await invoke<string>('get_base64');
-    const serviceInstanceList = (await store.get<string[]>('recognize_service_list')) ?? ['system', 'tesseract'];
+    const serviceInstanceList = (await store.get<string[]>('recognize_service_list')) ?? ['rapidocr', 'system', 'tesseract'];
     const language = (await store.get<string>('recognize_language')) ?? 'auto';
     const mergeWrappedLines = (await store.get<boolean>('recognize_merge_lines')) ?? true;
     const instanceKey = serviceInstanceList[0];
