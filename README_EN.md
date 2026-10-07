@@ -18,43 +18,9 @@
 
 </div>
 
-<!-- fork:start -->
+**Be Native** helps you read and write in a language that is not your own. It does selection translation, input translation, screenshot OCR, screenshot translation and writing improvement, which rewrites what you wrote so it reads naturally, with many translation, writing, OCR, text-to-speech and vocabulary services plus plugins. It runs on Windows, macOS and Linux.
 
-> **Be Native** helps you read and write in a language that is not your own. It does selection translation, input translation, screenshot OCR, screenshot translation and writing improvement, which rewrites what you wrote so it reads naturally, with many translation, writing, OCR, text-to-speech and vocabulary services plus plugins. It runs on Windows, macOS and Linux.
->
-> Be Native is built on [Pot](https://github.com/pot-app/pot-desktop) and is a personal fork of it. Upstream [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) has been archived; development continues in [whisperers26/be-native](https://github.com/whisperers26/be-native). Installers are published on this fork's [Releases](https://github.com/whisperers26/be-native/releases) page and the in-app updater reads them; the install instructions below are for upstream Pot.
->
-> Changes in this fork:
->
-> - The main branch is `main`; every change lands through a pull request.
-> - AI agents work from [AGENTS.md](./AGENTS.md) and the wiki in [docs/agents](./docs/agents/).
-> - CI checks every pull request (docs, types, tests and the frontend build).
-> - Automated tests (Vitest) pin the frontend's behaviour: `pnpm test`.
-> - A real-app smoke test (`pnpm smoke`, Windows) checks the app's windows through its local HTTP API.
-> - The frontend is strict TypeScript; CI rejects JavaScript files under `src/`.
-> - Pushing a `v*` tag builds and publishes signed installers as a GitHub release; the in-app updater reads the latest release instead of upstream's feed.
-> - The app is named Be Native and has its own icon; a debug build (`pnpm tauri dev`) calls itself "Be Native (Debug)" and does not check for updates at launch.
-> - Selecting a screen region shows a horizontal and a vertical line through the pointer instead of a small crosshair; the lines stay on one monitor and follow the pointer to another.
-> - Silent text recognition: its own hotkey (also in the tray menu and the HTTP API as `/ocr_copy`) selects a screen region and copies the recognized text to the clipboard without opening a window.
-> - Claude Code and Codex are translation services: they use the `claude` or `codex` command-line tool already installed and signed in on your computer, so translations run on your subscription with no API key. Each translation gets a fresh session, and one is kept ready in the background so answers come about as fast as from an API; model and reasoning level are set in the service settings, where a button asks the tool which models it offers and lists them.
-> - RapidOCR is a built-in OCR service: the PP-OCRv5 models run on your computer, fully offline, and read small text and tight selections that the system OCR misses (Simplified and Traditional Chinese, English and Japanese). It is the default OCR service on a fresh install; an existing OCR service list is left as it is.
-> - The translation window sizes itself to its text: it shows everything without scrolling where it can, gets wider rather than tall and narrow for longer text, and never fills the screen. Turn on "Remember Window Size" to keep the size you give it instead, which it now reopens with exactly.
-> - While a text is being recognized and translated, a small round progress indicator with the icon of the service at work is shown instead of an empty window; the window pours out of it, like liquid, once the translations are there. Click the indicator to open the window right away. "Window Animations" in the General settings turns the animations off, for the writing window too.
-> - Text that mixes languages is detected by its larger part, so mostly English text with some Chinese in it is translated instead of being taken for Chinese.
-> - The language of a text is detected on your computer by default, without sending it to a web service; the other engines can still be chosen in the Translate settings.
-> - When a web detection engine fails, the language label says "Detection failed (English)", so you know English is only the fallback.
-> - Recognized and selected text has its wrapped lines merged by default: lines that were broken only because the text wrapped are joined, while paragraphs, headings and list items (bulleted, numbered or unmarked) keep their own lines. Words broken by a hyphen are put back together, and Chinese and Japanese are joined without spaces. It replaces Pot's "Delete Newline", which made everything one line and was off by default.
-> - The About page links to this fork: GitHub opens this repository and Feedback opens its issues. Upstream's website, e-mail and community links are gone.
-> - Backup (WebDAV, Aliyun Drive, local file) is removed: the settings no longer have a Backup page.
-> - Writing improvement: select text you wrote and press its hotkey, and a window shows it rewritten to read naturally. The default service is LLM7, which is free and online and needs no account or key (without a token it answers only a few requests before it makes you wait; a free token from llm7.io lifts that to 60 a minute); any OpenAI-compatible API, or your subscription through Claude Code or Codex, works too, and each service's prompt can be changed. The Tones button adds versions in five tones (professional, casual, friendly, confident, concise; editable in the settings), and Custom Prompt takes a request of your own. Each result is a box of its own, and the window grows smoothly downwards, moving up only when there is no room below. Click any result to put it in place of the text you selected.
-> - The "Transparent Effect" setting is gone: the settings and updater windows are always opaque. "Remember Window Size" is off by default.
-> - The Recognize window closes when it loses focus by default, like the Translate window.
-> - Menus in the Config window open without the scale-and-fade animation: the page behind a menu no longer flickers in front of it.
-> - With screens stacked one above the other, windows now open on the screen you are working on instead of the one below it.
-> - On a screen whose scaling differs from the main screen's, selecting a screen region covers the whole screen again instead of showing a small copy of it in the top-left corner.
-> - Versions 1.1.5 and older cannot update themselves: the updater window tells them to download the latest release from GitHub and, during installation, to uninstall the old version and clean the app data, with a link to this repository.
-
-<!-- fork:end -->
+Be Native is built on [Pot](https://github.com/pot-app/pot-desktop) and is a personal fork of it. Upstream [pot-app/pot-desktop](https://github.com/pot-app/pot-desktop) has been archived; development continues in [whisperers26/be-native](https://github.com/whisperers26/be-native). Installers are published on this fork's [Releases](https://github.com/whisperers26/be-native/releases) page and the in-app updater reads them; the install instructions below are for upstream Pot.
 
 <div align="center">
 
@@ -71,6 +37,7 @@
 
 -   [Usage](#usage)
 -   [Features](#features)
+-   [Changes in This Fork](#changes-in-this-fork)
 -   [Supported Services](#supported-services)
 -   [Plugin System](#plugin-system)
 -   [Installation](#installation)
@@ -122,6 +89,44 @@ Every action below has its own shortcut. Set them in Settings → Hotkey; an act
 -   [x] Support Windows, macOS and Linux
 -   [x] Support Wayland (Tested on KDE, Gnome and Hyprland)
 -   [x] Multi-language support
+
+<div align="center">
+
+# Changes in This Fork
+
+</div>
+
+<!-- fork:start -->
+
+- The main branch is `main`; every change lands through a pull request.
+- AI agents work from [AGENTS.md](./AGENTS.md) and the wiki in [docs/agents](./docs/agents/).
+- CI checks every pull request (docs, types, tests and the frontend build).
+- Automated tests (Vitest) pin the frontend's behaviour: `pnpm test`.
+- A real-app smoke test (`pnpm smoke`, Windows) checks the app's windows through its local HTTP API.
+- The frontend is strict TypeScript; CI rejects JavaScript files under `src/`.
+- Pushing a `v*` tag builds and publishes signed installers as a GitHub release; the in-app updater reads the latest release instead of upstream's feed.
+- The app is named Be Native and has its own icon; a debug build (`pnpm tauri dev`) calls itself "Be Native (Debug)" and does not check for updates at launch.
+- Selecting a screen region shows a horizontal and a vertical line through the pointer instead of a small crosshair; the lines stay on one monitor and follow the pointer to another.
+- Silent text recognition: its own hotkey (also in the tray menu and the HTTP API as `/ocr_copy`) selects a screen region and copies the recognized text to the clipboard without opening a window.
+- Claude Code and Codex are translation services: they use the `claude` or `codex` command-line tool already installed and signed in on your computer, so translations run on your subscription with no API key. Each translation gets a fresh session, and one is kept ready in the background so answers come about as fast as from an API; model and reasoning level are set in the service settings, where a button asks the tool which models it offers and lists them.
+- RapidOCR is a built-in OCR service: the PP-OCRv5 models run on your computer, fully offline, and read small text and tight selections that the system OCR misses (Simplified and Traditional Chinese, English and Japanese). It is the default OCR service on a fresh install; an existing OCR service list is left as it is.
+- The translation window sizes itself to its text: it shows everything without scrolling where it can, gets wider rather than tall and narrow for longer text, and never fills the screen. Turn on "Remember Window Size" to keep the size you give it instead, which it now reopens with exactly.
+- While a text is being recognized and translated, a small round progress indicator with the icon of the service at work is shown instead of an empty window; the window pours out of it, like liquid, once the translations are there. Click the indicator to open the window right away. "Window Animations" in the General settings turns the animations off, for the writing window too.
+- Text that mixes languages is detected by its larger part, so mostly English text with some Chinese in it is translated instead of being taken for Chinese.
+- The language of a text is detected on your computer by default, without sending it to a web service; the other engines can still be chosen in the Translate settings.
+- When a web detection engine fails, the language label says "Detection failed (English)", so you know English is only the fallback.
+- Recognized and selected text has its wrapped lines merged by default: lines that were broken only because the text wrapped are joined, while paragraphs, headings and list items (bulleted, numbered or unmarked) keep their own lines. Words broken by a hyphen are put back together, and Chinese and Japanese are joined without spaces. It replaces Pot's "Delete Newline", which made everything one line and was off by default.
+- The About page links to this fork: GitHub opens this repository and Feedback opens its issues. Upstream's website, e-mail and community links are gone.
+- Backup (WebDAV, Aliyun Drive, local file) is removed: the settings no longer have a Backup page.
+- Writing improvement: select text you wrote and press its hotkey, and a window shows it rewritten to read naturally. The default service is LLM7, which is free and online and needs no account or key (without a token it answers only a few requests before it makes you wait; a free token from llm7.io lifts that to 60 a minute); any OpenAI-compatible API, or your subscription through Claude Code or Codex, works too, and each service's prompt can be changed. The Tones button adds versions in five tones (professional, casual, friendly, confident, concise; editable in the settings), and Custom Prompt takes a request of your own. Each result is a box of its own, and the window grows smoothly downwards, moving up only when there is no room below. Click any result to put it in place of the text you selected.
+- The "Transparent Effect" setting is gone: the settings and updater windows are always opaque. "Remember Window Size" is off by default.
+- The Recognize window closes when it loses focus by default, like the Translate window.
+- Menus in the Config window open without the scale-and-fade animation: the page behind a menu no longer flickers in front of it.
+- With screens stacked one above the other, windows now open on the screen you are working on instead of the one below it.
+- On a screen whose scaling differs from the main screen's, selecting a screen region covers the whole screen again instead of showing a small copy of it in the top-left corner.
+- Versions 1.1.5 and older cannot update themselves: the updater window tells them to download the latest release from GitHub and, during installation, to uninstall the old version and clean the app data, with a link to this repository.
+
+<!-- fork:end -->
 
 <div align="center">
 
