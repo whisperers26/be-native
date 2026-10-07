@@ -156,6 +156,22 @@ fn executable(spec: &Spec) -> Result<PathBuf, String> {
     ))
 }
 
+// A tool about to be started, with no console window of its own
+fn tool_command(program: &Path, args: Vec<String>) -> Command {
+    let mut command = Command::new(program);
+    command
+        .args(args)
+        // Away from any project, so the tool finds no project files to read
+        .current_dir(std::env::temp_dir());
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        // CREATE_NO_WINDOW
+        command.creation_flags(0x08000000);
+    }
+    command
+}
+
 // A running tool. Dropping it ends the session.
 struct Session {
     child: Child,
@@ -173,21 +189,12 @@ impl Session {
             CODEX => codex_args(spec),
             other => return Err(format!("Unknown provider: {other}")),
         };
-        let mut command = Command::new(&program);
+        let mut command = tool_command(&program, args);
         command
-            .args(args)
             .envs(envs(spec))
-            // Away from any project, so the tool finds no project files to read
-            .current_dir(std::env::temp_dir())
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
-        #[cfg(target_os = "windows")]
-        {
-            use std::os::windows::process::CommandExt;
-            // CREATE_NO_WINDOW
-            command.creation_flags(0x08000000);
-        }
         let mut child = command
             .spawn()
             .map_err(|e| format!("Failed to start {}: {e}", display(&program)))?;
