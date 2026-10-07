@@ -768,8 +768,16 @@ fn screenshot_window() -> Window {
         window.set_size(*size).unwrap();
     }
 
+    // Full screen is asked for from another thread, so that it reaches the event loop as a message
+    // of its own. Called here on the main thread (a hotkey, the tray), it would run inside the same
+    // event as the move in build_window, and tao applies the resize of a move to a monitor of
+    // another scale only once that event is over: the window came out of full screen again, at
+    // its default size in the monitor's corner.
     #[cfg(not(target_os = "macos"))]
-    window.set_fullscreen(true).unwrap();
+    {
+        let window = window.clone();
+        std::thread::spawn(move || window.set_fullscreen(true).unwrap_or_default());
+    }
 
     window.set_always_on_top(true).unwrap();
     window
