@@ -246,6 +246,7 @@
                     "command_placeholder": "Found automatically when empty",
                     "model": "Model",
                     "model_placeholder": "The tool's default",
+                    "list_models": "Check which models the tool offers",
                     "effort": "Reasoning Level",
                     "instructions": "Instructions",
                     "efforts": {

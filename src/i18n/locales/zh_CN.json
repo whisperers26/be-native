@@ -246,6 +246,7 @@
                     "command_placeholder": "留空则自动查找",
                     "model": "模型",
                     "model_placeholder": "工具的默认模型",
+                    "list_models": "查询工具提供的模型",
                     "effort": "推理级别",
                     "instructions": "指令",
                     "efforts": {

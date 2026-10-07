@@ -92,6 +92,73 @@ describe('AgentCliConfig', () => {
         expect(model).toHaveValue('Opus 5.5');
     });
 
+    it('asks Codex for its models, offers them by name and keeps the list with the settings', async () => {
+        fakeTauri.command('agent_cli_run', () => '你好');
+        fakeTauri.command('agent_cli_models', () => [
+            { label: 'GPT-6-Luna', value: 'gpt-6-luna' },
+            { label: 'GPT-5.6-Terra', value: 'gpt-5.6-terra' },
+        ]);
+        renderForm(CodexConfig, 'codex@abc');
+        fireEvent.change(await screen.findByLabelText('Executable'), { target: { value: 'C:/bin/codex.cmd' } });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Check which models the tool offers' }));
+
+        const model = await screen.findByRole('combobox', { name: 'Model' });
+        expect(fakeTauri.calls.find((call) => call.cmd === 'agent_cli_models')?.args).toEqual({
+            provider: 'codex',
+            command: 'C:/bin/codex.cmd',
+        });
+        fireEvent.change(model, { target: { value: 'GPT-5.6-Terra' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+        await vi.waitFor(() =>
+            expect(fakeTauri.store.get('codex@abc')).toMatchObject({
+                model: 'gpt-5.6-terra',
+                models: [
+                    { label: 'GPT-6-Luna', value: 'gpt-6-luna' },
+                    { label: 'GPT-5.6-Terra', value: 'gpt-5.6-terra' },
+                ],
+            })
+        );
+        expect(model).toHaveValue('GPT-5.6-Terra');
+    });
+
+    it('offers the models the tool listed the last time', async () => {
+        fakeTauri.store.set('codex@abc', {
+            model: 'gpt-6-luna',
+            models: [{ label: 'GPT-6-Luna', value: 'gpt-6-luna' }],
+        });
+        renderForm(CodexConfig, 'codex@abc');
+
+        expect(await screen.findByRole('combobox', { name: 'Model' })).toHaveValue('GPT-6-Luna');
+    });
+
+    it('replaces the suggested Claude Code models with the ones the tool lists', async () => {
+        fakeTauri.command('agent_cli_models', () => [
+            { label: 'Default (recommended)', value: 'default' },
+            { label: 'Haiku 4.5 (new)', value: 'claude-haiku-4-5-20251001' },
+        ]);
+        renderForm(ClaudeCodeConfig, 'claude_code@abc');
+        const model = await screen.findByRole('combobox', { name: 'Model' });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Check which models the tool offers' }));
+
+        await vi.waitFor(() => expect(model).toHaveValue('Haiku 4.5 (new)'));
+    });
+
+    it('shows why the models could not be listed and keeps the field as it was', async () => {
+        fakeTauri.command('agent_cli_models', () => {
+            throw 'The command-line tool did not list its models. Update it, or type the name of the model.';
+        });
+        renderForm(CodexConfig, 'codex@abc');
+        fireEvent.change(await screen.findByLabelText('Model'), { target: { value: 'gpt-x' } });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Check which models the tool offers' }));
+
+        expect(await screen.findByText(/did not list its models/)).toBeInTheDocument();
+        expect(screen.getByLabelText('Model')).toHaveValue('gpt-x');
+        expect(screen.queryByRole('combobox', { name: 'Model' })).not.toBeInTheDocument();
+    });
+
     it('shows why the test translation failed and does not add the instance', async () => {
         fakeTauri.command('agent_cli_run', () => {
             throw 'claude was not found. Install it, or set its path in the service settings.';
