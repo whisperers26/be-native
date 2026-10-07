@@ -525,5 +525,3 @@ Rust >= 1.80.0
 -   [@uiYzzi](https://github.com/uiYzzi) Implementation ideas
 -   [@Lichenkass](https://github.com/Lichenkass) Maintaining the Deepin App Store.
 -   [Tauri](https://github.com/tauri-apps/tauri) A user-friendly GUI framework.
-
-<div align="center">

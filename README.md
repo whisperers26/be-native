@@ -527,5 +527,3 @@ Rust >= 1.80.0
 -   [@uiYzzi](https://github.com/uiYzzi) 实现思路
 -   [@Lichenkass](https://github.com/Lichenkass) 维护 Deepin 应用商店中的 pot
 -   [Tauri](https://github.com/tauri-apps/tauri) 好用的 GUI 框架
-
-<div align="center">
