@@ -6,7 +6,7 @@
 
 # Be Native
 
-🌈 Read and write like a native speaker: a cross-platform translation and OCR app
+🌈 Read and write like a native speaker: a cross-platform app for translation, OCR and writing improvement
 
 ![License](https://img.shields.io/github/license/whisperers26/be-native.svg)
 ![Tauri](https://img.shields.io/badge/Tauri-1.6.8-blue?logo=tauri)
