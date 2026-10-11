@@ -13,6 +13,7 @@ mod placement;
 mod screenshot;
 mod server;
 mod system_ocr;
+mod system_tts;
 mod tray;
 mod updater;
 mod window;
@@ -30,6 +31,7 @@ use screenshot::screenshot;
 use server::*;
 use std::sync::Mutex;
 use system_ocr::*;
+use system_tts::*;
 use tauri::api::notification::Notification;
 use tauri::Manager;
 use tauri_plugin_log::LogTarget;
@@ -153,6 +155,7 @@ fn main() {
             get_base64,
             copy_img,
             system_ocr,
+            system_tts,
             set_proxy,
             unset_proxy,
             run_binary,
