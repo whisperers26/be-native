@@ -182,7 +182,10 @@ Be Native는 [Pot](https://github.com/pot-app/pot-desktop)을 기반으로 한 �
 
 ## 문자-음성변환
 
+-   [x] [Google](https://translate.google.com)
 -   [x] [Lingva](https://github.com/thedaviddelta/lingva-translate)
+-   [x] [Youdao](https://ai.youdao.com/)
+-   [x] 시스템 음성 (로컬, 오프라인: Windows SAPI, macOS `say`, Linux `espeak-ng`)
 
 추가항목은 다음을 참고 [Plugin System](#plugin-system)
 

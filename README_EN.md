@@ -182,7 +182,10 @@ More Services see [Plugin System](#plugin-system)
 
 ## Text-to-Speech
 
+-   [x] [Google](https://translate.google.com)
 -   [x] [Lingva](https://github.com/thedaviddelta/lingva-translate)
+-   [x] [Youdao](https://ai.youdao.com/)
+-   [x] System voice (local, offline: Windows SAPI, macOS `say`, Linux `espeak-ng`)
 
 More Services see [Plugin System](#plugin-system)
 

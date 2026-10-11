@@ -361,6 +361,16 @@
             },
             "instance_name": "اسم التكوين",
             "tts": {
+                "google_tts": {
+                    "title": "Google",
+                    "custom_url": "Custom URL"
+                },
+                "youdao_tts": {
+                    "title": "Youdao"
+                },
+                "system_tts": {
+                    "title": "System voice"
+                },
                 "lingva_tts": {
                     "request_path": "مسار الطلب",
                     "title": "مترجم النصوص لينجفا"

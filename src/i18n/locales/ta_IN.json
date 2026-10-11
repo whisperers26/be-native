@@ -386,6 +386,16 @@
             "no_need": "உள்ளமைவு தேவையில்லை",
             "instance_name": "உள்ளமைவு பெயர்",
             "tts": {
+                "google_tts": {
+                    "title": "Google",
+                    "custom_url": "Custom URL"
+                },
+                "youdao_tts": {
+                    "title": "Youdao"
+                },
+                "system_tts": {
+                    "title": "System voice"
+                },
                 "lingva_tts": {
                     "title": "மொழியியல்",
                     "request_path": "கோரிக்கை பாதை"

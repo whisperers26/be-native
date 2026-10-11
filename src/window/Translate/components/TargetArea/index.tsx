@@ -91,7 +91,7 @@ export default function TargetArea(props: TargetAreaProps) {
     // press comes long after, except that ttsPluginInfo never arrives for an uninstalled plugin (known-issues.md).
     const [appFontSize] = useConfig('app_font_size', 16);
     const [collectionServiceList] = useConfig<string[]>('collection_service_list', []);
-    const [ttsServiceList] = useConfig('tts_service_list', ['lingva_tts']);
+    const [ttsServiceList] = useConfig('tts_service_list', ['google_tts']);
     const [translateSecondLanguage] = useConfig('translate_second_language', 'en');
     const [historyDisable] = useConfig('history_disable', false);
     const [isLoading, setIsLoading] = useState(false);

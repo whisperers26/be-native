@@ -15,6 +15,7 @@
 | `clipboard` | The clipboard monitor loop |
 | `screenshot` | Captures one monitor to `pot_screenshot.png` |
 | `system_ocr` | OS OCR: Windows.Media.Ocr, a bundled macOS helper, or Linux `tesseract` |
+| `system_tts` | OS speech: SAPI through PowerShell on Windows, `say` on macOS, `espeak-ng` on Linux |
 | `lang_detect` | Offline language detection (lingua) |
 | `agent_cli` | Claude Code and Codex sessions for the translate and writing services of the same names ([services.md](services.md)) |
 | `writing` | Writing improvement: the selected text, the Writing window and its height, pasting a result over the selection |
@@ -47,6 +48,7 @@
 | `get_base64` | — | string | `pot_screenshot_cut.png` as base64; `""` if missing |
 | `copy_img` | `width`, `height` | — | Copies the cut image to the clipboard |
 | `system_ocr` | `lang` | string | OS OCR of `pot_screenshot_cut.png`; the text has one line per line read |
+| `system_tts` | `text`, `lang` | number[] | Speaks `text` with the installed voice for `lang` (a BCP-47 tag) and returns the audio: WAV on Windows and Linux, AIFF on macOS. An error when the OS has no voice for the language, or on Linux no `espeak-ng` |
 | `lang_detect` | `text` | string | Offline language detection; an app language code, `en` if unsure |
 | `get_writing_text` | — | string | The text waiting for the writing window |
 | `fit_writing_window` | `height` | — | Give the calling (Writing) window this height, in logical pixels, at once. Its top left corner stays, unless the window would reach below its monitor's work area: then it moves up as far as that takes (`placement::inside`) |

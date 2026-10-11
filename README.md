@@ -182,7 +182,10 @@ Be Native 是 [Pot](https://github.com/pot-app/pot-desktop) 的个人分支（fo
 
 ## 语音合成
 
+-   [x] [Google](https://translate.google.com)
 -   [x] [Lingva](https://github.com/thedaviddelta/lingva-translate)
+-   [x] [有道](https://ai.youdao.com/)
+-   [x] 系统语音（本地，离线：Windows SAPI、macOS `say`、Linux `espeak-ng`）
 
 更多接口支持见 [插件系统](#插件系统)
 

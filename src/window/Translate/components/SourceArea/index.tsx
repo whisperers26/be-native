@@ -61,7 +61,7 @@ export default function SourceArea(props: SourceAreaProps) {
     const [mergeWrappedLines] = useConfig('translate_merge_lines', true);
     const [recognizeLanguage] = useConfig('recognize_language', 'auto');
     const [recognizeServiceList] = useConfig('recognize_service_list', ['rapidocr', 'system', 'tesseract']);
-    const [ttsServiceList] = useConfig('tts_service_list', ['lingva_tts']);
+    const [ttsServiceList] = useConfig('tts_service_list', ['google_tts']);
     const [hideWindow] = useConfig('translate_hide_window', false);
     const [hideSource] = useConfig('hide_source', false);
     const [rememberWindowSize] = useConfig('translate_remember_window_size', false);
