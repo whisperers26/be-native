@@ -296,6 +296,10 @@
             },
             "help": "Guía de configuración",
             "tts": {
+                "google_tts": {
+                    "title": "Google",
+                    "custom_url": "Custom URL"
+                },
                 "lingva_tts": {
                     "title": "Lingva"
                 }

@@ -361,6 +361,10 @@
             },
             "instance_name": "اسم التكوين",
             "tts": {
+                "google_tts": {
+                    "title": "Google",
+                    "custom_url": "Custom URL"
+                },
                 "lingva_tts": {
                     "request_path": "مسار الطلب",
                     "title": "مترجم النصوص لينجفا"

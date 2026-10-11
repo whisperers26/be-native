@@ -137,6 +137,10 @@
                 }
             },
             "tts": {
+                "google_tts": {
+                    "title": "Google",
+                    "custom_url": "Custom URL"
+                },
                 "lingva_tts": {
                     "request_path": "リクエストパス"
                 }
