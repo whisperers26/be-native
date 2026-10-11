@@ -182,6 +182,7 @@ More Services see [Plugin System](#plugin-system)
 
 ## Text-to-Speech
 
+-   [x] [Google](https://translate.google.com)
 -   [x] [Lingva](https://github.com/thedaviddelta/lingva-translate)
 
 More Services see [Plugin System](#plugin-system)

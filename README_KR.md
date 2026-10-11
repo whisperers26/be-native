@@ -182,6 +182,7 @@ Be Native는 [Pot](https://github.com/pot-app/pot-desktop)을 기반으로 한 �
 
 ## 문자-음성변환
 
+-   [x] [Google](https://translate.google.com)
 -   [x] [Lingva](https://github.com/thedaviddelta/lingva-translate)
 
 추가항목은 다음을 참고 [Plugin System](#plugin-system)
