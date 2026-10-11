@@ -9,7 +9,7 @@ Built-in translation, writing improvement, OCR ("recognize"), text-to-speech and
 | translate | `src/services/translate/index` | `translate(text, from, to, options)` | 23 |
 | writing | `src/services/writing/index` | `improve(text, options)` | 4 |
 | recognize | `src/services/recognize/index` | `recognize(base64, language, options)` | 16 |
-| tts | `src/services/tts/index` | `tts(text, lang, options)` | 1 |
+| tts | `src/services/tts/index` | `tts(text, lang, options)` | 4 |
 | collection | `src/services/collection/index` | `collection(source, target, options)` | 2 |
 
 ## A service module
@@ -49,7 +49,7 @@ The types live in `src/types/service.ts`: `ServiceModule` is what every module p
 
 The usual form calls `useConfig(instanceKey, { instanceName: t('services.<kind>.<name>.title'), ...defaults }, { sync: false })`. On submit it runs the service once with a canned input (translate: `'hello'` from `auto` to `zh_cn`); only if that succeeds does it save with `setConfig(config, true)`, call `updateServiceList(instanceKey)`, and `onClose()`.
 
-Services with no settings (bing, yandex, bing_dict, cambridge_dict, ecdict and lingva for translate; system, tesseract, rapidocr and qrcode for OCR) call `updateServiceList('<name>')` with the bare name, so each has at most one instance.
+Services with no settings (bing, yandex, bing_dict, cambridge_dict, ecdict and lingva for translate; system, tesseract, rapidocr and qrcode for OCR; system_tts for TTS) call `updateServiceList('<name>')` with the bare name, so each has at most one instance.
 
 ## Instances
 
@@ -83,7 +83,7 @@ A writing service rewrites a text in the language it is written in. The Writing 
 ## Unusual services
 
 - Not using HTTP at all: claude_code and codex (`invoke('agent_cli_run')`, see above).
-- Not using Tauri's `fetch`: chatglm (global `fetch`), openai and geminipro when streaming (`window.fetch`), ollama (the `ollama/browser` package), tesseract (`tesseract.js`, with its worker and core in `public/`), rapidocr (ONNX Runtime and models in `public/rapidocr/`, see below), qrcode (canvas and `jsqr`), system OCR (`invoke('system_ocr')`).
+- Not using Tauri's `fetch`: chatglm (global `fetch`), openai and geminipro when streaming (`window.fetch`), ollama (the `ollama/browser` package), tesseract (`tesseract.js`, with its worker and core in `public/`), rapidocr (ONNX Runtime and models in `public/rapidocr/`, see below), qrcode (canvas and `jsqr`), system OCR (`invoke('system_ocr')`), system TTS (`invoke('system_tts')`).
 - Reading the cut screenshot from disk instead of using the `base64` argument: baidu_img_ocr, simple_latex_ocr, and system OCR (in Rust).
 - Signing requests with the current time or random values: alibaba, baidu and baidu_field, tencent (translate and OCR), volcengine (translate and OCR), the three iflytek OCR services, youdao, chatglm (a JWT signed with `jose`), deepl's free endpoint.
 
