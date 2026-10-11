@@ -13,6 +13,7 @@ import {
 } from '../../../../../../utils/service_instance';
 import * as builtinServices from '../../../../../../services/tts';
 import { useConfig } from '../../../../../../hooks';
+import { osType } from '../../../../../../utils/env';
 import type { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 import type { PluginConfigInfo, ServiceConfig, TtsService } from '../../../../../../types/service';
 
@@ -54,7 +55,11 @@ export default function ServiceItem(props: ServiceItemProps) {
                     {serviceSourceType === ServiceSourceType.BUILDIN && (
                         <>
                             <img
-                                src={`${(builtinServices as TtsServices)[serviceName].info.icon}`}
+                                src={
+                                    serviceName === 'system_tts'
+                                        ? `logo/${osType}.svg`
+                                        : (builtinServices as TtsServices)[serviceName].info.icon
+                                }
                                 className='h-[24px] w-[24px] my-auto'
                                 draggable={false}
                             />

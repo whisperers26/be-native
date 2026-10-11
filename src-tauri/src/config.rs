@@ -94,7 +94,7 @@ pub fn check_service_available() -> Result<(), Error> {
         "claude_code",
         "codex",
     ];
-    let builtin_tts_list: Vec<&str> = vec!["google_tts", "lingva_tts", "youdao_tts"];
+    let builtin_tts_list: Vec<&str> = vec!["google_tts", "lingva_tts", "system_tts", "youdao_tts"];
     let builtin_collection_list: Vec<&str> = vec!["anki", "eudic"];
     let builtin_writing_list: Vec<&str> = vec!["llm7", "openai", "claude_code", "codex"];
 
