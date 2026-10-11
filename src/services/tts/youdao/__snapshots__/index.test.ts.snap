@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`youdao TTS > exports its info and language table 1`] = `
+{
+  "Language": {
+    "ar": "ar",
+    "de": "de",
+    "en": "en",
+    "es": "es",
+    "fr": "fr",
+    "he": "he",
+    "hi": "hi",
+    "id": "id",
+    "it": "it",
+    "ja": "ja",
+    "ko": "ko",
+    "ms": "ms",
+    "nb_no": "no",
+    "nl": "nl",
+    "nn_no": "no",
+    "pl": "pl",
+    "pt_br": "pt",
+    "pt_pt": "pt",
+    "ru": "ru",
+    "sv": "sv",
+    "th": "th",
+    "tr": "tr",
+    "uk": "uk",
+    "vi": "vi",
+    "zh_cn": "zh",
+    "zh_tw": "zh-TW",
+  },
+  "info": {
+    "icon": "logo/youdao.svg",
+    "name": "youdao_tts",
+  },
+}
+`;

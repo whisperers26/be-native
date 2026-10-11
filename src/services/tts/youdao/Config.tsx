@@ -1,0 +1,77 @@
+import { INSTANCE_NAME_CONFIG_KEY } from '../../../utils/service_instance';
+import { Input, Button } from '@nextui-org/react';
+import toast, { Toaster } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react';
+
+import { useConfig } from '../../../hooks/useConfig';
+import { useToastStyle } from '../../../hooks';
+import { Language } from './index';
+import { tts } from './index';
+import type { ServiceConfigProps } from '../../../types/service';
+
+export function Config(props: ServiceConfigProps) {
+    const [isLoading, setIsLoading] = useState(false);
+    const { instanceKey, updateServiceList, onClose } = props;
+    const { t } = useTranslation();
+    const [config, setConfig] = useConfig(
+        instanceKey,
+        {
+            [INSTANCE_NAME_CONFIG_KEY]: t('services.tts.youdao_tts.title'),
+        },
+        { sync: false }
+    );
+
+    const toastStyle = useToastStyle();
+
+    return (
+        config !== null && (
+            <>
+                <Toaster />
+                <div className='config-item'>
+                    <Input
+                        label={t('services.instance_name')}
+                        labelPlacement='outside-left'
+                        value={config[INSTANCE_NAME_CONFIG_KEY]}
+                        variant='bordered'
+                        classNames={{
+                            base: 'justify-between',
+                            label: 'text-[length:--nextui-font-size-medium]',
+                            mainWrapper: 'max-w-[50%]',
+                        }}
+                        onValueChange={(value) => {
+                            setConfig({
+                                ...config,
+                                [INSTANCE_NAME_CONFIG_KEY]: value,
+                            });
+                        }}
+                    />
+                </div>
+                <div>
+                    <Button
+                        isLoading={isLoading}
+                        fullWidth
+                        color='primary'
+                        onPress={() => {
+                            setIsLoading(true);
+                            tts('hello', Language.en, { config }).then(
+                                () => {
+                                    setIsLoading(false);
+                                    setConfig(config, true);
+                                    updateServiceList(instanceKey);
+                                    onClose();
+                                },
+                                (e) => {
+                                    setIsLoading(false);
+                                    toast.error(t('config.service.test_failed') + e.toString(), { style: toastStyle });
+                                }
+                            );
+                        }}
+                    >
+                        {t('common.save')}
+                    </Button>
+                </div>
+            </>
+        )
+    );
+}
