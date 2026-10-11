@@ -184,6 +184,7 @@ More Services see [Plugin System](#plugin-system)
 
 -   [x] [Google](https://translate.google.com)
 -   [x] [Lingva](https://github.com/thedaviddelta/lingva-translate)
+-   [x] [Youdao](https://ai.youdao.com/)
 
 More Services see [Plugin System](#plugin-system)
 

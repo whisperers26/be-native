@@ -184,6 +184,7 @@ Be Native는 [Pot](https://github.com/pot-app/pot-desktop)을 기반으로 한 �
 
 -   [x] [Google](https://translate.google.com)
 -   [x] [Lingva](https://github.com/thedaviddelta/lingva-translate)
+-   [x] [Youdao](https://ai.youdao.com/)
 
 추가항목은 다음을 참고 [Plugin System](#plugin-system)
 

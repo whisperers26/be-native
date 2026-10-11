@@ -184,6 +184,7 @@ Be Native 是 [Pot](https://github.com/pot-app/pot-desktop) 的个人分支（fo
 
 -   [x] [Google](https://translate.google.com)
 -   [x] [Lingva](https://github.com/thedaviddelta/lingva-translate)
+-   [x] [有道](https://ai.youdao.com/)
 
 更多接口支持见 [插件系统](#插件系统)
 
