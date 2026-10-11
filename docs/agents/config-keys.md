@@ -76,6 +76,7 @@ Every setting lives in one JSON file, `config.json` in the app config directory 
 | `writing_service_list` | `['llm7']` | Same; no plugins |
 | `recognize_service_list` | `['rapidocr', 'system', 'tesseract']` | Same |
 | `tts_service_list` | `['google_tts']` | Same; only the first entry is used |
+| `tts_default_google` | unset | Set by Rust once it has moved every `lingva_tts` instance in `tts_service_list` to `google_tts` (1.2.0) |
 | `collection_service_list` | `[]` | Same |
 | `<instance key>` | `{}` | That instance's settings: `instanceName`, the service's own fields, and for translate `enable`. Rust reads `command`, `model`, `effort`, `systemPrompt` and `enable` of `claude_code` and `codex` instances, of both the translate and the writing list |
 
