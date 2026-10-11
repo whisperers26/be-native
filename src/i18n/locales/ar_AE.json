@@ -365,6 +365,9 @@
                     "title": "Google",
                     "custom_url": "Custom URL"
                 },
+                "youdao_tts": {
+                    "title": "Youdao"
+                },
                 "lingva_tts": {
                     "request_path": "مسار الطلب",
                     "title": "مترجم النصوص لينجفا"

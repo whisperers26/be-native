@@ -459,6 +459,9 @@
                     "title": "Google",
                     "custom_url": "自定义 URL"
                 },
+                "youdao_tts": {
+                    "title": "Youdao"
+                },
                 "lingva_tts": {
                     "title": "Lingva",
                     "request_path": "请求地址"

@@ -390,6 +390,9 @@
                     "title": "Google",
                     "custom_url": "Custom URL"
                 },
+                "youdao_tts": {
+                    "title": "Youdao"
+                },
                 "lingva_tts": {
                     "title": "மொழியியல்",
                     "request_path": "கோரிக்கை பாதை"
