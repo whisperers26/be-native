@@ -94,7 +94,7 @@ pub fn check_service_available() -> Result<(), Error> {
         "claude_code",
         "codex",
     ];
-    let builtin_tts_list: Vec<&str> = vec!["lingva_tts"];
+    let builtin_tts_list: Vec<&str> = vec!["google_tts", "lingva_tts"];
     let builtin_collection_list: Vec<&str> = vec!["anki", "eudic"];
     let builtin_writing_list: Vec<&str> = vec!["llm7", "openai", "claude_code", "codex"];
 
@@ -119,6 +119,26 @@ pub fn check_service_available() -> Result<(), Error> {
             plugin_translate_list,
             "translate_service_list",
         );
+    }
+    // The default Lingva host no longer resolves; swap an untouched default instance for Google.
+    if let Some(tts_service_list) = get("tts_service_list") {
+        let mut tts_service_list: Vec<String> = serde_json::from_value(tts_service_list)?;
+        let is_default_host = match get("lingva_tts") {
+            None => true,
+            Some(config) => matches!(
+                config.get("requestPath").and_then(|v| v.as_str()),
+                None | Some("") | Some("lingva.pot-app.com")
+            ),
+        };
+        if is_default_host && tts_service_list.iter().any(|x| x == "lingva_tts") {
+            tts_service_list.retain(|x| x != "google_tts");
+            for x in tts_service_list.iter_mut() {
+                if x == "lingva_tts" {
+                    *x = "google_tts".to_string();
+                }
+            }
+            set("tts_service_list", tts_service_list);
+        }
     }
     if let Some(tts_service_list) = get("tts_service_list") {
         let tts_service_list: Vec<String> = serde_json::from_value(tts_service_list)?;
