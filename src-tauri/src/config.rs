@@ -120,7 +120,26 @@ pub fn check_service_available() -> Result<(), Error> {
             "translate_service_list",
         );
     }
-    // The default Lingva host no longer resolves; swap an untouched default instance for Google.
+    // 1.2.0: the default Lingva host no longer resolves and Lingva was the only TTS service, so move every Lingva
+    // instance to Google once. The flag keeps a Lingva instance the user adds later.
+    if get("tts_default_google").is_none() {
+        if let Some(tts_service_list) = get("tts_service_list") {
+            let tts_service_list: Vec<String> = serde_json::from_value(tts_service_list)?;
+            let mut moved: Vec<String> = vec![];
+            for service in tts_service_list {
+                let service = if service.split("@").next() == Some("lingva_tts") {
+                    "google_tts".to_string()
+                } else {
+                    service
+                };
+                if !moved.contains(&service) {
+                    moved.push(service);
+                }
+            }
+            set("tts_service_list", moved);
+            set("tts_default_google", true);
+        }
+    }
     if let Some(tts_service_list) = get("tts_service_list") {
         let mut tts_service_list: Vec<String> = serde_json::from_value(tts_service_list)?;
         let is_default_host = match get("lingva_tts") {
