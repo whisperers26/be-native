@@ -51,18 +51,20 @@ impl Source {
     }
 }
 
-// The window that has the focus, unless it is the Writing window itself
+// The window that has the focus, unless it is one of this app's own
 #[cfg(target_os = "windows")]
 pub fn foreground_window() -> Option<isize> {
     use windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow;
 
     let foreground = unsafe { GetForegroundWindow() }.0 as isize;
-    let own = APP
-        .get()
-        .and_then(|app| app.get_window("writing"))
-        .and_then(|window| window.hwnd().ok())
-        .map(|hwnd| hwnd.0 as isize);
-    Some(foreground).filter(|hwnd| Some(*hwnd) != own)
+    let own = APP.get().is_some_and(|app| {
+        app.windows().values().any(|window| {
+            window
+                .hwnd()
+                .is_ok_and(|hwnd| hwnd.0 as isize == foreground)
+        })
+    });
+    Some(foreground).filter(|_| !own)
 }
 
 #[cfg(not(target_os = "windows"))]
