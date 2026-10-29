@@ -199,7 +199,7 @@ fn open(text: String, from_selection: bool) {
 // Improve the text selected in the app that has the focus
 pub fn selection_writing() {
     let source = foreground_window();
-    let text = selection::get_text();
+    let text = crate::selected_text::get_text();
     if text.trim().is_empty() {
         info!("Writing improvement: nothing is selected");
         notify(
