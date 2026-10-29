@@ -11,6 +11,7 @@ mod hotkey;
 mod lang_detect;
 mod placement;
 mod screenshot;
+mod selected_text;
 mod server;
 mod system_ocr;
 mod system_tts;
