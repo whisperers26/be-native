@@ -10,6 +10,7 @@ mod error;
 mod hotkey;
 mod lang_detect;
 mod placement;
+mod replace;
 mod screenshot;
 mod selected_text;
 mod server;
