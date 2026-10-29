@@ -2,13 +2,10 @@
 // user picks there is pasted over the selection.
 
 use crate::placement::{beside, inside, Rect};
-use crate::replace::{foreground_window, notify, remember_source, replace, REPLACING};
-use crate::window::{
-    build_window, placement_point, set_rect, test_mode, translate_area, PLACEMENT_GAP,
-};
+use crate::replace::{foreground_window, notify, put_in_place, Source};
+use crate::window::{build_window, placement_point, set_rect, translate_area, PLACEMENT_GAP};
 use crate::APP;
 use log::{info, warn};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 use tauri::{Manager, Window};
 
@@ -19,9 +16,8 @@ pub struct WritingText(pub Mutex<String>);
 // height of what it shows, through `fit_writing_window`.
 const WRITING_SIZE: (f64, f64) = (460.0, 120.0);
 
-// Whether the text came from a selection, which a result can then be pasted over. A text from the
-// HTTP API has none.
-static FROM_SELECTION: AtomicBool = AtomicBool::new(false);
+// Where the text came from, for pasting a result over it. A text from the HTTP API has no selection.
+static SOURCE: Source = Source::new();
 
 // The Writing window: beside the cursor, so that it has the room below it to grow into
 fn writing_window() -> Window {
@@ -60,11 +56,10 @@ fn writing_window() -> Window {
     window
 }
 
-fn open(text: String, from_selection: bool) {
+fn open(text: String) {
     let app_handle = APP.get().unwrap();
     let state: tauri::State<WritingText> = app_handle.state();
     state.0.lock().unwrap().replace_range(.., &text);
-    FROM_SELECTION.store(from_selection, Ordering::SeqCst);
     let window = writing_window();
     let _ = window.emit("new_writing_text", text);
 }
@@ -82,8 +77,8 @@ pub fn selection_writing() {
         return;
     }
     // Only now: a press with nothing selected leaves an open window's source as it is
-    remember_source(source);
-    open(text, true);
+    SOURCE.selected_in(source);
+    open(text);
 }
 
 // Improve a text that did not come from a selection (the HTTP API). There is nothing to paste a
@@ -92,7 +87,8 @@ pub fn text_writing(text: String) {
     if text.trim().is_empty() {
         return;
     }
-    open(text, false);
+    SOURCE.not_selected();
+    open(text);
 }
 
 #[tauri::command]
@@ -134,23 +130,8 @@ pub fn fit_writing_window(window: Window, height: f64) {
     );
 }
 
-// Put `text` in place of the selection: the app it was in gets the focus back and the text is
-// pasted there. The clipboard gets back what it held afterwards. Without a selection to paste
-// over, or when its window does not get the focus back, the text is copied instead.
+// Put the result the user picked in place of the selection (`replace::put_in_place`)
 #[tauri::command(async)]
 pub fn writing_replace(window: Window, text: String) -> Result<(), String> {
-    if test_mode() {
-        // A test has no selection, and must leave the owner's foreground app and clipboard alone
-        info!("Writing improvement: test mode, nothing is pasted");
-        let _ = window.close();
-        return Ok(());
-    }
-    // A second press on a result while the first is being pasted
-    if REPLACING.swap(true, Ordering::SeqCst) {
-        return Ok(());
-    }
-    let result = replace(&window, FROM_SELECTION.load(Ordering::SeqCst), text);
-    REPLACING.store(false, Ordering::SeqCst);
-    let _ = window.close();
-    result
+    put_in_place(&window, &SOURCE, text)
 }

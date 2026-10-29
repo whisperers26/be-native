@@ -1,29 +1,59 @@
 // Putting a text in place of the selection it was made from: the app the selection was in gets
 // the focus back and the text is pasted there.
 
+use crate::window::test_mode;
 use crate::APP;
-use log::warn;
-use std::sync::atomic::{AtomicBool, Ordering};
+use log::{info, warn};
+use std::sync::atomic::{AtomicBool, AtomicIsize, Ordering};
 use std::time::Duration;
 use tauri::api::notification::Notification;
 use tauri::{Manager, Window};
 
 // Whether a result is being pasted, which takes the clipboard for a moment
-pub(crate) static REPLACING: AtomicBool = AtomicBool::new(false);
+static REPLACING: AtomicBool = AtomicBool::new(false);
 
 // The clipboard monitor asks, so that it does not take the pasted text for something copied
 pub fn replacing() -> bool {
     REPLACING.load(Ordering::SeqCst)
 }
 
-// The window the selection was in, which gets the focus back for the paste
-#[cfg(target_os = "windows")]
-pub(crate) static SOURCE_WINDOW: std::sync::atomic::AtomicIsize =
-    std::sync::atomic::AtomicIsize::new(0);
+// Where a window's text came from. Translation and writing each keep their own, so that one does
+// not paste into the app the other's selection was in.
+pub struct Source {
+    // The window the selection was in, which gets the focus back for the paste (Windows)
+    #[cfg_attr(not(target_os = "windows"), allow(dead_code))]
+    window: AtomicIsize,
+    // Whether the text came from a selection, which a result can then be pasted over
+    from_selection: AtomicBool,
+}
+
+impl Source {
+    pub const fn new() -> Self {
+        Source {
+            window: AtomicIsize::new(0),
+            from_selection: AtomicBool::new(false),
+        }
+    }
+
+    // The text came from a selection in `window`, which `foreground_window` gave before the
+    // selection was read. Without one, the window remembered before stays.
+    pub fn selected_in(&self, window: Option<isize>) {
+        if let Some(hwnd) = window {
+            self.window.store(hwnd, Ordering::SeqCst);
+        }
+        self.from_selection.store(true, Ordering::SeqCst);
+    }
+
+    // The text came from elsewhere (typed, recognized, the clipboard or the HTTP API): there is
+    // nothing to paste a result over
+    pub fn not_selected(&self) {
+        self.from_selection.store(false, Ordering::SeqCst);
+    }
+}
 
 // The window that has the focus, unless it is the Writing window itself
 #[cfg(target_os = "windows")]
-pub(crate) fn foreground_window() -> Option<isize> {
+pub fn foreground_window() -> Option<isize> {
     use windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow;
 
     let foreground = unsafe { GetForegroundWindow() }.0 as isize;
@@ -35,31 +65,21 @@ pub(crate) fn foreground_window() -> Option<isize> {
     Some(foreground).filter(|hwnd| Some(*hwnd) != own)
 }
 
-#[cfg(target_os = "windows")]
-pub(crate) fn remember_source(source: Option<isize>) {
-    if let Some(hwnd) = source {
-        SOURCE_WINDOW.store(hwnd, Ordering::SeqCst);
-    }
-}
-
 #[cfg(not(target_os = "windows"))]
-pub(crate) fn foreground_window() -> Option<isize> {
+pub fn foreground_window() -> Option<isize> {
     None
 }
-
-#[cfg(not(target_os = "windows"))]
-pub(crate) fn remember_source(_source: Option<isize>) {}
 
 // Give the focus back to the window the selection was in, and say whether it has it: a paste
 // must not go to another window.
 #[cfg(target_os = "windows")]
-fn focus_source() -> bool {
+fn focus_source(source: &Source) -> bool {
     use windows::Win32::Foundation::HWND;
     use windows::Win32::UI::WindowsAndMessaging::{
         GetForegroundWindow, IsWindow, SetForegroundWindow,
     };
 
-    let hwnd = HWND(SOURCE_WINDOW.load(Ordering::SeqCst) as _);
+    let hwnd = HWND(source.window.load(Ordering::SeqCst) as _);
     unsafe {
         if !IsWindow(hwnd).as_bool() {
             warn!("The window the selection was in is gone");
@@ -72,9 +92,9 @@ fn focus_source() -> bool {
     }
 }
 
-// Elsewhere than on Windows, hiding the Writing window gives the focus back
+// Elsewhere than on Windows, hiding this app's window gives the focus back
 #[cfg(not(target_os = "windows"))]
-fn focus_source() -> bool {
+fn focus_source(_source: &Source) -> bool {
     std::thread::sleep(Duration::from_millis(150));
     true
 }
@@ -127,7 +147,7 @@ fn run_paste_command(program: &str, args: &[&str]) -> Result<(), String> {
     }
 }
 
-pub(crate) fn notify(title: &str, body: &str) {
+pub fn notify(title: &str, body: &str) {
     let app_handle = APP.get().unwrap();
     let _ = Notification::new(&app_handle.config().tauri.bundle.identifier)
         .title(title)
@@ -136,10 +156,31 @@ pub(crate) fn notify(title: &str, body: &str) {
         .show();
 }
 
-pub(crate) fn replace(window: &Window, from_selection: bool, text: String) -> Result<(), String> {
+// Put `text` in place of the selection `source` came from: the app it was in gets the focus back
+// and the text is pasted there. The clipboard gets back what it held afterwards. Without a
+// selection to paste over, or when its window does not get the focus back, the text is copied
+// instead. `window`, this app's window the text was picked in, is hidden first and closed after.
+pub fn put_in_place(window: &Window, source: &Source, text: String) -> Result<(), String> {
+    if test_mode() {
+        // A test has no selection, and must leave the owner's foreground app and clipboard alone
+        info!("Replace: test mode, nothing is pasted");
+        let _ = window.close();
+        return Ok(());
+    }
+    // A second press while the first is being pasted
+    if REPLACING.swap(true, Ordering::SeqCst) {
+        return Ok(());
+    }
+    let result = replace(window, source, text);
+    REPLACING.store(false, Ordering::SeqCst);
+    let _ = window.close();
+    result
+}
+
+fn replace(window: &Window, source: &Source, text: String) -> Result<(), String> {
     let _ = window.hide();
     let mut clipboard = arboard::Clipboard::new().map_err(|e| e.to_string())?;
-    if !from_selection || !focus_source() {
+    if !source.from_selection.load(Ordering::SeqCst) || !focus_source(source) {
         clipboard.set_text(text).map_err(|e| e.to_string())?;
         notify(
             "Copied to the clipboard",
@@ -166,7 +207,7 @@ pub(crate) fn replace(window: &Window, from_selection: bool, text: String) -> Re
         }
         Err(e) => {
             // The text stays on the clipboard, to be pasted by hand
-            warn!("Writing improvement: paste failed: {}", e);
+            warn!("Replace: paste failed: {}", e);
             notify(
                 "Copied to the clipboard",
                 "It could not be pasted for you: paste it yourself.",
