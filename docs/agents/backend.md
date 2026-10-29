@@ -14,6 +14,7 @@
 | `server` | The local HTTP API |
 | `clipboard` | The clipboard monitor loop |
 | `screenshot` | Captures one monitor to `pot_screenshot.png` |
+| `selected_text` | Reads the selected text for the selection hotkeys ([Hotkeys](#hotkeys)) |
 | `system_ocr` | OS OCR: Windows.Media.Ocr, a bundled macOS helper, or Linux `tesseract` |
 | `system_tts` | OS speech: SAPI through PowerShell on Windows, `say` on macOS, `espeak-ng` on Linux |
 | `lang_detect` | Offline language detection (lingua) |
@@ -94,6 +95,8 @@ On Windows every window except Screenshot is subclassed by `drag_guard.rs` for t
 ## Hotkeys
 
 The settings `hotkey_selection_translate`, `hotkey_input_translate`, `hotkey_ocr_recognize`, `hotkey_ocr_translate`, `hotkey_ocr_copy` and `hotkey_selection_writing` are empty by default, so there are no shortcuts until the user sets them. They are registered at launch; if one fails, the ones after it are skipped.
+
+Both selection hotkeys read the selection with `selected_text::get_text`. Elsewhere than on Windows that is `selection::get_text`. On Windows it asks UI Automation first, which Chrome without accessibility turned on does not answer, then presses Ctrl+C and reads the clipboard, giving it back what it held. Before pressing, it waits (up to 1.5 s) until the user has let go of every key: pressing Ctrl+C while the shortcut's Alt is still held, as the `selection` crate does, lets the held key repeat after its software release, and the real release then reaches the app as a tap of Alt alone. Chrome moves the focus to its menu button on that tap, so the next copy got nothing and a writing result was pasted nowhere until the user clicked into the page. It also waits up to 800 ms for the copy, instead of 100.
 
 The writing hotkey (`writing::selection_writing`) reads the selection as selection translation does. With nothing selected it shows a notification and opens no window. The tray has no entry for it: opening the tray menu takes the focus, and the selection with it.
 
