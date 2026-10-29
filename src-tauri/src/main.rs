@@ -45,6 +45,7 @@ use window::fit_translate_window;
 use window::focus_window;
 use window::show_window;
 use window::test_mode;
+use window::translate_replace;
 use window::translate_window_opened;
 use window::translate_window_origin;
 use window::translate_window_waiting;
@@ -180,6 +181,7 @@ fn main() {
             get_writing_text,
             fit_writing_window,
             writing_replace,
+            translate_replace,
             install_plugin,
             font_list
         ])

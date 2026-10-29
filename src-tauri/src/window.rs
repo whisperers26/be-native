@@ -3,6 +3,7 @@ use std::fs;
 use crate::config::get;
 use crate::config::set;
 use crate::placement::{beside, between, inset, inside, Rect};
+use crate::replace::{foreground_window, put_in_place, Source};
 use crate::StringWrapper;
 use crate::APP;
 use dirs::cache_dir;
@@ -606,8 +607,19 @@ pub fn translate_window_opened(window: Window) {
     let _ = window;
 }
 
+// Where the Translate window's text came from, for pasting a translation over it
+static TRANSLATE_SOURCE: Source = Source::new();
+
+// Put a translation the user picked in place of the selection it was made from
+// (`replace::put_in_place`). Without a selection it is copied.
+#[tauri::command(async)]
+pub fn translate_replace(window: Window, text: String) -> Result<(), String> {
+    put_in_place(&window, &TRANSLATE_SOURCE, text)
+}
+
 pub fn selection_translate() {
     use crate::selected_text::get_text;
+    let source = foreground_window();
     // Get Selected Text
     let text = get_text();
     if !text.trim().is_empty() {
@@ -615,6 +627,9 @@ pub fn selection_translate() {
         // Write into State
         let state: tauri::State<StringWrapper> = app_handle.state();
         state.0.lock().unwrap().replace_range(.., &text);
+        TRANSLATE_SOURCE.selected_in(source);
+    } else {
+        TRANSLATE_SOURCE.not_selected();
     }
 
     // With nothing selected there is nothing to wait for
@@ -623,6 +638,7 @@ pub fn selection_translate() {
 }
 
 pub fn input_translate() {
+    TRANSLATE_SOURCE.not_selected();
     let app_handle = APP.get().unwrap();
     // Clear State
     let state: tauri::State<StringWrapper> = app_handle.state();
@@ -644,6 +660,7 @@ pub fn input_translate() {
 }
 
 pub fn text_translate(text: String) {
+    TRANSLATE_SOURCE.not_selected();
     let app_handle = APP.get().unwrap();
     // Clear State
     let state: tauri::State<StringWrapper> = app_handle.state();
@@ -653,6 +670,7 @@ pub fn text_translate(text: String) {
 }
 
 pub fn image_translate() {
+    TRANSLATE_SOURCE.not_selected();
     let app_handle = APP.get().unwrap();
     let state: tauri::State<StringWrapper> = app_handle.state();
     state
