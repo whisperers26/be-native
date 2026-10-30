@@ -55,7 +55,7 @@ Be Native is built on [Pot](https://github.com/pot-app/pot-desktop) and is a per
 
 Every action below has its own shortcut. Set them in Settings → Hotkey; an action with no shortcut is not triggered.
 
--   **Selection translation**: select text in any app, then press the selection translation shortcut. The translation window opens next to the pointer with the text translated by every service you turned on.
+-   **Selection translation**: select text in any app, then press the selection translation shortcut. The translation window opens next to the pointer with the text translated by every service you turned on. A result's replace button puts that translation in place of the text you selected.
 -   **Input translation**: press the input translation shortcut, type or paste the text in the window that opens, and press Enter.
 -   **Clipboard listening**: click the top left icon of a translation window; from then on every text you copy is translated automatically.
 -   **Screenshot OCR**: press the shortcut, then drag over the part of the screen to read. The recognized text appears in a window, where you can copy or translate it.
@@ -119,6 +119,7 @@ Every action below has its own shortcut. Set them in Settings → Hotkey; an act
 - The About page links to this fork: GitHub opens this repository and Feedback opens its issues. Upstream's website, e-mail and community links are gone.
 - Backup (WebDAV, Aliyun Drive, local file) is removed: the settings no longer have a Backup page.
 - Writing improvement: select text you wrote and press its hotkey, and a window shows it rewritten to read naturally. The default service is LLM7, which is free and online and needs no account or key (without a token it answers only a few requests before it makes you wait; a free token from llm7.io lifts that to 60 a minute); any OpenAI-compatible API, or your subscription through Claude Code or Codex, works too, and each service's prompt can be changed. The Tones button adds versions in five tones (professional, casual, friendly, confident, concise; editable in the settings), and Custom Prompt takes a request of your own. Each result is a box of its own, and the window grows smoothly downwards, moving up only when there is no room below. Click any result to put it in place of the text you selected.
+- Selection translation can replace the selected text too: each result has a replace button that puts its translation where the text was.
 - The "Transparent Effect" setting is gone: the settings and updater windows are always opaque. "Remember Window Size" is off by default.
 - The Recognize window closes when it loses focus by default, like the Translate window.
 - Menus in the Config window open without the scale-and-fade animation: the page behind a menu no longer flickers in front of it.
