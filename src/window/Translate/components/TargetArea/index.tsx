@@ -464,7 +464,7 @@ export default function TargetArea(props: TargetAreaProps) {
             >
                 {/* current service instance and available service instance to change */}
                 <div className='flex'>
-                    <Dropdown>
+                    <Dropdown disableAnimation>
                         <DropdownTrigger>
                             <Button
                                 size='sm'

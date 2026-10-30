@@ -46,7 +46,7 @@ export default function LanguageArea() {
         >
             <CardFooter className='bg-content2 flex justify-between p-0 rounded-[10px]'>
                 <div className='flex'>
-                    <Dropdown>
+                    <Dropdown disableAnimation>
                         <DropdownTrigger>
                             <Button
                                 radius='sm'
@@ -103,7 +103,7 @@ export default function LanguageArea() {
                     </Button>
                 </div>
                 <div className='flex'>
-                    <Dropdown>
+                    <Dropdown disableAnimation>
                         <DropdownTrigger>
                             <Button
                                 radius='sm'

@@ -310,4 +310,22 @@ describe('Translate window', () => {
         await vi.waitFor(() => expect(screen.getByRole('tooltip')).toHaveTextContent(/^Translate$/));
         expect(motionStyles(screen.getByRole('tooltip'))).toEqual([]);
     });
+
+    // A menu that faded and scaled in let the text under it show through its items.
+    it('opens its language menus at once, not faded or scaled in', async () => {
+        fakeTauri.store.set('translate_detect_engine', 'local');
+        render(
+            <Provider>
+                <NextUIProvider>
+                    <Translate />
+                </NextUIProvider>
+            </Provider>
+        );
+
+        fireEvent.click(await screen.findByRole('button', { name: 'Simplified Chinese' }));
+
+        const menu = await screen.findByRole('menu');
+        expect(within(menu).getByText('English')).toBeInTheDocument();
+        expect(motionStyles(menu)).toEqual([]);
+    });
 });
