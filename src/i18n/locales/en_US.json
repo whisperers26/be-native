@@ -511,6 +511,7 @@
             "recognizing": "Recognizing…",
             "speak": "Speak",
             "copy": "Copy",
+            "replace": "Replace the selection",
             "retry": "Try again",
             "detect_failed": "Detection failed ({{language}})",
             "delete_newline": "Merge Wrapped Lines",

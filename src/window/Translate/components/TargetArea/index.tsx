@@ -21,8 +21,9 @@ import { TbTransformFilled } from 'react-icons/tb';
 import { HiOutlineVolumeUp } from 'react-icons/hi';
 import { semanticColors } from '@nextui-org/theme';
 import toast, { Toaster } from 'react-hot-toast';
-import { MdContentCopy } from 'react-icons/md';
+import { MdContentCopy, MdFindReplace } from 'react-icons/md';
 import { useTranslation } from 'react-i18next';
+import { invoke } from '@tauri-apps/api/tauri';
 import Database from 'tauri-plugin-sql-api';
 import { GiCycle } from 'react-icons/gi';
 import { useTheme } from 'next-themes';
@@ -744,6 +745,23 @@ export default function TargetArea(props: TargetAreaProps) {
                                     }}
                                 >
                                     <MdContentCopy className='text-[16px]' />
+                                </Button>
+                            </Tooltip>
+                            {/* replace button: the translation takes the place of the selected text */}
+                            <Tooltip content={t('translate.replace')}>
+                                <Button
+                                    isIconOnly
+                                    variant='light'
+                                    size='sm'
+                                    aria-label={t('translate.replace')}
+                                    isDisabled={typeof result !== 'string' || result === ''}
+                                    onPress={() => {
+                                        invoke('translate_replace', { text: result }).catch((e) => {
+                                            void logError(`Translate: replace failed: ${e}`);
+                                        });
+                                    }}
+                                >
+                                    <MdFindReplace className='text-[16px]' />
                                 </Button>
                             </Tooltip>
                             {/* translate back button */}

@@ -19,7 +19,8 @@
 | `system_tts` | OS speech: SAPI through PowerShell on Windows, `say` on macOS, `espeak-ng` on Linux |
 | `lang_detect` | Offline language detection (lingua) |
 | `agent_cli` | Claude Code and Codex sessions for the translate and writing services of the same names ([services.md](services.md)) |
-| `writing` | Writing improvement: the selected text, the Writing window and its height, pasting a result over the selection |
+| `writing` | Writing improvement: the selected text, the Writing window and its height |
+| `replace` | Pasting a result over the selection it was made from (`put_in_place`). Translation and writing each keep a `Source`: the window the selection was in (never one of this app's) and whether the text came from a selection |
 | `cmd` | Other commands: text state, store reload, image cut, base64 and copy, proxy, plugin install and run, fonts, devtools |
 | `updater` | Update check at launch |
 | `error` | The `Error` type commands return; sent to JavaScript as its message |
@@ -53,7 +54,8 @@
 | `lang_detect` | `text` | string | Offline language detection; an app language code, `en` if unsure |
 | `get_writing_text` | — | string | The text waiting for the writing window |
 | `fit_writing_window` | `height` | — | Give the calling (Writing) window this height, in logical pixels, at once. Its top left corner stays, unless the window would reach below its monitor's work area: then it moves up as far as that takes (`placement::inside`) |
-| `writing_replace` | `text` | — | Hide the Writing window, give the focus back to the window the selection was in (Windows; elsewhere hiding does), put `text` on the clipboard, send the paste shortcut (`enigo` on Windows, `osascript` on macOS, `xdotool` on Linux), put back the text or image the clipboard held, and close the window. The text is only copied, and a notification says so, when there is no selection to paste over (a text from `/writing`), when that window is gone or does not get the focus back, or when the shortcut cannot be sent. A second call while one is under way does nothing, and the clipboard monitor does not read the clipboard meanwhile. In test mode it only closes the window |
+| `writing_replace` | `text` | — | `replace::put_in_place` with the Writing window's source: hide the Writing window, give the focus back to the window the selection was in (Windows; elsewhere hiding does), put `text` on the clipboard, send the paste shortcut (`enigo` on Windows, `osascript` on macOS, `xdotool` on Linux), put back the text or image the clipboard held, and close the window. The text is only copied, and a notification says so, when there is no selection to paste over (a text from `/writing`), when that window is gone or does not get the focus back, or when the shortcut cannot be sent. A second call while one is under way does nothing, and the clipboard monitor does not read the clipboard meanwhile. In test mode it only closes the window |
+| `translate_replace` | `text` | — | The same as `writing_replace`, for the Translate window, with its own source. Only selection translation has a selection; a text typed, recognized, from the clipboard monitor or from the HTTP API is copied |
 | `agent_cli_run` | `id`, `spec`, `prompt` | string | Runs one prompt in a Claude Code or Codex session of its own and returns the answer; emits `agent_cli_stream` meanwhile |
 | `agent_cli_models` | `provider`, `command` | `[{ label, value }]` | Asks the installed Claude Code or Codex which models it offers; sends no prompt |
 | `set_proxy`, `unset_proxy` | — | bool | Set or clear the proxy environment variables. The frontend never calls them; the proxy is applied at launch |
