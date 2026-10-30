@@ -1,9 +1,10 @@
 import { NextUIProvider } from '@nextui-org/react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { Provider } from 'jotai';
 import { describe, expect, it, vi } from 'vitest';
 import { fakeTauri } from '../../test/fake-tauri';
 import { httpMock } from '../../test/http';
+import { hover, motionStyles } from '../../test/overlay';
 import '../../i18n';
 
 vi.hoisted(() => {
@@ -274,5 +275,39 @@ describe('Translate window', () => {
                 text: '你好世界',
             })
         );
+    });
+
+    // A tooltip that faded and scaled in let the text under it show through its own, and two that crossed on the way
+    // from one button to the next jumbled both: the text flashed.
+    it('shows the tooltips of its buttons at once, not faded or scaled in', async () => {
+        fakeTauri.command('get_text', () => 'hello world');
+        fakeTauri.command('test_mode', () => true);
+        fakeTauri.store.set('translate_detect_engine', 'local');
+        fakeTauri.command('lang_detect', () => new Promise((done) => setTimeout(() => done('en'), 50)));
+        httpMock.queue({ data: [[['你好世界', 'hello world']], null, 'en'] });
+        render(
+            <Provider>
+                <NextUIProvider>
+                    <Translate />
+                </NextUIProvider>
+            </Provider>
+        );
+        await screen.findByText('你好世界');
+
+        // A card's button
+        hover(screen.getByRole('button', { name: 'Replace the selection' }));
+        const cardTip = await screen.findByRole('tooltip');
+        expect(cardTip).toHaveTextContent('Replace the selection');
+        expect(motionStyles(cardTip)).toEqual([]);
+
+        // The last button of the source box, Translate. Its buttons have no names: the box is the one around the text
+        // that can be edited.
+        let sourceBox = screen.getAllByRole('textbox').find((box) => !box.hasAttribute('readonly'))!;
+        while (within(sourceBox).queryAllByRole('button').length < 5) {
+            sourceBox = sourceBox.parentElement!;
+        }
+        hover(within(sourceBox).getAllByRole('button').at(-1)!);
+        await vi.waitFor(() => expect(screen.getByRole('tooltip')).toHaveTextContent(/^Translate$/));
+        expect(motionStyles(screen.getByRole('tooltip'))).toEqual([]);
     });
 });

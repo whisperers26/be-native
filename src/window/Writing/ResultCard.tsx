@@ -149,7 +149,10 @@ export default function ResultCard(props: ResultCardProps) {
                             {t('writing.replace')}
                         </span>
                     )}
-                    <Tooltip content={t('translate.copy')}>
+                    <Tooltip
+                        content={t('translate.copy')}
+                        disableAnimation
+                    >
                         <Button
                             isIconOnly
                             variant='light'

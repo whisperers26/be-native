@@ -718,7 +718,10 @@ export default function TargetArea(props: TargetAreaProps) {
                     >
                         <ButtonGroup>
                             {/* speak button */}
-                            <Tooltip content={t('translate.speak')}>
+                            <Tooltip
+                                content={t('translate.speak')}
+                                disableAnimation
+                            >
                                 <Button
                                     isIconOnly
                                     variant='light'
@@ -734,7 +737,10 @@ export default function TargetArea(props: TargetAreaProps) {
                                 </Button>
                             </Tooltip>
                             {/* copy button */}
-                            <Tooltip content={t('translate.copy')}>
+                            <Tooltip
+                                content={t('translate.copy')}
+                                disableAnimation
+                            >
                                 <Button
                                     isIconOnly
                                     variant='light'
@@ -748,7 +754,10 @@ export default function TargetArea(props: TargetAreaProps) {
                                 </Button>
                             </Tooltip>
                             {/* replace button: the translation takes the place of the selected text */}
-                            <Tooltip content={t('translate.replace')}>
+                            <Tooltip
+                                content={t('translate.replace')}
+                                disableAnimation
+                            >
                                 <Button
                                     isIconOnly
                                     variant='light'
@@ -765,7 +774,10 @@ export default function TargetArea(props: TargetAreaProps) {
                                 </Button>
                             </Tooltip>
                             {/* translate back button */}
-                            <Tooltip content={t('translate.translate_back')}>
+                            <Tooltip
+                                content={t('translate.translate_back')}
+                                disableAnimation
+                            >
                                 <Button
                                     isIconOnly
                                     variant='light'
@@ -890,7 +902,10 @@ export default function TargetArea(props: TargetAreaProps) {
                                 </Button>
                             </Tooltip>
                             {/* error retry button */}
-                            <Tooltip content={t('translate.retry')}>
+                            <Tooltip
+                                content={t('translate.retry')}
+                                disableAnimation
+                            >
                                 <Button
                                     isIconOnly
                                     variant='light'

@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { fakeTauri } from '../../test/fake-tauri';
 import { httpMock } from '../../test/http';
+import { hover, motionStyles } from '../../test/overlay';
 import '../../i18n';
 
 vi.hoisted(() => {
@@ -146,6 +147,19 @@ describe('Writing window', () => {
                 text: 'He and I go.',
             })
         );
+    });
+
+    // A tooltip that faded and scaled in let the rewrite under it show through its own text: the text flashed.
+    it("shows the tooltip of a box's copy button at once, not faded or scaled in", async () => {
+        httpMock.queue(answer('He and I go.'));
+        open();
+        await screen.findByText('He and I go.');
+
+        hover(screen.getByRole('button', { name: 'Copy' }));
+
+        const tip = await screen.findByRole('tooltip');
+        expect(tip).toHaveTextContent('Copy');
+        expect(motionStyles(tip)).toEqual([]);
     });
 
     it('replaces once when the box is clicked twice', async () => {
