@@ -42,6 +42,7 @@ const DEFAULT_COMMANDS: Record<string, Handler> = {
     get_writing_text: () => '',
     fit_writing_window: () => null,
     writing_replace: () => null,
+    translate_replace: () => null,
     set_proxy: () => true,
     unset_proxy: () => true,
     install_plugin: () => 0,

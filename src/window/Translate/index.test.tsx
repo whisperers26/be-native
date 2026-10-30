@@ -1,5 +1,5 @@
 import { NextUIProvider } from '@nextui-org/react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'jotai';
 import { describe, expect, it, vi } from 'vitest';
 import { fakeTauri } from '../../test/fake-tauri';
@@ -248,5 +248,31 @@ describe('Translate window', () => {
 
         expect(await screen.findByText('English')).toBeInTheDocument();
         expect(screen.queryByText(/Detection failed/)).not.toBeInTheDocument();
+    });
+
+    it('puts a translation in place of the selection when its replace button is pressed', async () => {
+        fakeTauri.command('get_text', () => 'hello world');
+        fakeTauri.command('test_mode', () => true);
+        fakeTauri.store.set('translate_detect_engine', 'local');
+        // Detected a moment later, as over IPC: the source box has its text by then.
+        fakeTauri.command('lang_detect', () => new Promise((done) => setTimeout(() => done('en'), 50)));
+        httpMock.queue({ data: [[['你好世界', 'hello world']], null, 'en'] });
+
+        render(
+            <Provider>
+                <NextUIProvider>
+                    <Translate />
+                </NextUIProvider>
+            </Provider>
+        );
+        await screen.findByText('你好世界');
+
+        fireEvent.click(screen.getByRole('button', { name: 'Replace the selection' }));
+
+        await vi.waitFor(() =>
+            expect(fakeTauri.calls.find((call) => call.cmd === 'translate_replace')?.args).toEqual({
+                text: '你好世界',
+            })
+        );
     });
 });
