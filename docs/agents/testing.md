@@ -22,6 +22,7 @@ Tests sit next to the code they test (`src/utils/index.test.ts` tests `src/utils
 | `src/test/http.ts` | `httpMock`: replaces `fetch` from `@tauri-apps/api/http` |
 | `src/test/fake-tauri.ts` | `fakeTauri`: an in-memory Tauri backend answering every IPC call |
 | `src/test/stream.ts` | `stubFetch`, `streamBody`, `sseEvent`: the browser `fetch` and streamed bodies, for the services that do not use Tauri's `fetch` |
+| `src/test/overlay.ts` | `hover`: hovers an element as a mouse does, which opens a button's tooltip; `motionStyles`: the fade and scale an open tooltip or menu is drawn with, empty when it has no animation |
 | `src/test/harness.test.ts` | Tests of the helpers above, including the frozen values |
 
 ## What is frozen
