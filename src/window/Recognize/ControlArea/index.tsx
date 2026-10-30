@@ -62,7 +62,7 @@ export default function ControlArea(props: ControlAreaProps) {
     return (
         <div className='flex justify-between px-[12px] h-full'>
             {currentServiceInstanceKey && (
-                <Dropdown>
+                <Dropdown disableAnimation>
                     <DropdownTrigger>
                         <Button
                             className='my-auto'
@@ -137,7 +137,7 @@ export default function ControlArea(props: ControlAreaProps) {
                 </Dropdown>
             )}
             {language && (
-                <Dropdown>
+                <Dropdown disableAnimation>
                     <DropdownTrigger>
                         <Button
                             className='my-auto'

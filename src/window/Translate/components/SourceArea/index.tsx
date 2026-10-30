@@ -460,7 +460,10 @@ export default function SourceArea(props: SourceAreaProps) {
                 <CardFooter className='bg-content1 rounded-none rounded-b-[10px] flex justify-between px-[12px] p-[5px]'>
                     <div className='flex justify-start'>
                         <ButtonGroup className='mr-[5px]'>
-                            <Tooltip content={t('translate.speak')}>
+                            <Tooltip
+                                content={t('translate.speak')}
+                                disableAnimation
+                            >
                                 <Button
                                     isIconOnly
                                     variant='light'
@@ -474,7 +477,10 @@ export default function SourceArea(props: SourceAreaProps) {
                                     <HiOutlineVolumeUp className='text-[16px]' />
                                 </Button>
                             </Tooltip>
-                            <Tooltip content={t('translate.copy')}>
+                            <Tooltip
+                                content={t('translate.copy')}
+                                disableAnimation
+                            >
                                 <Button
                                     isIconOnly
                                     variant='light'
@@ -486,7 +492,10 @@ export default function SourceArea(props: SourceAreaProps) {
                                     <MdContentCopy className='text-[16px]' />
                                 </Button>
                             </Tooltip>
-                            <Tooltip content={t('translate.delete_newline')}>
+                            <Tooltip
+                                content={t('translate.delete_newline')}
+                                disableAnimation
+                            >
                                 <Button
                                     isIconOnly
                                     variant='light'
@@ -502,7 +511,10 @@ export default function SourceArea(props: SourceAreaProps) {
                                     <MdSmartButton className='text-[16px]' />
                                 </Button>
                             </Tooltip>
-                            <Tooltip content={t('common.clear')}>
+                            <Tooltip
+                                content={t('common.clear')}
+                                disableAnimation
+                            >
                                 <Button
                                     variant='light'
                                     size='sm'
@@ -529,7 +541,10 @@ export default function SourceArea(props: SourceAreaProps) {
                             </Chip>
                         )}
                     </div>
-                    <Tooltip content={t('translate.translate')}>
+                    <Tooltip
+                        content={t('translate.translate')}
+                        disableAnimation
+                    >
                         <Button
                             size='sm'
                             color='primary'

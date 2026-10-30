@@ -111,5 +111,6 @@ An unknown label renders nothing. Rust creates the windows: [backend.md](backend
 - CSS files: `src/style.css` (rounded transparent window, thin scrollbars), `src/window/Config/style.css`, `src/components/WindowControl/style.css`.
 - Icons come from `react-icons`; flags from `flag-icons` (`fi fi-<country>` classes; codes in `src/utils/language`).
 - Draggable lists use `react-beautiful-dnd`; the result card's collapse animation uses `@react-spring/web`.
+- Tooltips and menus (NextUI `Tooltip` and `Dropdown`) are drawn without animation in every window. Animated, a tooltip faded and scaled in over 0.2 s: the text under it showed through its own, two tooltips crossed on the way from one button to the next, and its text jumped by a pixel when the spring settled, so the text flashed on every hover (recorded on Windows 11 on 2026-10-30); a menu let the text under it show through its items the same way. The Config window turns off every NextUI animation through `NextUIProvider` (see Boot). In the other windows each `Tooltip` and `Dropdown` takes `disableAnimation`; give a new one the prop too. Their render tests check it with `motionStyles` from `src/test/overlay`.
 
 Frontend bugs found so far: [known-issues.md](known-issues.md).

@@ -66,7 +66,10 @@ export default function ImageArea() {
                 )}
             </CardBody>
             <CardFooter className='bg-content1 flex justify-start px-[12px]'>
-                <Tooltip content={t('recognize.copy_img')}>
+                <Tooltip
+                    content={t('recognize.copy_img')}
+                    disableAnimation
+                >
                     <Button
                         isIconOnly
                         size='sm'
