@@ -29,7 +29,7 @@ Closing a window never quits the app; only Quit or Restart in the tray does. A s
 
 ## Main flows
 
-- **Selection translation.** Hotkey → Rust reads the selected text (UI Automation or a simulated copy on Windows) → stores it and opens or focuses the `translate` window → a new window fetches it with `get_text`, an open one receives `new_text` → the window detects the language and calls every enabled translate service.
+- **Selection translation.** Hotkey → Rust reads the selected text (UI Automation or a simulated copy on Windows) → stores it and opens or focuses the `translate` window → a new window fetches it with `get_text`, an open one receives `new_text` → the window detects the language and calls every enabled translate service → a card's replace button calls `translate_replace`, which pastes its translation over the selection as writing does.
 - **Writing improvement.** Hotkey → Rust reads the selected text, remembers the window it was in, and opens or focuses the `writing` window beside the cursor → the window fetches the text with `get_writing_text` (an open one receives `new_writing_text`) and asks every enabled writing service for a rewrite → the user may ask for tones or add a request of their own → a click on a result calls `writing_replace`, and Rust gives the focus back and pastes the text over the selection.
 - **Input translation.** The same, with the text `[INPUT_TRANSLATE]`, which opens an empty input box.
 - **OCR.** Hotkey → Rust opens the `screenshot` window → it captures the monitor (`pot_screenshot.png`), the user drags a region, `cut_image` writes `pot_screenshot_cut.png`, and the window emits `success` → Rust opens `recognize` → it reads the image with `get_base64` and runs the chosen OCR service.
